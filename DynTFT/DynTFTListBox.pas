@@ -94,9 +94,9 @@ begin
   NumberOfItemsToDraw := DynTFTGetNumberOfItemsToDraw(AItems);
 
   if NumberOfItemsToDraw < AItems^.Count then
-    DynTFTShowComponent(PDynTFTBaseComponent(TPtrRec(AListBox^.VertScrollBar^.PnlScroll)))
+    DynTFTShowComponent(PDynTFTBaseComponent(TPtrRec(AListBox^.VertScrollBar^.BtnScroll)))
   else
-    DynTFTHideComponent(PDynTFTBaseComponent(TPtrRec(AListBox^.VertScrollBar^.PnlScroll)));
+    DynTFTHideComponent(PDynTFTBaseComponent(TPtrRec(AListBox^.VertScrollBar^.BtnScroll)));
 
   if AListBox^.BaseProps.Enabled and CENABLED = CENABLED then
   begin

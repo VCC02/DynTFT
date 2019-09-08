@@ -33,8 +33,16 @@ unit DynTFTBaseDrawing;
   {$DEFINE IsDesktop}
 {$ENDIF}
 
+{$IFDEF FPC}
+  {$MODE Delphi}
+{$ENDIF}
+
 {$IFDEF IsDesktop}
 interface
+{$ENDIF}
+
+{$IFNDEF UserTFTCommands}  //this can be a project-level definition
+  {$DEFINE mikroTFT}
 {$ENDIF}
 
 uses
@@ -48,7 +56,16 @@ uses
   {$ELSE}
     {$IFDEF IsDesktop}
       MemManager,
+    {$ENDIF}
+  {$ENDIF}
+
+  {$IFDEF mikroTFT}
+    {$IFDEF IsDesktop}
+      TFT,
     {$ENDIF}  
+  {$ELSE}
+    {$INCLUDE UserDrawingUnits.inc}
+    ,
   {$ENDIF}
 
   DynTFTUtils;
@@ -157,6 +174,7 @@ const
   CRELEASED = 0;
   CPRESSED = 1;
   CCHANGEDNOTIFY = 2;  //reserved
+  CDISABLEPRESSING = 4;
 
   //Focused property
   CUNFOCUSED = 0;
@@ -188,31 +206,26 @@ implementation
 {$DEFINE CenterTextOnComponent}  //to draw centered text on a component
 
 {$IFDEF IsDesktop}
-uses
-  TFT;
+  procedure DynTFTInitBaseHandlersAndProperties(ABase: PDynTFTBaseComponent); //Delphi only
+  begin
+    New(ABase^.BaseProps.OnMouseDownUser);
+    New(ABase^.BaseProps.OnMouseMoveUser);
+    New(ABase^.BaseProps.OnMouseUpUser);
+    {$IFDEF ComponentsHaveName}
+      New(ABase^.BaseProps.Name);
+    {$ENDIF}
+  end;
 
 
-procedure DynTFTInitBaseHandlersAndProperties(ABase: PDynTFTBaseComponent); //Delphi only
-begin
-  New(ABase^.BaseProps.OnMouseDownUser);
-  New(ABase^.BaseProps.OnMouseMoveUser);
-  New(ABase^.BaseProps.OnMouseUpUser);
-  {$IFDEF ComponentsHaveName}
-    New(ABase^.BaseProps.Name);
-  {$ENDIF}
-end;
-
-
-procedure DynTFTFreeBaseHandlersAndProperties(ABase: PDynTFTBaseComponent); //Delphi only
-begin
-  Dispose(ABase^.BaseProps.OnMouseDownUser);
-  Dispose(ABase^.BaseProps.OnMouseMoveUser);
-  Dispose(ABase^.BaseProps.OnMouseUpUser);
-  {$IFDEF ComponentsHaveName}
-    Dispose(ABase^.BaseProps.Name);
-  {$ENDIF}
-end;
-        
+  procedure DynTFTFreeBaseHandlersAndProperties(ABase: PDynTFTBaseComponent); //Delphi only
+  begin
+    Dispose(ABase^.BaseProps.OnMouseDownUser);
+    Dispose(ABase^.BaseProps.OnMouseMoveUser);
+    Dispose(ABase^.BaseProps.OnMouseUpUser);
+    {$IFDEF ComponentsHaveName}
+      Dispose(ABase^.BaseProps.Name);
+    {$ENDIF}
+  end;
 {$ENDIF}
 
 var
@@ -371,7 +384,7 @@ begin //chain means linked list
         x2 := PDynTFTBaseComponent(TPtrRec(PDynTFTComponent(TPtrRec(CurrentComp^.NextSibling))^.BaseComponent))^.BaseProps.Width + x1;
         y2 := PDynTFTBaseComponent(TPtrRec(PDynTFTComponent(TPtrRec(CurrentComp^.NextSibling))^.BaseComponent))^.BaseProps.Height + y1;
         DynTFT_Rectangle(x1, y1, x2, y2);
-        {}
+        }
 
         //Free user component (payload)
         {$IFDEF IsMCU}

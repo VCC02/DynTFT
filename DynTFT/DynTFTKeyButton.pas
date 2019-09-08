@@ -58,6 +58,9 @@ type
     DownCaption: TDynTFTKeyButtonCaption;
     Color: TColor;
     Font_Color: TColor;
+    {$IFDEF DynTFTFontSupport}
+      ActiveFont: PByte;
+    {$ENDIF}
 
     OnGenerateDrawingUser: PDynTFTGenericEventHandler;
   end;
@@ -155,7 +158,11 @@ begin
   else
     ACol := CL_DynTFTKeyButton_DisabledFont;
 
-  DynTFT_Set_Font(@TFT_defaultFont, ACol, FO_HORIZONTAL);
+  {$IFDEF DynTFTFontSupport}
+    DynTFT_Set_Font(AKeyButton^.ActiveFont, ACol, FO_HORIZONTAL);
+  {$ELSE}
+    DynTFT_Set_Font(@TFT_defaultFont, ACol, FO_HORIZONTAL);
+  {$ENDIF}
 
   GetTextWidthAndHeight(AKeyButton^.UpCaption, TextWidth, TextHeight);
   {$IFDEF CenterTextOnComponent}
@@ -202,6 +209,10 @@ begin
   Result^.UpCaption := '';
   Result^.DownCaption := '';
   Result^.BaseProps.Focused := CREJECTFOCUS;
+
+  {$IFDEF DynTFTFontSupport}
+    Result^.ActiveFont := @TFT_defaultFont;
+  {$ENDIF} 
 
   {$IFDEF IsDesktop}
     New(Result^.OnGenerateDrawingUser);

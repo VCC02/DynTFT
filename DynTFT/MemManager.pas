@@ -21,7 +21,11 @@ type
   dword = Cardinal;
 
 //const HEAP_START  : dword; external;   //defined later as variable
-const HEAP_SIZE = 20000;
+{$IFDEF MaxMMAtProjectLevel}
+  const HEAP_SIZE = {$I MaxMM.inc};  //relative to the project file  (in the same folder as the project file)
+{$ELSE}
+  const HEAP_SIZE = {$I ..\MaxMM.inc};  //relative to the project file
+{$ENDIF}
 
 procedure MM_Init();
 // Initializes the memory manager.

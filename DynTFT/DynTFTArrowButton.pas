@@ -151,7 +151,7 @@ begin
   if not DynTFTIsDrawableComponent(PDynTFTBaseComponent(TPtrRec(AArrowButton))) then
     Exit;
 
-  Pressed := AArrowButton^.BaseProps.CompState and CPRESSED = CPRESSED;
+  Pressed := AArrowButton^.BaseProps.CompState and (CPRESSED xor CDISABLEPRESSING) = CPRESSED;
 
   x1 := AArrowButton^.BaseProps.Left;
   y1 := AArrowButton^.BaseProps.Top;

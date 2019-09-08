@@ -2,7 +2,7 @@
 <CONFIG>
   <ProjectSession>
     <PathDelim Value="\"/>
-    <Version Value="10"/>
+    <Version Value="11"/>
     <BuildModes Active="Default"/>
     <Units Count="33">
       <Unit0>
@@ -19,7 +19,7 @@
         <ComponentName Value="frmDynTFTSimMain"/>
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
-        <IsVisibleTab Value="True"/>
+        <TopLine Value="6"/>
         <CursorPos X="27" Y="12"/>
         <UsageCount Value="22"/>
         <Loaded Value="True"/>
@@ -62,8 +62,8 @@
         <ComponentName Value="frmDynTFTSimScreen"/>
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
-        <EditorIndex Value="1"/>
-        <TopLine Value="124"/>
+        <EditorIndex Value="2"/>
+        <TopLine Value="135"/>
         <CursorPos X="39" Y="140"/>
         <UsageCount Value="22"/>
         <Loaded Value="True"/>
@@ -269,11 +269,12 @@
       </Unit27>
       <Unit28>
         <Filename Value="D:\DynTFT\MemManager.pas"/>
-        <EditorIndex Value="-1"/>
-        <WindowIndex Value="-1"/>
-        <TopLine Value="-1"/>
-        <CursorPos X="-1" Y="-1"/>
+        <IsVisibleTab Value="True"/>
+        <EditorIndex Value="1"/>
+        <TopLine Value="12"/>
+        <CursorPos X="34" Y="28"/>
         <UsageCount Value="20"/>
+        <Loaded Value="True"/>
         <DefaultSyntaxHighlighter Value="Delphi"/>
       </Unit28>
       <Unit29>
@@ -312,7 +313,7 @@
         <DefaultSyntaxHighlighter Value="Delphi"/>
       </Unit32>
     </Units>
-    <JumpHistory Count="8" HistoryIndex="7">
+    <JumpHistory Count="9" HistoryIndex="8">
       <Position1>
         <Filename Value="DynTFTSimMainForm.pas"/>
         <Caret Line="8" Column="23"/>
@@ -345,6 +346,14 @@
         <Filename Value="DynTFTSimScreenForm.pas"/>
         <Caret Line="140" Column="39" TopLine="124"/>
       </Position8>
+      <Position9>
+        <Filename Value="DynTFTSimMainForm.pas"/>
+        <Caret Line="12" Column="27" TopLine="6"/>
+      </Position9>
     </JumpHistory>
+    <RunParams>
+      <FormatVersion Value="2"/>
+      <Modes Count="0" ActiveMode="default"/>
+    </RunParams>
   </ProjectSession>
 </CONFIG>

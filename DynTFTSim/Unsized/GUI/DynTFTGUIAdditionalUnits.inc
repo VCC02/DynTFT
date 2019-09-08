@@ -1,1 +1,3 @@
-//
+{$IFDEF IsDesktop}
+, TFT
+{$ENDIF}

@@ -53,29 +53,30 @@ interface
 
 uses
   DynTFTTypes
-  {$IFDEF mikroTFT}
+  {$IFDEF mikroTFT}      
     {$DEFINE MissingStuff}
 
     {$IFDEF IsDesktop}
-      ,TFT
+      , TFT
     {$ELSE}
-      //,__Lib_TFT
+      //, __Lib_TFT
     {$ENDIF}
+  {$ELSE}              
+    , {$INCLUDE UserDrawingUnits.inc}   //if required
   {$ENDIF}
 
-  {$IFDEF userTFT}
+  (*{$IFDEF userTFT}
     {$IFNDEF MissingStuff}
       {$DEFINE MissingStuff}
     {$ENDIF}
-    UserTFT
-  {$ENDIF}
+    , UserTFT
+  {$ENDIF}*)
 
   {$IFDEF IsDesktop}
-    ,Classes, SysUtils, Graphics, Forms, StdCtrls
-  {$ENDIF}
-
-  {$IFDEF UserTFTCommands}  //this can be a project-level definition
-    {$INCLUDE UserDrawingUnits.inc} //if required
+    , Classes, SysUtils, Graphics, Forms, StdCtrls
+    {$IFDEF DynTFTFontSupport}
+      , DynTFTFonts //this should exist in near the 'DynTFTGUI.pas' file when using fonts
+    {$ENDIF}
   {$ENDIF}
   ;
 
@@ -104,13 +105,13 @@ uses
     {$DEFINE AppArch32}  //then it must be 32-bit !
   {$ENDIF}
 
-type
+(*type
   //PByte = ^Byte;
   {$IFDEF AppArch16}
     PByte = ^far const code Byte;
   {$ELSE}
     PByte = ^const code Byte;
-  {$ENDIF}
+  {$ENDIF} *)
 {$ENDIF}
 
 {$IFNDEF IsDesktop}
@@ -147,13 +148,21 @@ procedure DynTFT_Circle(x_center, y_center, radius: Integer);
 {$ENDIF}
 
 
-{$IFDEF MissingStuff}
-  {$IFDEF IsDesktop}
+
+{$IFDEF IsDesktop}
+  var
+    TFT_defaultFont: TDynTFTFontSettings; //Byte;
+    TFT_fallbackFont: TDynTFTFontSettings;  //used on Desktop only, when the selected font can't be found
+{$ELSE}
+  {$IFNDEF MissingStuff}
     var
-      TFT_defaultFont: Byte;
+      TFT_defaultFont: Byte; //this should have a user-defined value for a user TFT library
+  {$ELSE}
+    //extra stuff when using mikro TFT library
   {$ENDIF}
 {$ENDIF}
 
+  
 implementation
 
 {$IFDEF IsDesktop}
@@ -232,6 +241,87 @@ implementation
 {$ENDIF}
 
 
+{$IFDEF IsDesktop}
+  procedure DynTFT_AssignDebugConsole(AComp: TComponent); //this should be a TListBox or a TMemo
+  begin
+    DebugComponent := AComp;
+  end;
+
+
+  procedure AddMultipleItems(AItems: TStrings; s: string);
+  var
+    TempItems: TStringList;
+  begin
+    TempItems := TStringList.Create;
+    try
+      TempItems.Text := s;
+      AItems.AddStrings(TempItems);
+    finally
+      TempItems.Free;
+    end;
+  end;
+
+
+  procedure DynTFT_DebugConsole(AText: string);
+  var
+    i: Integer;
+    AForm: TForm;
+  begin
+    try
+      if Assigned(DebugComponent) then
+      begin
+        if DebugComponent is TListBox then
+        begin
+          if Pos(#13#10, AText) > 0 then
+            AddMultipleItems((DebugComponent as TListBox).Items, AText)
+          else
+            (DebugComponent as TListBox).Items.Add(AText);
+
+          (DebugComponent as TListBox).ItemIndex := (DebugComponent as TListBox).Count - 1;
+        end
+        else
+          if DebugComponent is TMemo then
+            (DebugComponent as TMemo).Lines.Add(AText);
+      end
+      else
+      begin
+        if Assigned(Application) then
+        begin
+          AForm := Application.MainForm;
+          if AForm = nil then
+            Exit;
+            
+          for i := 0 to AForm.ComponentCount - 1 do
+          begin
+            if AForm.Components[i] is TListBox then
+            begin
+              DebugComponent := AForm.Components[i];
+              (DebugComponent as TListBox).Items.Add('DebugConsoleItems self assigned to ' + (DebugComponent as TListBox).Name + ' because you didn''t assign it.');
+              Break;
+            end;
+
+            if AForm.Components[i] is TMemo then
+            begin
+              DebugComponent := AForm.Components[i];
+              (DebugComponent as TMemo).Lines.Add('DebugConsoleItems self assigned to ' + (DebugComponent as TMemo).Name + ' because you didn''t assign it.');
+              Break;
+            end;
+          end;
+        end;
+      end;
+    except
+    end;
+  end;
+{$ELSE}
+  procedure DynTFT_DebugConsole(var AText: string);
+  begin
+    {$IFDEF UseDynTFT_DebugConsole}
+      {$I DynTFT_DebugConsole.inc}  //call UART_Write_Text or whatever you want here
+    {$ENDIF}
+  end;
+{$ENDIF}
+
+
 {$IFNDEF UserTFTCommands}
 
   procedure DynTFT_Init(display_width, display_height: Word);
@@ -254,7 +344,11 @@ implementation
 
   procedure DynTFT_Set_Font(activeFont: PByte; font_color: TColor; font_orientation: Word);
   begin
-    TFT_Set_Font(activeFont, font_color and $00FFFFFF, font_orientation);
+    {$IFDEF UseExternalFont}
+      TFT_Set_Ext_Font(DWord(activeFont), font_color and $00FFFFFF, font_orientation);
+    {$ELSE}  
+      TFT_Set_Font(activeFont, font_color and $00FFFFFF, font_orientation);
+    {$ENDIF}
   end;
 
   
@@ -312,100 +406,43 @@ implementation
     procedure GetTextWidthAndHeight(var AText: string; var Width, Height: Word);
   {$ENDIF}
     begin
-      {$IFDEF IsDesktop}
+      (*{$IFDEF IsDesktop}
         TFT_Set_Font(@TFT_defaultFont, GCanvas.Font.Color, 0);
-      {$ENDIF}
+      {$ENDIF}*) ///////////////////////////////////////////////////////////////////////////// to be verified where (in what project) it is needed
       TFT_Write_Text_Return_Pos(AText, 0, 0);
 
       Width := caption_length;
       Height := caption_height;
     end;
-
-
-    {$IFDEF IsDesktop}
-      procedure DynTFT_AssignDebugConsole(AComp: TComponent); //this should be a TListBox or a TMemo
-      begin
-        DebugComponent := AComp;
-      end;
-
-
-      procedure AddMultipleItems(AItems: TStrings; s: string);
-      var
-        TempItems: TStringList;
-      begin
-        TempItems := TStringList.Create;
-        try
-          AItems.Text := s;
-          AItems.AddStrings(TempItems);
-        finally
-          TempItems.Free;
-        end;
-      end;
-
-
-      procedure DynTFT_DebugConsole(AText: string);
-      var
-        i: Integer;
-        AForm: TForm;
-      begin
-        try
-          if Assigned(DebugComponent) then
-          begin
-            if DebugComponent is TListBox then
-            begin
-              if Pos(#13#10, AText) > 0 then
-                AddMultipleItems((DebugComponent as TListBox).Items, AText)
-              else  
-                (DebugComponent as TListBox).Items.Add(AText);
-                
-              (DebugComponent as TListBox).ItemIndex := (DebugComponent as TListBox).Count - 1;
-            end
-            else
-              if DebugComponent is TMemo then
-                (DebugComponent as TMemo).Lines.Add(AText);
-          end
-          else
-          begin
-            if Assigned(Application) then
-            begin
-              AForm := Application.MainForm;
-              for i := 0 to AForm.ComponentCount - 1 do
-              begin
-                if AForm.Components[i] is TListBox then
-                begin
-                  DebugComponent := AForm.Components[i];
-                  (DebugComponent as TListBox).Items.Add('DebugConsoleItems self assigned to ' + (DebugComponent as TListBox).Name + ' because you didn''t assign it.');
-                  Break;
-                end;
-
-                if AForm.Components[i] is TMemo then
-                begin
-                  DebugComponent := AForm.Components[i];
-                  (DebugComponent as TMemo).Lines.Add('DebugConsoleItems self assigned to ' + (DebugComponent as TMemo).Name + ' because you didn''t assign it.');
-                  Break;
-                end;
-              end;
-            end;
-          end;
-        except
-        end;
-      end;
-    {$ELSE}
-      procedure DynTFT_DebugConsole(var AText: string);
-      begin
-        {$IFDEF UseDynTFT_DebugConsole}
-          {$I DynTFT_DebugConsole.inc}  //call UART_Write_Text or whatever you want here
-        {$ENDIF}
-      end;
-    {$ENDIF}
-
-
 {$ELSE}
-  {$I UserTFT.inc}  //This file should contain the required implementation of TFT function, matching the headers above.
+  {$I UserTFT.inc}  //This file should contain the required implementation of TFT functions, matching the headers above.
 {$ENDIF}
+
 
 {$IFDEF IsDesktop}
 begin
   DebugComponent := nil;
+
+  //Please override these default font setting, somewhere in the main window of the simulator (e.g. FormCreate), if needed.
+  //Do not modify these settings here!
+  TFT_defaultFont.FontName := 'Tahoma';
+  TFT_defaultFont.FontSize := 10;
+  TFT_defaultFont.Bold := True;
+  TFT_defaultFont.Italic := False;
+  TFT_defaultFont.Underline := False;
+  TFT_defaultFont.StrikeOut := False;
+  TFT_defaultFont.Charset := 1; //DEFAULT_CHARSET;
+  TFT_defaultFont.Pitch := fpDefault;
+
+  TFT_fallbackFont.FontName := 'Tahoma';
+  TFT_fallbackFont.FontSize := 8;
+  TFT_fallbackFont.Bold := False;
+  TFT_fallbackFont.Italic := False;
+  TFT_fallbackFont.Underline := False;
+  TFT_fallbackFont.StrikeOut := True;
+  TFT_fallbackFont.Charset := 1; //DEFAULT_CHARSET;
+  TFT_fallbackFont.Pitch := fpDefault;
+  
+
 {$ENDIF}
 end.

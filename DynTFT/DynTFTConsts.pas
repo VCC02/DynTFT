@@ -33,6 +33,10 @@ unit DynTFTConsts;
   {$DEFINE IsDesktop}
 {$ENDIF}
 
+{$IFNDEF UserTFTCommands}  //this can be a project-level definition
+  {$DEFINE mikroTFT}
+{$ENDIF}
+
 {$IFDEF IsDesktop}
 interface
 
@@ -59,12 +63,15 @@ const
     CL_PURPLE = clPurple;
     CL_OLIVE = clOlive;
     CL_TEAL = clTeal;
+    CL_MONEYGREEN = clMoneyGreen;
+    CL_SKYBLUE = clSkyBlue;
 
     CL_LIGHTGRAY = $00F0F0F0;
     CL_LIGHTBLUE = $00FFEFEF;
     CL_DARKGRAY = $00404040;
 
     CL_HIGHLIGHT = $00FF9933;
+    CL_CREAM = clCream;
 
     FO_HORIZONTAL = 0;
     FO_VERTICAL = 1;
@@ -82,12 +89,23 @@ const
     CL_YELLOW = $FFE0;
     CL_FUCHSIA = $F81F; }
 
-    CL_LIGHTGRAY = $F79E;
-    CL_LIGHTBLUE = $EF7F;
-    CL_DARKGRAY = $0841;
-    CL_MEDGRAY = $A514;
+    {$IFDEF mikroTFT}
+      CL_LIGHTGRAY = $F79E;
+      CL_LIGHTBLUE = $EF7F;
+      CL_DARKGRAY = $0841;
+      CL_MEDGRAY = $A514;
 
-    CL_HIGHLIGHT = $34DF;
+      CL_MONEYGREEN = $C6F8;
+      CL_SKYBLUE = $A65E;
+
+      CL_HIGHLIGHT = $34DF;
+      CL_CREAM = $F7DF;
+    {$ELSE}
+      FO_HORIZONTAL = 0;  //these might interfere with user constants
+      FO_VERTICAL = 1;
+
+      {$I MCUUserColors.inc}
+    {$ENDIF}
   {$ENDIF}
 
 

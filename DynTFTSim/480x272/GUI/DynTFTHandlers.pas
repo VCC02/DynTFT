@@ -49,7 +49,7 @@ uses
   DynTFTButton, DynTFTArrowButton, DynTFTPanel, DynTFTCheckBox, DynTFTScrollBar,
   DynTFTItems, DynTFTListBox, DynTFTLabel, DynTFTRadioButton, DynTFTRadioGroup,
   DynTFTTabButton, DynTFTPageControl, DynTFTEdit, DynTFTKeyButton, DynTFTProgressBar,
-  DynTFTVirtualKeyboard, DynTFTComboBox, DynTFTMessageBox
+  DynTFTVirtualKeyboard, DynTFTComboBox, DynTFTMessageBox, DynTFTTrackBar
 
   {$IFDEF IsDesktop}
     ,SysUtils, Forms, TFT
@@ -57,38 +57,22 @@ uses
   {$I DynTFTHandlersAdditionalUnits.inc}
   ;
 
-procedure SwitchScreen_OnMouseDownUser(Sender: PPtrRec);
-procedure VirtualKeyboard_OnCharKey(Sender: PPtrRec; var PressedChar: TVKPressedChar; CurrentShiftState: TPtr);
-procedure VirtualKeyboard_OnSpecialKey(Sender: PPtrRec; SpecialKey: Integer; CurrentShiftState: TPtr);
-procedure ListBoxItemsGetItemText(AItems: PPtrRec; Index: LongInt; var ItemText: string);
-procedure ComboBoxItemsGetItemText(AItems: PPtrRec; Index: LongInt; var ItemText: string);
-procedure btnShowMessageBox_OnMouseUpUser(Sender: PPtrRec);
-
+procedure VirtualKeyboard_OnCharKey(Sender: PPtrRec; var PressedChar: TVKPressedChar; CurrentShiftState: TPtr); //CodegenSym:header
+procedure VirtualKeyboard_OnSpecialKey(Sender: PPtrRec; SpecialKey: Integer; CurrentShiftState: TPtr); //CodegenSym:header
+procedure ListBoxItemsGetItemText(AItems: PPtrRec; Index: LongInt; var ItemText: string); //CodegenSym:header
+procedure ComboBoxItemsGetItemText(AItems: PPtrRec; Index: LongInt; var ItemText: string); //CodegenSym:header
+procedure btnShowMessageBox_OnMouseUpUser(Sender: PPtrRec); //CodegenSym:header
+procedure PageControl1_OnChange(Sender: PPtrRec); //CodegenSym:header
+procedure TrackBar1_OnTrackBarChange(Sender: PPtrRec); //CodegenSym:header
+procedure TrackBar2_OnTrackBarChange(Sender: PPtrRec); //CodegenSym:header
 
 implementation
 
 
-procedure SwitchScreen_OnMouseDownUser(Sender: PPtrRec);
-var
-  i: Integer;
-begin
-  DynTFT_Set_Pen(DynTFTAllComponentsContainer[PageControl1^.ActiveIndex].ScreenColor, 1);
-  DynTFT_Set_Brush(1, DynTFTAllComponentsContainer[PageControl1^.ActiveIndex].ScreenColor, 0, 0, 0, 0);
-  DynTFT_Rectangle(0, 21, TFT_DISP_WIDTH, TFT_DISP_HEIGHT);
-
-  for i := 1 to PageControl1^.PageCount {- 1} do
-  begin
-    DynTFTAllComponentsContainer[i].Active := PageControl1^.ActiveIndex = i - 1;
-    if DynTFTAllComponentsContainer[i].Active then
-      DynTFTRepaintScreenComponents(i, CREPAINTONSTARTUP, nil);
-  end;
-end;
-
-
-procedure VirtualKeyboard_OnCharKey(Sender: PPtrRec; var PressedChar: TVKPressedChar; CurrentShiftState: TPtr);
+procedure VirtualKeyboard_OnCharKey(Sender: PPtrRec; var PressedChar: TVKPressedChar; CurrentShiftState: TPtr); //CodegenSym:handler
 var
   AText: string {$IFNDEF IsDesktop}[CMaxKeyButtonStringLength] {$ENDIF};
-begin
+begin //CodegenSym:handler:begin
   if PDynTFTVirtualKeyboard(TPtrRec(Sender))^.ShiftState and CDYNTFTSS_CTRL = CDYNTFTSS_CTRL then
     Exit;
 
@@ -100,11 +84,11 @@ begin
 
   if Edit1^.BaseProps.Focused and CFOCUSED <> CFOCUSED then
     DynTFTFocusComponent(PDynTFTBaseComponent(TPtrRec(Edit1)));
-end;
+end; //CodegenSym:handler:end
 
 
-procedure VirtualKeyboard_OnSpecialKey(Sender: PPtrRec; SpecialKey: Integer; CurrentShiftState: TPtr);
-begin
+procedure VirtualKeyboard_OnSpecialKey(Sender: PPtrRec; SpecialKey: Integer; CurrentShiftState: TPtr); //CodegenSym:handler
+begin //CodegenSym:handler:begin
   case SpecialKey of
     VK_BACK : DynTFTEditBackspaceAtCaret(Edit1);
 
@@ -127,36 +111,36 @@ begin
 
     VK_END: DynTFTMoveEditCaretToEnd(Edit1);
   end;
-end;
+end; //CodegenSym:handler:end
 
 
-procedure ListBoxItemsGetItemText(AItems: PPtrRec; Index: LongInt; var ItemText: string);
-begin
+procedure ListBoxItemsGetItemText(AItems: PPtrRec; Index: LongInt; var ItemText: string); //CodegenSym:handler
+begin //CodegenSym:handler:begin
   {$IFDEF IsDesktop}
     ItemText := IntToStr(Index);
   {$ELSE}
     IntToStr(Index, ItemText);
   {$ENDIF}
-end;
+end; //CodegenSym:handler:end
 
 
-procedure ComboBoxItemsGetItemText(AItems: PPtrRec; Index: LongInt; var ItemText: string);
-begin
+procedure ComboBoxItemsGetItemText(AItems: PPtrRec; Index: LongInt; var ItemText: string); //CodegenSym:handler
+begin //CodegenSym:handler:begin
   {$IFDEF IsDesktop}
     ItemText := IntToStr(Index);
   {$ELSE}
     IntToStr(Index, ItemText);
   {$ENDIF}
-end;
+end; //CodegenSym:handler:end
 
 
-procedure btnShowMessageBox_OnMouseUpUser(Sender: PPtrRec);
+procedure btnShowMessageBox_OnMouseUpUser(Sender: PPtrRec); //CodegenSym:handler
 var
   AButton: PDynTFTButton;
   Res: Integer;                                
   MBMsg: string {$IFNDEF IsDesktop}[CMessageBoxMaxTextLength] {$ENDIF};
   MBTitle: string {$IFNDEF IsDesktop}[CMessageBoxMaxTitleLength] {$ENDIF};
-begin
+begin //CodegenSym:handler:begin
   AButton := PDynTFTButton(TPtrRec(Sender));
   MBMsg := 'This is a very long messagebox.';
   MBTitle := 'MB Title fp';
@@ -182,6 +166,47 @@ begin
   ProgressBar2^.Position := Res * 3;
   DynTFTDrawProgressBar(ProgressBar1, False);
   DynTFTDrawProgressBar(ProgressBar2, False);
-end;
+
+  TrackBar1^.Position := ProgressBar1^.Position;
+  TrackBar2^.Position := ProgressBar2^.Position;
+
+  DynTFTDrawTrackBar(TrackBar1, False);
+  DynTFTDrawTrackBar(TrackBar2, False);
+end; //CodegenSym:handler:end
+
+
+procedure PageControl1_OnChange(Sender: PPtrRec); //CodegenSym:handler
+var
+  i: Integer;
+begin //CodegenSym:handler:begin
+  DynTFT_Set_Pen(DynTFTAllComponentsContainer[PageControl1^.ActiveIndex].ScreenColor, 1);
+  DynTFT_Set_Brush(1, DynTFTAllComponentsContainer[PageControl1^.ActiveIndex].ScreenColor, 0, 0, 0, 0);
+  DynTFT_Rectangle(0, 21, TFT_DISP_WIDTH, TFT_DISP_HEIGHT);
+
+  for i := 1 to PageControl1^.PageCount {- 1} do
+  begin
+    DynTFTAllComponentsContainer[i].Active := PageControl1^.ActiveIndex = i - 1;
+    if DynTFTAllComponentsContainer[i].Active then
+      DynTFTRepaintScreenComponents(i, CREPAINTONSTARTUP, nil);
+  end;
+
+end; //CodegenSym:handler:end
+
+
+procedure TrackBar1_OnTrackBarChange(Sender: PPtrRec); //CodegenSym:handler
+begin //CodegenSym:handler:begin
+  ProgressBar1^.Position := TrackBar1^.Position;
+  DynTFTDrawProgressBar(ProgressBar1, False);
+end; //CodegenSym:handler:end
+
+
+procedure TrackBar2_OnTrackBarChange(Sender: PPtrRec); //CodegenSym:handler
+begin //CodegenSym:handler:begin
+  ProgressBar2^.Position := TrackBar2^.Position;
+  DynTFTDrawProgressBar(ProgressBar2, False);
+end; //CodegenSym:handler:end
+
+
+
 
 end.

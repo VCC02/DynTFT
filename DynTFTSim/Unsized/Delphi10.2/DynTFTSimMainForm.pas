@@ -142,16 +142,16 @@ end;
 
 procedure TfrmDynTFTSimMain.tmrSimulatorTimer(Sender: TObject);
 var
-  TotalFreeMemSize: Integer;
+  AllocatedMemSize: Integer;
 begin
   try
     DynTFT_GUI_LoopIteration;
 
-    TotalFreeMemSize := {$IFDEF UseSmallMM} MaxMM {$ELSE} HEAP_SIZE {$ENDIF} - MM_TotalFreeMemSize;
-    if prbAllocatedMemory.Position <> TotalFreeMemSize then
+    AllocatedMemSize := {$IFDEF UseSmallMM} MaxMM {$ELSE} HEAP_SIZE {$ENDIF} - MM_TotalFreeMemSize;
+    if prbAllocatedMemory.Position <> AllocatedMemSize then
     begin
-      prbAllocatedMemory.Position := TotalFreeMemSize;
-      lblAllocatedMemory.Caption := 'Allocated Memory: ' + IntToStr(TotalFreeMemSize) + ' B    (' + IntToStr(TotalFreeMemSize shr 10) + ' KB)';
+      prbAllocatedMemory.Position := AllocatedMemSize;
+      lblAllocatedMemory.Caption := 'Allocated Memory: ' + IntToStr(AllocatedMemSize) + ' B    (' + IntToStr(AllocatedMemSize shr 10) + ' KB)';
     end;
   except
     on E: Exception do
@@ -214,6 +214,7 @@ begin
   try
     New(DynTFTMessageBoxMainLoopHandler);
     DynTFT_GUI_Start;
+    DynTFTSetScreenSizeForMessageBox(TFT_DISP_WIDTH, TFT_DISP_HEIGHT);
     {$IFDEF IsDesktop}
       DynTFTMessageBoxMainLoopHandler^ := HandleMessageBox;
     {$ELSE}

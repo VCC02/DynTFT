@@ -64,39 +64,51 @@ procedure Default_OnMouseUpUser(Sender: PPtrRec);
 
 procedure SetAllHandlersToDefault(ABase: PDynTFTBaseComponent);
 
-procedure CreateNewButton_OnMouseUpUser(Sender: PPtrRec);
-procedure LstBoxScroll_OnMouseMoveUser(Sender: PPtrRec);
-procedure TestScrollBarChange(Sender: PPtrRec);
-procedure MoveCarretLeft(Sender: PPtrRec);
-procedure MoveCarretRight(Sender: PPtrRec);
+procedure CreateNewButton_OnMouseUpUser(Sender: PPtrRec); //CodegenSym:header
+procedure TestScrollBarChange(Sender: PPtrRec); //CodegenSym:header
 
-procedure TestShapes_OnMouseDownUser(Sender: PPtrRec);
+procedure MoveCarretLeft(Sender: PPtrRec); //CodegenSym:header
+procedure MoveCarretRight(Sender: PPtrRec); //CodegenSym:header
 
-procedure CheckPasswordChar_OnMouseUpUser(Sender: PPtrRec);
-procedure CheckTestVisibility_OnMouseUpUser(Sender: PPtrRec);
-procedure CheckTestEnabling_OnMouseUpUser(Sender: PPtrRec);
-procedure CheckTestRdBtnVisibility_OnMouseUpUser(Sender: PPtrRec);
-procedure CheckTestLstBoxVisibility_OnMouseUpUser(Sender: PPtrRec);
-procedure CheckTestRdGrpVisibility_OnMouseUpUser(Sender: PPtrRec);
-procedure CheckTestPagVisibility_OnMouseUpUser(Sender: PPtrRec);
-procedure CreateNewKeyButtons_OnMouseUpUser(Sender: PPtrRec);
-procedure DestroyTab_OnMouseUpUser(Sender: PPtrRec);
-procedure DestroyPage_OnMouseUpUser(Sender: PPtrRec);
-procedure DestroyRdBtn_OnMouseUpUser(Sender: PPtrRec);
-procedure DestroyRdGrp_OnMouseUpUser(Sender: PPtrRec);
-procedure SelfDestroy_OnMouseUpUser(Sender: PPtrRec);
-procedure ToggleCmbEditable_OnMouseUpUser(Sender: PPtrRec);
+procedure TestShapes_OnMouseDownUser(Sender: PPtrRec); //CodegenSym:header
 
-procedure HorizTrackBar_OnTrackBarChange(Sender: PPtrRec);
-procedure VertTrackBar_OnTrackBarChange(Sender: PPtrRec);
+procedure CheckPasswordChar_OnMouseUpUser(Sender: PPtrRec); //CodegenSym:header
+procedure CheckTestVisibility_OnMouseUpUser(Sender: PPtrRec); //CodegenSym:header
+procedure CheckTestEnabling_OnMouseUpUser(Sender: PPtrRec); //CodegenSym:header
+procedure CheckTestRdBtnVisibility_OnMouseUpUser(Sender: PPtrRec); //CodegenSym:header
+procedure CheckTestLstBoxVisibility_OnMouseUpUser(Sender: PPtrRec); //CodegenSym:header
+procedure CheckTestRdGrpVisibility_OnMouseUpUser(Sender: PPtrRec); //CodegenSym:header
+procedure CheckTestPagVisibility_OnMouseUpUser(Sender: PPtrRec); //CodegenSym:header
+procedure CreateNewKeyButtons_OnMouseUpUser(Sender: PPtrRec); //CodegenSym:header
+procedure DestroyTab_OnMouseUpUser(Sender: PPtrRec); //CodegenSym:header
+procedure DestroyPage_OnMouseUpUser(Sender: PPtrRec); //CodegenSym:header
+procedure DestroyRdBtn_OnMouseUpUser(Sender: PPtrRec); //CodegenSym:header
+procedure DestroyRdGrp_OnMouseUpUser(Sender: PPtrRec); //CodegenSym:header
+procedure SelfDestroy_OnMouseUpUser(Sender: PPtrRec); //CodegenSym:header
+procedure ToggleCmbEditable_OnMouseUpUser(Sender: PPtrRec); //CodegenSym:header
 
-procedure ListBoxItemsGetItemText(AItems: PPtrRec; Index: LongInt; var ItemText: string);
-procedure ComboBoxItemsGetItemText(AItems: PPtrRec; Index: LongInt; var ItemText: string);
+procedure HorizTrackBar_OnTrackBarChange(Sender: PPtrRec); //CodegenSym:header
+procedure VertTrackBar_OnTrackBarChange(Sender: PPtrRec); //CodegenSym:header
 
-procedure btnMsgBox_OnMouseUpUser(Sender: PPtrRec);
+procedure ListBoxItemsGetItemText(AItems: PPtrRec; Index: LongInt; var ItemText: string); //CodegenSym:header
+procedure ComboBoxItemsGetItemText(AItems: PPtrRec; Index: LongInt; var ItemText: string); //CodegenSym:header
+
+procedure btnMsgBox_OnMouseUpUser(Sender: PPtrRec); //CodegenSym:header
+
+procedure ATestRadioGroup1_OnSelectionChanged(Sender: PPtrRec); //CodegenSym:header
+
+
 
 
 implementation
+
+
+procedure ATestRadioGroup1_OnSelectionChanged(Sender: PPtrRec); //CodegenSym:handler
+begin //CodegenSym:handler:begin
+  {$IFDEF IsDesktop}
+    DynTFT_DebugConsole('ATestRadioGroup1.ItemIndex: ' + IntToStr(PDynTFTRadioGroup(TPtrRec(Sender))^.ItemIndex));
+  {$ENDIF}
+end; //CodegenSym:handler:end
 
 
 //Default handlers
@@ -159,68 +171,53 @@ begin
 end;
 
 
-procedure CreateNewButton_OnMouseUpUser(Sender: PPtrRec);
+procedure CreateNewButton_OnMouseUpUser(Sender: PPtrRec); //CodegenSym:handler
 var
   AButton: PDynTFTButton;
-begin
-  AButton := DynTFTButton_Create(1, 430, 20, 120, 20);
+begin //CodegenSym:handler:begin
+  AButton := DynTFTButton_Create(0, 430, 20, 120, 20);
   SetAllHandlersToDefault(PDynTFTBaseComponent(TPtrRec(AButton)));
   {$IFDEF ComponentsHaveName}
     AButton^.BaseProps.Name^ := 'NewButton';
   {$ENDIF}
-    
+
   AButton^.Caption := 'My new button';
   {$IFDEF IsDesktop}
     DynTFT_DebugConsole(PDynTFTButton(TPtrRec(Sender))^.Caption + ' up ' + IntToStr(Random(10)));
   {$ENDIF}
   DynTFTShowComponent(PDynTFTBaseComponent(TPtrRec(AButton)));
   DynTFTDisableComponent(PDynTFTBaseComponent(TPtrRec(Sender)));
-end;
+end; //CodegenSym:handler:end
 
 
-procedure LstBoxScroll_OnMouseMoveUser(Sender: PPtrRec);
-var
-  APanel: PDynTFTPanel;
-  AScrollBar: PDynTFTScrollBar;
-  AListBox: PDynTFTListBox;
-begin
-  APanel := PDynTFTPanel(TPtrRec(Sender));
-  AScrollBar := PDynTFTScrollBar(TPtrRec(APanel^.BaseProps.Parent));
-  AListBox := PDynTFTListBox(TPtrRec(AScrollBar^.BaseProps.Parent));
-  
-  {$IFDEF IsDesktop}
-    DynTFT_DebugConsole('AScrollBar.Position = ' + IntToStr(AScrollBar^.Position) + ' on move ' + IntToStr(Random(1000)));
-    DynTFT_DebugConsole('FirstVisibleIndex = ' + IntToStr(AListBox^.Items^.FirstVisibleIndex) + ' on move ' + IntToStr(Random(1000)));
-  {$ENDIF}
-end;
-
-
-procedure TestScrollBarChange(Sender: PPtrRec);
-begin
+procedure TestScrollBarChange(Sender: PPtrRec); //CodegenSym:handler
+begin //CodegenSym:handler:begin
   {$IFDEF IsDesktop}
     {$IFDEF ComponentsHaveName}
       DynTFT_DebugConsole(PDynTFTBaseComponent(Sender)^.BaseProps.Name^ + ' change ' + IntToStr(Random(10)));
+    {$ELSE}
+      DynTFT_DebugConsole('TestScroll change ' + IntToStr(PDynTFTScrollBar(TPtrRec(Sender))^.Position));
     {$ENDIF}
   {$ENDIF}
-end;
+end; //CodegenSym:handler:end
 
 
-procedure MoveCarretLeft(Sender: PPtrRec);
-begin
-  DynTFTMoveEditCaretToLeft(ATestEdit, 1);
+procedure MoveCarretLeft(Sender: PPtrRec); //CodegenSym:handler
+begin //CodegenSym:handler:begin
+  DynTFTMoveEditCaretToLeft(ATestEdit2, 1);
   //ATestEdit^.BaseProps.Focused := CFOCUSED;
-end;
+end; //CodegenSym:handler:end
 
 
-procedure MoveCarretRight(Sender: PPtrRec);
-begin
-  DynTFTMoveEditCaretToRight(ATestEdit, 1);
+procedure MoveCarretRight(Sender: PPtrRec); //CodegenSym:handler
+begin //CodegenSym:handler:begin
+  DynTFTMoveEditCaretToRight(ATestEdit2, 1);
   //ATestEdit^.BaseProps.Focused := CFOCUSED;
-end;
+end; //CodegenSym:handler:end
 
 
-procedure TestShapes_OnMouseDownUser(Sender: PPtrRec);
-begin
+procedure TestShapes_OnMouseDownUser(Sender: PPtrRec); //CodegenSym:handler
+begin //CodegenSym:handler:begin
   DynTFT_Set_Pen(CL_BLACK, 1);
   DynTFT_Set_Brush(0, CL_WHITE, 0, 0, 0, 0);
 
@@ -238,84 +235,83 @@ begin
   DynTFT_Line(44, 140, 45, 141);
   DynTFT_Line(46, 140, 48, 142);
 
-
   DynTFT_Set_Pen(CL_RED, 1);
   DynTFT_Set_Brush(1, CL_BLUE, 0, 0, 0, 0);
   DynTFT_Rectangle(50, 145, 52, 147);
   DynTFT_Rectangle(50, 150, 53, 153);
   DynTFT_Rectangle(50, 160, 54, 164);
-end;
+end; //CodegenSym:handler:end
 
 
-procedure CheckPasswordChar_OnMouseUpUser(Sender: PPtrRec);
-begin
-  ATestEdit^.PasswordText := PDynTFTCheckBox(TPtrRec(Sender))^.Checked;
-  DynTFTEditAfterTypingText(ATestEdit);
-end;
+procedure CheckPasswordChar_OnMouseUpUser(Sender: PPtrRec); //CodegenSym:handler
+begin //CodegenSym:handler:begin
+  ATestEdit2^.PasswordText := PDynTFTCheckBox(TPtrRec(Sender))^.Checked;
+  DynTFTEditAfterTypingText(ATestEdit2);
+end; //CodegenSym:handler:end
 
 
-procedure CheckTestVisibility_OnMouseUpUser(Sender: PPtrRec);
-begin
+procedure CheckTestVisibility_OnMouseUpUser(Sender: PPtrRec); //CodegenSym:handler
+begin //CodegenSym:handler:begin
   if PDynTFTCheckBox(TPtrRec(Sender))^.Checked then
-    DynTFTShowComponent(PDynTFTBaseComponent(TPtrRec(ATestScrollBar)))
+    DynTFTShowComponent(PDynTFTBaseComponent(TPtrRec(ATestScrollBar2)))
   else
-    DynTFTHideComponent(PDynTFTBaseComponent(TPtrRec(ATestScrollBar)));
-end;
+    DynTFTHideComponent(PDynTFTBaseComponent(TPtrRec(ATestScrollBar2)));
+end; //CodegenSym:handler:end
 
 
-procedure CheckTestEnabling_OnMouseUpUser(Sender: PPtrRec);
-begin
+procedure CheckTestEnabling_OnMouseUpUser(Sender: PPtrRec); //CodegenSym:handler
+begin //CodegenSym:handler:begin
   if PDynTFTCheckBox(TPtrRec(Sender))^.Checked then
-    DynTFTEnableComponent(PDynTFTBaseComponent(TPtrRec(ATestScrollBar)))
+    DynTFTEnableComponent(PDynTFTBaseComponent(TPtrRec(ATestScrollBar3)))
   else
-    DynTFTDisableComponent(PDynTFTBaseComponent(TPtrRec(ATestScrollBar)));
+    DynTFTDisableComponent(PDynTFTBaseComponent(TPtrRec(ATestScrollBar3)));
 
   if PDynTFTCheckBox(TPtrRec(Sender))^.Checked then
-    DynTFTEnableComponent(PDynTFTBaseComponent(TPtrRec(ATestListBox{^.Items})))
+    DynTFTEnableComponent(PDynTFTBaseComponent(TPtrRec(ATestListBox)))
   else
-    DynTFTDisableComponent(PDynTFTBaseComponent(TPtrRec(ATestListBox{^.Items})));
-end;
+    DynTFTDisableComponent(PDynTFTBaseComponent(TPtrRec(ATestListBox)));
+end; //CodegenSym:handler:end
 
 
-procedure CheckTestRdBtnVisibility_OnMouseUpUser(Sender: PPtrRec);
-begin
+procedure CheckTestRdBtnVisibility_OnMouseUpUser(Sender: PPtrRec); //CodegenSym:handler
+begin //CodegenSym:handler:begin
   if PDynTFTCheckBox(TPtrRec(Sender))^.Checked then
-    DynTFTShowComponent(PDynTFTBaseComponent(TPtrRec(ATestRadioButton3)))
+    DynTFTShowComponent(PDynTFTBaseComponent(TPtrRec(ATestRadioGroup1^.Buttons[2])))
   else
-    DynTFTHideComponent(PDynTFTBaseComponent(TPtrRec(ATestRadioButton3)));
-end;
+    DynTFTHideComponent(PDynTFTBaseComponent(TPtrRec(ATestRadioGroup1^.Buttons[2])));
+end; //CodegenSym:handler:end
 
 
-procedure CheckTestLstBoxVisibility_OnMouseUpUser(Sender: PPtrRec);
-begin
+procedure CheckTestLstBoxVisibility_OnMouseUpUser(Sender: PPtrRec); //CodegenSym:handler
+begin //CodegenSym:handler:begin
   if PDynTFTCheckBox(TPtrRec(Sender))^.Checked then
     DynTFTShowComponent(PDynTFTBaseComponent(TPtrRec(ATestListBox)))
   else
     DynTFTHideComponent(PDynTFTBaseComponent(TPtrRec(ATestListBox)));
-end;
+end; //CodegenSym:handler:end
 
 
-procedure CheckTestRdGrpVisibility_OnMouseUpUser(Sender: PPtrRec);
-begin
+procedure CheckTestRdGrpVisibility_OnMouseUpUser(Sender: PPtrRec); //CodegenSym:handler
+begin //CodegenSym:handler:begin
   if PDynTFTCheckBox(TPtrRec(Sender))^.Checked then
-    DynTFTShowComponent(PDynTFTBaseComponent(TPtrRec(ATestRadioGroup)))
+    DynTFTShowComponent(PDynTFTBaseComponent(TPtrRec(ATestRadioGroup1)))
   else
-    DynTFTHideComponent(PDynTFTBaseComponent(TPtrRec(ATestRadioGroup)));
-end;
+    DynTFTHideComponent(PDynTFTBaseComponent(TPtrRec(ATestRadioGroup1)));
+end; //CodegenSym:handler:end
 
 
-procedure CheckTestPagVisibility_OnMouseUpUser(Sender: PPtrRec);
-begin
+procedure CheckTestPagVisibility_OnMouseUpUser(Sender: PPtrRec); //CodegenSym:handler
+begin //CodegenSym:handler:begin
   if PDynTFTCheckBox(TPtrRec(Sender))^.Checked then
-    DynTFTShowComponent(PDynTFTBaseComponent(TPtrRec(ATestPageControl)))
+    DynTFTShowComponent(PDynTFTBaseComponent(TPtrRec(ATestPageControl1)))
   else
   begin
-    ATestPageControl^.BaseProps.Visible := 0;
+    ATestPageControl1^.BaseProps.Visible := 0;
     //DynTFTHideComponent(PDynTFTBaseComponent(TPtrRec(ATestPageControl))); //if calling DynTFTHideComponent, the area is going to be repainted later, after the execution of DynTFTRepaintScreenComponentsFromArea
-    OnDynTFTBaseInternalRepaint(PDynTFTBaseComponent(TPtrRec(ATestPageControl)), True, CSETSUBCOMPONENTSINVISIBLEONCLEARAREAREPAINT, nil);
-    DynTFTRepaintScreenComponentsFromArea(PDynTFTBaseComponent(TPtrRec(ATestPageControl)));
+    OnDynTFTBaseInternalRepaint(PDynTFTBaseComponent(TPtrRec(ATestPageControl1)), True, CSETSUBCOMPONENTSINVISIBLEONCLEARAREAREPAINT, nil);
+    DynTFTRepaintScreenComponentsFromArea(PDynTFTBaseComponent(TPtrRec(ATestPageControl1)));
   end;
-end;
+end; //CodegenSym:handler:end
 
 
 procedure Edit_OnMouseDownUser(Sender: PPtrRec);
@@ -342,7 +338,7 @@ begin
     Sender := PPtrRec(TPtrRec(ABtnTemp));
   {$ENDIF}
   
-  DynTFTEnableComponent(PDynTFTBaseComponent(TPtrRec(btnCreateKeybord)));
+  DynTFTEnableComponent(PDynTFTBaseComponent(TPtrRec(btnCreateKeyboard)));
 end;
 
 
@@ -357,17 +353,17 @@ begin
     Exit;
     
   AText := PressedChar;
-  DynTFTEditInsertTextAtCaret(ATestEdit, AText);
+  DynTFTEditInsertTextAtCaret(ATestEdit2, AText);
 
-  if ATestEdit^.BaseProps.Focused and CFOCUSED <> CFOCUSED then
-    Edit_OnMouseDownUser(PPtrRec(TPtrRec(ATestEdit)));
+  if ATestEdit2^.BaseProps.Focused and CFOCUSED <> CFOCUSED then
+    Edit_OnMouseDownUser(PPtrRec(TPtrRec(ATestEdit2)));
 end;
 
 
 procedure VirtualKeyboard_OnSpecialKey(Sender: PPtrRec; SpecialKey: Integer; CurrentShiftState: TPtr);
 begin
   case SpecialKey of
-    VK_BACK : DynTFTEditBackspaceAtCaret(ATestEdit);
+    VK_BACK : DynTFTEditBackspaceAtCaret(ATestEdit2);
 
     VK_DELETE :
     begin
@@ -377,25 +373,25 @@ begin
         {$ELSE}
           Application.MainForm.Close;
         {$ENDIF}
-      DynTFTEditDeleteAtCaret(ATestEdit);
+      DynTFTEditDeleteAtCaret(ATestEdit2);
     end;
 
-    VK_LEFT: DynTFTMoveEditCaretToLeft(ATestEdit, 1);
+    VK_LEFT: DynTFTMoveEditCaretToLeft(ATestEdit2, 1);
 
-    VK_RIGHT: DynTFTMoveEditCaretToRight(ATestEdit, 1);
+    VK_RIGHT: DynTFTMoveEditCaretToRight(ATestEdit2, 1);
 
-    VK_HOME: DynTFTMoveEditCaretToHome(ATestEdit);
+    VK_HOME: DynTFTMoveEditCaretToHome(ATestEdit2);
 
-    VK_END: DynTFTMoveEditCaretToEnd(ATestEdit);
+    VK_END: DynTFTMoveEditCaretToEnd(ATestEdit2);
   end;
 end;
 
 
-procedure CreateNewKeyButtons_OnMouseUpUser(Sender: PPtrRec);
-begin
+procedure CreateNewKeyButtons_OnMouseUpUser(Sender: PPtrRec); //CodegenSym:handler
+begin //CodegenSym:handler:begin
   DynTFTDisableComponent(PDynTFTBaseComponent(TPtrRec(Sender)));
 
-  AVirtualKeyboard := DynTFTVirtualKeyboard_Create(1, 1, 646, 318, 182);
+  AVirtualKeyboard := DynTFTVirtualKeyboard_Create(0, 1, 646, 318, 182);
   AVirtualKeyboard^.Color := CL_HIGHLIGHT;
   DynTFTShowComponent(PDynTFTBaseComponent(TPtrRec(AVirtualKeyboard)));
 
@@ -407,7 +403,7 @@ begin
     AVirtualKeyboard^.OnSpecialKey := @VirtualKeyboard_OnSpecialKey;
   {$ENDIF}
 
-  ATestButton := DynTFTButton_Create(1, 340, 614, 130, 20);
+  ATestButton := DynTFTButton_Create(0, 340, 614, 130, 20);
   ATestButton^.Caption := 'Destroy Keyboard';
   {$IFDEF IsDesktop}
     ATestButton^.BaseProps.OnMouseUpUser^ := DestroyKeyButtons_OnMouseUpUser;
@@ -416,54 +412,54 @@ begin
   {$ENDIF}
 
   DynTFTShowComponent(PDynTFTBaseComponent(TPtrRec(ATestButton)));
-  DynTFTDisableComponent(PDynTFTBaseComponent(TPtrRec(btnCreateKeybord)));
-end;
+  DynTFTDisableComponent(PDynTFTBaseComponent(TPtrRec(btnCreateKeyboard)));
+end; //CodegenSym:handler:end
 
 
-procedure DestroyTab_OnMouseUpUser(Sender: PPtrRec);
-begin
-  DynTFTTabButton_DestroyAndPaint(ATabButton3);
-  
-  PDynTFTButton(TPtrRec(Sender))^.Font_Color := CL_RED;
-  OnDynTFTBaseInternalRepaint(PDynTFTBaseComponent(TPtrRec(Sender)), False, CNORMALREPAINT, nil);
-end;
-
-
-procedure DestroyPage_OnMouseUpUser(Sender: PPtrRec);
-begin
-  DynTFTPageControl_DestroyAndPaint(ATestPageControl);
+procedure DestroyTab_OnMouseUpUser(Sender: PPtrRec); //CodegenSym:handler
+begin //CodegenSym:handler:begin
+  DynTFTTabButton_DestroyAndPaint(ATestPageControl1^.TabButtons[2]);
 
   PDynTFTButton(TPtrRec(Sender))^.Font_Color := CL_RED;
   OnDynTFTBaseInternalRepaint(PDynTFTBaseComponent(TPtrRec(Sender)), False, CNORMALREPAINT, nil);
-end;
+end; //CodegenSym:handler:end
 
 
-procedure DestroyRdBtn_OnMouseUpUser(Sender: PPtrRec);
-begin
-  DynTFTRadioButton_DestroyAndPaint(ATestRadioButton3);
-
-  PDynTFTButton(TPtrRec(Sender))^.Font_Color := CL_RED;
-  OnDynTFTBaseInternalRepaint(PDynTFTBaseComponent(TPtrRec(Sender)), False, CNORMALREPAINT, nil);
-end;
-
-
-procedure DestroyRdGrp_OnMouseUpUser(Sender: PPtrRec);
-begin
-  DynTFTRadioGroup_DestroyAndPaint(ATestRadioGroup);
+procedure DestroyPage_OnMouseUpUser(Sender: PPtrRec); //CodegenSym:handler
+begin //CodegenSym:handler:begin
+  DynTFTPageControl_DestroyAndPaint(ATestPageControl1);
 
   PDynTFTButton(TPtrRec(Sender))^.Font_Color := CL_RED;
   OnDynTFTBaseInternalRepaint(PDynTFTBaseComponent(TPtrRec(Sender)), False, CNORMALREPAINT, nil);
-end;
+end; //CodegenSym:handler:end
 
 
-procedure SelfDestroy_OnMouseUpUser(Sender: PPtrRec);
+procedure DestroyRdBtn_OnMouseUpUser(Sender: PPtrRec); //CodegenSym:handler
+begin //CodegenSym:handler:begin
+  DynTFTRadioButton_DestroyAndPaint(ATestRadioGroup1^.Buttons[2]);
+
+  PDynTFTButton(TPtrRec(Sender))^.Font_Color := CL_RED;
+  OnDynTFTBaseInternalRepaint(PDynTFTBaseComponent(TPtrRec(Sender)), False, CNORMALREPAINT, nil);
+end; //CodegenSym:handler:end
+
+
+procedure DestroyRdGrp_OnMouseUpUser(Sender: PPtrRec); //CodegenSym:handler
+begin //CodegenSym:handler:begin
+  DynTFTRadioGroup_DestroyAndPaint(ATestRadioGroup1);
+
+  PDynTFTButton(TPtrRec(Sender))^.Font_Color := CL_RED;
+  OnDynTFTBaseInternalRepaint(PDynTFTBaseComponent(TPtrRec(Sender)), False, CNORMALREPAINT, nil);
+end; //CodegenSym:handler:end
+
+
+procedure SelfDestroy_OnMouseUpUser(Sender: PPtrRec); //CodegenSym:handler
 {$IFNDEF IsDesktop}
   var
     ABtnTemp: PDynTFTButton;
 {$ENDIF}
-begin
+begin //CodegenSym:handler:begin
   DynTFTComponent_BringMultipleComponentsToFront(PDynTFTBaseComponent(TPtrRec(Sender)), nil); //simply call this proc, to make sure it doesn't crash
-  
+
   {$IFDEF IsDesktop}
     DynTFTButton_DestroyAndPaint(PDynTFTButton(TPtrRec(Sender)));
   {$ELSE}
@@ -472,26 +468,26 @@ begin
     DynTFTButton_DestroyAndPaint(ABtnTemp);
     Sender := PPtrRec(TPtrRec(ABtnTemp));
   {$ENDIF}
-end;
+end; //CodegenSym:handler:end
 
 
-procedure ToggleCmbEditable_OnMouseUpUser(Sender: PPtrRec);
-begin
-  AComboBox^.Editable := not AComboBox^.Editable;
+procedure ToggleCmbEditable_OnMouseUpUser(Sender: PPtrRec); //CodegenSym:handler
+begin //CodegenSym:handler:begin
+  AComboBox1^.Editable := not AComboBox1^.Editable;
 
-  if AComboBox^.Editable then
+  if AComboBox1^.Editable then
     PDynTFTButton(TPtrRec(Sender))^.Font_Color := CL_TEAL
   else
     PDynTFTButton(TPtrRec(Sender))^.Font_Color := CL_DynTFTButton_EnabledFont;
-    
+
   OnDynTFTBaseInternalRepaint(PDynTFTBaseComponent(TPtrRec(Sender)), False, CNORMALREPAINT, nil);
-end;
+end; //CodegenSym:handler:end
 
 
-procedure HorizTrackBar_OnTrackBarChange(Sender: PPtrRec);
+procedure HorizTrackBar_OnTrackBarChange(Sender: PPtrRec); //CodegenSym:handler
 var
   APos: LongInt;
-begin
+begin //CodegenSym:handler:begin
   APos := PDynTFTTrackBar(TPtrRec(Sender))^.Position;
   {$IFDEF IsDesktop}
     ALabelH^.Caption := IntToStr(APos);
@@ -502,13 +498,13 @@ begin
 
   AProgressBarH^.Position := APos;
   DynTFTDrawProgressBar(AProgressBarH, True);
-end;
+end; //CodegenSym:handler:end
 
 
-procedure VertTrackBar_OnTrackBarChange(Sender: PPtrRec);
+procedure VertTrackBar_OnTrackBarChange(Sender: PPtrRec); //CodegenSym:handler
 var
   APos: LongInt;
-begin
+begin //CodegenSym:handler:begin
   APos := PDynTFTTrackBar(TPtrRec(Sender))^.Position;
   {$IFDEF IsDesktop}
     ALabelV^.Caption := IntToStr(APos);
@@ -519,35 +515,35 @@ begin
 
   AProgressBarV^.Position := APos;
   DynTFTDrawProgressBar(AProgressBarV, True);
-end;
+end; //CodegenSym:handler:end
 
 
-procedure ListBoxItemsGetItemText(AItems: PPtrRec; Index: LongInt; var ItemText: string);
-begin
+procedure ListBoxItemsGetItemText(AItems: PPtrRec; Index: LongInt; var ItemText: string); //CodegenSym:handler
+begin //CodegenSym:handler:begin
   {$IFDEF IsDesktop}
     ItemText := IntToStr(Index);
   {$ELSE}
     IntToStr(Index, ItemText);
   {$ENDIF}
-end;
+end; //CodegenSym:handler:end
 
 
-procedure ComboBoxItemsGetItemText(AItems: PPtrRec; Index: LongInt; var ItemText: string);
-begin
+procedure ComboBoxItemsGetItemText(AItems: PPtrRec; Index: LongInt; var ItemText: string); //CodegenSym:handler
+begin //CodegenSym:handler:begin
   {$IFDEF IsDesktop}
     ItemText := IntToStr(Index);
   {$ELSE}
     IntToStr(Index, ItemText);
   {$ENDIF}
-end;
+end; //CodegenSym:handler:end
 
 
-procedure btnMsgBox_OnMouseUpUser(Sender: PPtrRec);
+procedure btnMsgBox_OnMouseUpUser(Sender: PPtrRec); //CodegenSym:handler
 var
   AButton: PDynTFTButton;
   Res: Integer;
   MBMsg, MBTitle: string;
-begin
+begin //CodegenSym:handler:begin
   AButton := PDynTFTButton(TPtrRec(Sender));
   MBMsg := 'This is a very long messagebox';
   MBTitle := 'MB Title fp';
@@ -556,14 +552,13 @@ begin
     DynTFT_DebugConsole('AButton $' + IntToHex(DWord(AButton), 8) + ' before showing Messagebox');
   {$ENDIF}
 
-  Res := DynTFTShowMessageBox(1, MBMsg, MBTitle, CDynTFT_MB_OKCANCEL);
+  Res := DynTFTShowMessageBox(0, MBMsg, MBTitle, CDynTFT_MB_OKCANCEL);
   //Res := DynTFTShowMessageBox(1, MBMsg, MBTitle, CDynTFT_MB_YESNO);
 
   {$IFDEF IsDesktop}
     DynTFT_DebugConsole('AButton $' + IntToHex(DWord(AButton), 8) + ' after closing Messagebox: ' + IntToStr(Res));
     DynTFT_DebugConsole('');
   {$ENDIF}
-end;
-
+end; //CodegenSym:handler:end
 
 end.

@@ -33,6 +33,10 @@ unit DynTFTMessageBox;
   {$DEFINE IsDesktop}
 {$ENDIF}
 
+{$IFNDEF UserTFTCommands}  //this can be a project-level definition
+  {$DEFINE mikroTFT}
+{$ENDIF}
+
 {$IFDEF IsDesktop}
 interface
 {$ENDIF}
@@ -42,7 +46,12 @@ uses
   DynTFTButton, DynTFTLabel
 
   {$IFDEF IsDesktop}
-    ,SysUtils, Forms, Math, TFT
+    ,SysUtils, Forms, Math
+    (*{$IFNDEF UserTFTCommands}
+      , TFT
+    {$ELSE}
+      , {$INCLUDE UserDrawingUnits.inc}
+    {$ENDIF} *)
   {$ENDIF}
   ;
 
@@ -87,7 +96,10 @@ function DynTFTMessageBox_Create(ScreenIndex: Byte; Left, Top, Width, Height: TS
 procedure DynTFTMessageBox_Destroy(var AMessageBox: PDynTFTMessageBox);
 procedure DynTFTMessageBox_DestroyAndPaint(var AMessageBox: PDynTFTMessageBox);
 
+procedure DynTFTPrepareMessageBoxContent(AMessageBox: PDynTFTMessageBox; var MBMsg, MBTitle: string; ButtonsType: Integer);  //exposed for debugging
 function DynTFTShowMessageBox(ScreenIndex: Byte; var MBMsg, MBTitle: string; ButtonsType: Integer): Integer;
+
+procedure DynTFTSetScreenSizeForMessageBox(NewWidth, NewHeight: Word);
 
 procedure DynTFTRegisterMessageBoxEvents;
 function DynTFTGetMessageBoxComponentType: TDynTFTComponentType;
@@ -100,6 +112,10 @@ implementation
 
 var
   ComponentType: TDynTFTComponentType;
+  ScreenWidth, ScreenHeight: Word;
+  {$IFDEF IsDesktop}
+    ScreenSizeSet: Boolean;
+  {$ENDIF} 
 
 
 function DynTFTGetMessageBoxComponentType: TDynTFTComponentType;
@@ -146,16 +162,16 @@ begin
     DynTFT_Rectangle(x1 + 2, y1 + 2, x2 - 2, y1 + 20);
   end;
 
-  DynTFTDrawButton(AMessageBox^.BtnOK, FullRedraw);
-  DynTFTDrawButton(AMessageBox^.BtnCancel, FullRedraw);
+  //draw title
+  DynTFT_Set_Font(@TFT_defaultFont, CL_DynTFTMessageBox_TitleFont, FO_HORIZONTAL);
+  DynTFT_Write_Text(AMessageBox^.Title, x1 + 10, y1 + 2);
 
   //draw text
   DynTFT_Set_Font(@TFT_defaultFont, CL_DynTFTMessageBox_MessageFont, FO_HORIZONTAL);
   DynTFT_Write_Text(AMessageBox^.Text, x1 + 10, y1 + 30);
 
-  //draw title
-  DynTFT_Set_Font(@TFT_defaultFont, CL_DynTFTMessageBox_TitleFont, FO_HORIZONTAL);
-  DynTFT_Write_Text(AMessageBox^.Title, x1 + 10, y1 + 2);
+  DynTFTDrawButton(AMessageBox^.BtnOK, FullRedraw);
+  DynTFTDrawButton(AMessageBox^.BtnCancel, FullRedraw);
 end;
 
 
@@ -352,24 +368,8 @@ begin
 end;
 
 
-function DynTFTShowMessageBox(ScreenIndex: Byte; var MBMsg, MBTitle: string; ButtonsType: Integer): Integer;
-var
-  AMessageBox: PDynTFTMessageBox;
-  TextWidth, TextHeight: Word;
-  Left, Top: Integer;
+procedure DynTFTPrepareMessageBoxContent(AMessageBox: PDynTFTMessageBox; var MBMsg, MBTitle: string; ButtonsType: Integer);
 begin
-  GetTextWidthAndHeight(MBMsg, TextWidth, TextHeight);
-  TextWidth := Max(170, TextWidth + 20);
-
-  if TextWidth > TFT_DISP_WIDTH then
-    Left := 0
-  else
-    Left := (Integer(TFT_DISP_WIDTH) - Integer(TextWidth)) shr 1;
-
-  Top := (TFT_DISP_HEIGHT - 100) shr 1;  // 100 is the initial height
-
-  AMessageBox := DynTFTMessageBox_Create(ScreenIndex, Left, Top, TextWidth, 100);
-
   if Length(MBTitle) > CMessageBoxMaxTitleLength then
   begin
     {$IFDEF IsDesktop}
@@ -407,6 +407,32 @@ begin
       AMessageBox^.BtnCancel^.Caption := 'No';
     end;
   end;
+end;  
+
+
+function DynTFTShowMessageBox(ScreenIndex: Byte; var MBMsg, MBTitle: string; ButtonsType: Integer): Integer;
+var
+  AMessageBox: PDynTFTMessageBox;
+  TextWidth, TextHeight: Word;
+  Left, Top: Integer;
+begin
+  {$IFDEF IsDesktop}
+    if not ScreenSizeSet then
+      raise Exception.Create('ScreenSize is not set for MessageBox. '#13#10' Please call DynTFTSetScreenSizeForMessageBox once, after DynTFT_GUI_Start, with screen width and height.');
+  {$ENDIF}
+  
+  GetTextWidthAndHeight(MBMsg, TextWidth, TextHeight);
+  TextWidth := Max(170, TextWidth + 20);
+
+  if TextWidth > ScreenWidth then
+    Left := 0
+  else
+    Left := (Integer(ScreenWidth) - Integer(TextWidth)) shr 1;
+
+  Top := (ScreenHeight - 100) shr 1;  // 100 is the initial height
+
+  AMessageBox := DynTFTMessageBox_Create(ScreenIndex, Left, Top, TextWidth, 100);
+  DynTFTPrepareMessageBoxContent(AMessageBox, MBMsg, MBTitle, ButtonsType);
 
   ShowMessageBoxAndBringToFront(AMessageBox);
 
@@ -421,6 +447,17 @@ begin
       DynTFTMessageBoxMainLoopHandler^(AMessageBox);
                                              
   Result := AMessageBox^.CloseResult;    
+end;
+
+
+procedure DynTFTSetScreenSizeForMessageBox(NewWidth, NewHeight: Word);
+begin
+  ScreenWidth := NewWidth;
+  ScreenHeight := NewHeight;
+
+  {$IFDEF IsDesktop}
+    ScreenSizeSet := True;
+  {$ENDIF}  
 end;
 
 
@@ -542,6 +579,9 @@ begin
   {$IFDEF IsDesktop}
     DynTFTDisposeInternalHandlers(ABaseEventReg);
   {$ENDIF}
+
+  ScreenWidth := 200; //"smallest" screen width by default (portrait mode)
+  ScreenHeight := 200; //"smallest" screen height by default (landscape mode)
 end;
 
 
@@ -549,6 +589,7 @@ end;
 begin
   ComponentType := -1;
   DynTFTMessageBoxMainLoopHandler := nil;
+  ScreenSizeSet := False;
 {$ENDIF}
 
 end.

@@ -58,6 +58,10 @@ type
     //Edit properties
     Color: TColor;
     Font_Color: TColor;
+    {$IFDEF DynTFTFontSupport}
+      ActiveFont: PByte;
+    {$ENDIF}
+    
     FirstDispChIndex: Integer;  //starts at 1  (if 1, the displayed text should start with the first character in string)
     DisplayableLength: Integer; //this has to be computed at every content change or FirstDispChIndex change. It is updated by DisplayableLength function.
     CaretPosCh: Integer;  //draw the caret before the character of this index, relative to the first character in string.  Starts at 1 (Delphi string)
@@ -363,7 +367,11 @@ begin
   else
     TextColor := CL_DynTFTEdit_DisabledFont;
 
-  DynTFT_Set_Font(@TFT_defaultFont, TextColor, FO_HORIZONTAL);
+  {$IFDEF DynTFTFontSupport}
+    DynTFT_Set_Font(APDynTFTEdit^.ActiveFont, TextColor, FO_HORIZONTAL);
+  {$ELSE}
+    DynTFT_Set_Font(@TFT_defaultFont, TextColor, FO_HORIZONTAL);
+  {$ENDIF}
 
   DynTFT_Rectangle(APDynTFTEdit^.BaseProps.Left, APDynTFTEdit^.BaseProps.Top, APDynTFTEdit^.BaseProps.Left + APDynTFTEdit^.BaseProps.Width, APDynTFTEdit^.BaseProps.Top + APDynTFTEdit^.BaseProps.Height);
 
@@ -613,6 +621,10 @@ begin
   Result^.CaretBlinkStatus := 0;
   Result^.Readonly := False;
   Result^.PasswordText := False;
+
+  {$IFDEF DynTFTFontSupport}
+    Result^.ActiveFont := @TFT_defaultFont;
+  {$ENDIF} 
 
   {$IFDEF IsDesktop}
     New(Result^.OnOwnerInternalMouseDown);

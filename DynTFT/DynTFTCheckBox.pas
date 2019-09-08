@@ -56,6 +56,9 @@ type
     Caption: string[CMaxCheckBoxStringLength];
     Color: TColor;
     Font_Color: TColor;
+    {$IFDEF DynTFTFontSupport}
+      ActiveFont: PByte;
+    {$ENDIF}
   end;
   PDynTFTCheckBox = ^TDynTFTCheckBox;
 
@@ -187,9 +190,17 @@ begin
 
   //Caption
   if ACheckBox^.BaseProps.Enabled = 0 then
-    DynTFT_Set_Font(@TFT_defaultFont, CL_DynTFTCheckBox_DisabledFont, FO_HORIZONTAL)
+    {$IFDEF DynTFTFontSupport}
+      DynTFT_Set_Font(ACheckBox^.ActiveFont, CL_DynTFTCheckBox_DisabledFont, FO_HORIZONTAL)
+    {$ELSE}
+      DynTFT_Set_Font(@TFT_defaultFont, CL_DynTFTCheckBox_DisabledFont, FO_HORIZONTAL)
+    {$ENDIF}
   else
-    DynTFT_Set_Font(@TFT_defaultFont, ACheckBox^.Font_Color, FO_HORIZONTAL);
+    {$IFDEF DynTFTFontSupport}
+      DynTFT_Set_Font(ACheckBox^.ActiveFont, ACheckBox^.Font_Color, FO_HORIZONTAL);
+    {$ELSE}
+      DynTFT_Set_Font(@TFT_defaultFont, ACheckBox^.Font_Color, FO_HORIZONTAL);
+    {$ENDIF}
         
   DynTFT_Write_Text(ACheckBox^.Caption, ACheckBox^.BaseProps.Left + 16, ACheckBox^.BaseProps.Top + 1);
 end;
@@ -216,6 +227,10 @@ begin
   Result^.Color := CL_DynTFTCheckBox_Background;
   Result^.Font_Color := CL_DynTFTCheckBox_EnabledFont;
   Result^.Caption := '';
+
+  {$IFDEF DynTFTFontSupport}
+    Result^.ActiveFont := @TFT_defaultFont;
+  {$ENDIF} 
 end;
 
 

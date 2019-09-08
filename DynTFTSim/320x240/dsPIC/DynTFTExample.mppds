@@ -6,7 +6,7 @@ Value=0
 [BUILD_TYPE]
 Value=0
 [ACTIVE_TAB]
-Value=..\GUI\DynTFTHandlers.pas
+Value=DynTFTExample.mpas
 [USE_EEPROM]
 Value=0
 [USE_HEAP]
@@ -16,13 +16,14 @@ Value=2000
 [EEPROM_DEFINITION]
 Value=
 [FILES]
-Count=6
+Count=7
 File0=DynTFTExample.mpas
 File1=..\..\..\DynTFT\DynTFTBaseDrawing.mpas
 File2=..\..\..\DynTFT\DynTFTControls.mpas
 File3=..\GUI\DynTFTGUI.mpas
 File4=..\GUI\DynTFTGUIObjects.mpas
 File5=..\GUI\DynTFTHandlers.mpas
+File6=..\GUI\ExternalResources.mpas
 [BINARIES]
 Count=0
 [IMAGES]

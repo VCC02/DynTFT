@@ -55,6 +55,9 @@ type
     Caption: string[CMaxButtonStringLength];
     Color: TColor;
     Font_Color: TColor;
+    {$IFDEF DynTFTFontSupport}
+      ActiveFont: PByte;
+    {$ENDIF}  
   end;
   PDynTFTButton = ^TDynTFTButton;
 
@@ -89,6 +92,7 @@ var
 
   {$IFDEF CenterTextOnComponent}
     TextXOffset: TSInt; //used to compute the X coord of text on button to make the text centered
+    TextYOffset: TSInt; //used to compute the Y coord of text on button to make the text centered
   {$ENDIF}
 begin
   if not DynTFTIsDrawableComponent(PDynTFTBaseComponent(TPtrRec(AButton))) then
@@ -98,9 +102,6 @@ begin
   y1 := AButton^.BaseProps.Top;
   x2 := x1 + AButton^.BaseProps.Width;
   y2 := y1 + AButton^.BaseProps.Height;
-
-  HalfWidth := AButton^.BaseProps.Width shr 1;
-  HalfHeight := AButton^.BaseProps.Height shr 1;
 
   BkCol := AButton^.Color;
 
@@ -144,19 +145,40 @@ begin
   DynTFT_V_Line(y1, y2, x2); //vert
   DynTFT_H_Line(x1, x2, y2); //horiz
 
-  //draw text
-  if AButton^.BaseProps.Enabled and CENABLED = CDISABLED then
-    DynTFT_Set_Font(@TFT_defaultFont, CL_DynTFTButton_DisabledFont, FO_HORIZONTAL)
-  else
-    DynTFT_Set_Font(@TFT_defaultFont, AButton^.Font_Color, FO_HORIZONTAL);
+  if Length(AButton^.Caption) > 0 then
+  begin
+    //draw text
+    if AButton^.BaseProps.Enabled and CENABLED = CDISABLED then
+      {$IFDEF DynTFTFontSupport}
+        DynTFT_Set_Font(AButton^.ActiveFont, CL_DynTFTButton_DisabledFont, FO_HORIZONTAL)
+      {$ELSE}
+        DynTFT_Set_Font(@TFT_defaultFont, CL_DynTFTButton_DisabledFont, FO_HORIZONTAL)
+      {$ENDIF}
+    else
+      {$IFDEF DynTFTFontSupport}
+        DynTFT_Set_Font(AButton^.ActiveFont, AButton^.Font_Color, FO_HORIZONTAL);
+      {$ELSE}
+        DynTFT_Set_Font(@TFT_defaultFont, AButton^.Font_Color, FO_HORIZONTAL);
+      {$ENDIF}
 
-  {$IFDEF CenterTextOnComponent}
-    GetTextWidthAndHeight(AButton^.Caption, TextWidth, TextHeight);
-    TextXOffset := HalfWidth - TSInt(TextWidth shr 1);
-    DynTFT_Write_Text(AButton^.Caption, x1 + TextXOffset, y1 + HalfHeight - TSInt(TextHeight shr 1));
-  {$ELSE}
-    DynTFT_Write_Text(AButton^.Caption, x1 + 4, y1 + HalfHeight - 6);
-  {$ENDIF}
+    {$IFDEF CenterTextOnComponent}
+      HalfWidth := AButton^.BaseProps.Width shr 1;
+      HalfHeight := AButton^.BaseProps.Height shr 1;
+  
+      GetTextWidthAndHeight(AButton^.Caption, TextWidth, TextHeight);
+      TextXOffset := HalfWidth - TSInt(TextWidth shr 1);
+      if TextXOffset < 0 then
+        TextXOffset := 0;
+
+      TextYOffset := HalfHeight - TSInt(TextHeight shr 1);
+      if TextYOffset < 0 then
+        TextYOffset := 0;
+
+      DynTFT_Write_Text(AButton^.Caption, x1 + TextXOffset, y1 + TextYOffset);
+    {$ELSE}
+      DynTFT_Write_Text(AButton^.Caption, x1 + 4, y1 + HalfHeight - 6);
+    {$ENDIF}
+  end;
 end;
 
 
@@ -180,6 +202,10 @@ begin
   Result^.Color := CL_DynTFTButton_Background;
   Result^.Font_Color := CL_DynTFTButton_EnabledFont;
   Result^.Caption := '';
+
+  {$IFDEF DynTFTFontSupport}
+    Result^.ActiveFont := @TFT_defaultFont;
+  {$ENDIF} 
 end;
 
 

@@ -57,7 +57,7 @@ const
 type
   TItemsString = string[CMaxItemsStringLength];
 
-  TOnGetItemEvent = procedure(AComp: PPtrRec; Index: LongInt; var ItemText: string);
+  TOnGetItemEvent = procedure(AItems: PPtrRec; Index: LongInt; var ItemText: string);
   POnGetItemEvent = ^TOnGetItemEvent;
 
   TDynTFTItems = record
@@ -66,7 +66,10 @@ type
     FirstVisibleIndex, Count, ItemIndex: LongInt;
 
     //Items properties
-    FontColor, BackgroundColor: TColor;
+    Font_Color, BackgroundColor: TColor;
+    {$IFDEF DynTFTFontSupport}
+      ActiveFont: PByte;
+    {$ENDIF}
 
     ItemHeight: Word; //no TSInt allowed :(
     {$IFNDEF AppArch16}
@@ -175,7 +178,7 @@ begin
   FocusRectangleY := -1;
 
   if AItems^.BaseProps.Enabled and CENABLED = CENABLED then
-    FontCol := AItems^.FontColor
+    FontCol := AItems^.Font_Color
   else
     FontCol := CL_DynTFTItems_DisabledFont;
 
@@ -185,16 +188,25 @@ begin
     IndexOfDrawingItem := i + AItems^.FirstVisibleIndex;
     if IndexOfDrawingItem = AItems^.ItemIndex then
     begin
-      DynTFT_Set_Font(@TFT_defaultFont, AItems^.BackgroundColor, FO_HORIZONTAL);
+      {$IFDEF DynTFTFontSupport}
+        DynTFT_Set_Font(AItems^.ActiveFont, AItems^.BackgroundColor, FO_HORIZONTAL);
+      {$ELSE}
+        DynTFT_Set_Font(@TFT_defaultFont, AItems^.BackgroundColor, FO_HORIZONTAL);
+      {$ENDIF}
       DynTFT_Set_Brush(1, CL_DynTFTItems_SelectedItem, 0, 0, 0, 0);                    //selected
       FocusRectangleY := y1 + i * AItems^.ItemHeight;
 
       DynTFT_Set_Pen(CL_DynTFTItems_SelectedItem, 1);
       DynTFT_Rectangle(x1 + 1, FocusRectangleY, x2 - 2, FocusRectangleY + AItems^.ItemHeight);
+      DynTFT_Set_Brush(0, CL_DynTFTItems_SelectedItem, 0, 0, 0, 0);
     end
     else
     begin
-      DynTFT_Set_Font(@TFT_defaultFont, FontCol, FO_HORIZONTAL);
+      {$IFDEF DynTFTFontSupport}
+        DynTFT_Set_Font(AItems^.ActiveFont, FontCol, FO_HORIZONTAL);
+      {$ELSE}
+        DynTFT_Set_Font(@TFT_defaultFont, FontCol, FO_HORIZONTAL);
+      {$ENDIF}
       DynTFT_Set_Brush(1, AItems^.BackgroundColor, 0, 0, 0, 0);
     end;
 
@@ -279,7 +291,7 @@ begin
   Result^.Count := 0;
   Result^.FirstVisibleIndex := 0;
   Result^.BackgroundColor := CL_DynTFTItems_Background;
-  Result^.FontColor := CL_DynTFTItems_EnabledFont;
+  Result^.Font_Color := CL_DynTFTItems_EnabledFont;
 
   {$IFNDEF UseExternalItems}
     for i := 0 to CMaxItemItemCount - 1 do
@@ -291,6 +303,10 @@ begin
       //DynTFT_DebugConsole('Using ExternalItemsStringLength. CMaxItemsStringLength = ' + IntToStr(CMaxItemsStringLength));
     {$ENDIF}
   {$ENDIF}
+
+  {$IFDEF DynTFTFontSupport}
+    Result^.ActiveFont := @TFT_defaultFont;
+  {$ENDIF} 
 end;
 
 

@@ -50,17 +50,24 @@ const
   CMaxRadioGroupButtonCount = 20;
 
 type
+  TOnRadioGroupSelectionChangedEvent = procedure(AComp: PPtrRec);
+  POnRadioGroupSelectionChangedEvent = ^TOnRadioGroupSelectionChangedEvent;
+  
   TDynTFTRadioGroup = record
     BaseProps: TDynTFTBaseProperties;  //inherited properties from TDynTFTBaseProperties - must be the first field of this structure !!!
 
     //RadioGroup properties
-    ItemIndex: LongInt;
+    ItemIndex, OldItemIndex: LongInt;
     ButtonCount: LongInt;
     Caption: string[CMaxRadioGroupStringLength];
     Color: TColor;
     Font_Color: TColor;
+    {$IFDEF DynTFTFontSupport}
+      ActiveFont: PByte;
+    {$ENDIF}
 
     Buttons: array[0..CMaxRadioGroupButtonCount - 1] of PDynTFTRadioButton;
+    OnSelectionChanged: POnRadioGroupSelectionChangedEvent;
   end;
   PDynTFTRadioGroup = ^TDynTFTRadioGroup;
 
@@ -70,7 +77,11 @@ procedure DynTFTRadioGroup_Destroy(var ARadioGroup: PDynTFTRadioGroup);
 procedure DynTFTRadioGroup_DestroyAndPaint(var ARadioGroup: PDynTFTRadioGroup);
 
 function DynTFTAddRadioButtonToRadioGroup(ARadioGroup: PDynTFTRadioGroup; ARadioButton: PDynTFTRadioButton): Byte; //returns button index
-  
+
+procedure DynTFTRadioGroupSetEnabledState(ARadioGroup: PDynTFTRadioGroup; NewState: Byte);
+procedure DynTFTEnableRadioGroup(ARadioGroup: PDynTFTRadioGroup);
+procedure DynTFTDisableRadioGroup(ARadioGroup: PDynTFTRadioGroup);
+
 procedure DynTFTRegisterRadioGroupEvents;
 function DynTFTGetRadioGroupComponentType: TDynTFTComponentType;
   
@@ -118,7 +129,12 @@ begin
     else
       ACol := CL_DynTFTRadioGroup_DisabledFont;
 
-    DynTFT_Set_Font(@TFT_defaultFont, ACol, FO_HORIZONTAL);
+    DynTFT_Set_Brush(0, ACol, 0, 0, 0, 0);
+    {$IFDEF DynTFTFontSupport}
+      DynTFT_Set_Font(ARadioGroup^.ActiveFont, ACol, FO_HORIZONTAL);
+    {$ELSE}
+      DynTFT_Set_Font(@TFT_defaultFont, ACol, FO_HORIZONTAL);
+    {$ENDIF}
     DynTFT_Write_Text(ARadioGroup^.Caption, x1 + 6, y1 + 1);
 
     GetTextWidthAndHeight(ARadioGroup^.Caption, TextWidth, TextHeight);
@@ -156,6 +172,32 @@ begin
 end;
 
 
+procedure DynTFTRadioGroupSetEnabledState(ARadioGroup: PDynTFTRadioGroup; NewState: Byte);
+var
+  n, i: Integer;
+begin
+  ARadioGroup^.BaseProps.Enabled := NewState;
+  n := ARadioGroup^.ButtonCount - 1;
+  for i := 0 to n do
+  begin
+    ARadioGroup^.Buttons[i]^.BaseProps.Enabled := NewState;
+    DynTFTDrawRadioButton(ARadioGroup^.Buttons[i], True);
+  end;
+end;
+
+
+procedure DynTFTEnableRadioGroup(ARadioGroup: PDynTFTRadioGroup);
+begin
+  DynTFTRadioGroupSetEnabledState(ARadioGroup, CENABLED);
+end;
+
+
+procedure DynTFTDisableRadioGroup(ARadioGroup: PDynTFTRadioGroup);
+begin
+  DynTFTRadioGroupSetEnabledState(ARadioGroup, CDISABLED);
+end;
+
+
 procedure TDynTFTRadioGroup_OnDynTFTChildRadioButtonInternalMouseDown(ABase: PDynTFTBaseComponent);
 var
   ARadioGroup: PDynTFTRadioGroup;
@@ -174,8 +216,22 @@ end;
 
 
 procedure TDynTFTRadioGroup_OnDynTFTChildRadioButtonInternalMouseUp(ABase: PDynTFTBaseComponent);
+var
+  ARadioGroup: PDynTFTRadioGroup; 
 begin
+  ARadioGroup := PDynTFTRadioGroup(TPtrRec(PDynTFTRadioButton(TPtrRec(ABase))^.BaseProps.Parent));
 
+  if ARadioGroup^.OldItemIndex <> ARadioGroup^.ItemIndex then
+  begin
+    ARadioGroup^.OldItemIndex := ARadioGroup^.ItemIndex;
+    {$IFDEF IsDesktop}
+      if Assigned(ARadioGroup^.OnSelectionChanged) then
+        if Assigned(ARadioGroup^.OnSelectionChanged^) then
+    {$ELSE}
+      if ARadioGroup^.OnSelectionChanged <> nil then
+    {$ENDIF}
+        ARadioGroup^.OnSelectionChanged^(PPtrRec(TPtrRec(ARadioGroup)));
+  end;
 end;
 
 
@@ -225,13 +281,28 @@ begin
   DynTFTInitBasicStatePropertiesToDefault(PDynTFTBaseComponent(TPtrRec(Result)));
 
   Result^.ButtonCount := 0;
-  Result^.ItemIndex := 0;
+  Result^.ItemIndex := -1;
+  Result^.OldItemIndex := -1;
   for i := 0 to CMaxRadioGroupButtonCount - 1 do
     Result^.Buttons[i] := nil;
 
   Result^.Color := CL_DynTFTRadioGroup_Background;
   Result^.Font_Color := CL_DynTFTRadioGroup_EnabledFont;
   Result^.Caption := '';
+
+  {$IFDEF IsDesktop}
+    New(Result^.OnSelectionChanged);
+  {$ENDIF}
+
+  {$IFDEF IsDesktop}
+    Result^.OnSelectionChanged^ := nil;
+  {$ELSE}
+    Result^.OnSelectionChanged := nil;
+  {$ENDIF}
+
+  {$IFDEF DynTFTFontSupport}
+    Result^.ActiveFont := @TFT_defaultFont;
+  {$ENDIF} 
 end;
 
 
@@ -248,6 +319,10 @@ var
     ATemp: PDynTFTBaseComponent;
   {$ENDIF}
 begin
+  {$IFDEF IsDesktop}
+    Dispose(ARadioGroup^.OnSelectionChanged);
+  {$ENDIF}
+
   for i := 0 to ARadioGroup^.ButtonCount - 1 do
   begin
     {$IFDEF IsDesktop}

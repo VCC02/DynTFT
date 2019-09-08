@@ -39,7 +39,7 @@ interface
 
 uses
   DynTFTTypes, DynTFTBaseDrawing, DynTFTConsts, DynTFTUtils,
-  DynTFTPanel
+  DynTFTArrowButton
 
   {$IFDEF IsDesktop}
     ,SysUtils, Forms
@@ -56,6 +56,7 @@ const
   CTrackBarPanelFromMarginDbl = CTrackBarPanelFromMargin * 2; //px
   CTrackBarNotchFromMargin = 10; //px
 
+  CTrackBarDrawNoTicks = 0;
   CTrackBarComputeEveryTick = 1;   //used for TickMode (see below)
   CTrackBarDrawRectTick = 2;   //other values, like 0 or greater than 2, will draw no ticks
 
@@ -70,7 +71,7 @@ type
     BaseProps: TDynTFTBaseProperties;  //inherited properties from TDynTFTBaseProperties - must be the first field of this structure !!!
 
     //TrackBar properties
-    PnlTrack: PDynTFTPanel;
+    BtnTrack: PDynTFTArrowButton;
     Min, Max, Position, OldPosition: LongInt;
     Orientation: Byte; //0 = horizontal, 1 = vertical
     PnlDragging: Byte; //0 = not dragging, 1 = dragging
@@ -161,7 +162,7 @@ begin
   {$IFDEF IsDesktop}
     Result := Round(LongInt(PnlPos) * TotalPositionSpace / LongInt(TotalPanelSpace));
   {$ELSE}
-    Result := Word(Real(Real(LongInt(PnlPos)) * Real(TotalPositionSpace) / Real(LongInt(TotalPanelSpace))));
+    Result := LongInt(Real(Real(LongInt(PnlPos)) * Real(TotalPositionSpace) / Real(LongInt(TotalPanelSpace))));
   {$ENDIF}
 
   Result := Result + TrbBar^.Min;
@@ -244,16 +245,16 @@ procedure DrawNotch(ATrackBar: PDynTFTTrackBar; x1, y1, x2, y2: TSInt);
 begin
   if ATrackBar^.Orientation = CTrackBarHorizDir then
   begin
-    DynTFT_Rectangle(x1 + CTrackBarPanelFromMargin, y1 + CTrackBarNotchFromMargin, ATrackBar^.PnlTrack^.BaseProps.Left {- 1}, y2 - CTrackBarNotchFromMargin);
-    DynTFT_Rectangle(ATrackBar^.PnlTrack^.BaseProps.Left + ATrackBar^.PnlTrack^.BaseProps.Width {+ 1}, y1 + CTrackBarNotchFromMargin, x2 - CTrackBarPanelFromMargin, y2 - CTrackBarNotchFromMargin);
+    DynTFT_Rectangle(x1 + CTrackBarPanelFromMargin, y1 + CTrackBarNotchFromMargin, ATrackBar^.BtnTrack^.BaseProps.Left {- 1}, y2 - CTrackBarNotchFromMargin);
+    DynTFT_Rectangle(ATrackBar^.BtnTrack^.BaseProps.Left + ATrackBar^.BtnTrack^.BaseProps.Width {+ 1}, y1 + CTrackBarNotchFromMargin, x2 - CTrackBarPanelFromMargin, y2 - CTrackBarNotchFromMargin);
 
     DynTFT_Set_Pen(CL_DynTFTTrackBar_LightEdge, 1);
     DynTFT_Line(x1 + CTrackBarPanelFromMargin, y2 - CTrackBarNotchFromMargin, x2 - CTrackBarPanelFromMargin, y2 - CTrackBarNotchFromMargin);
   end
   else
   begin
-    DynTFT_Rectangle(x1 + CTrackBarNotchFromMargin, y1 + CTrackBarPanelFromMargin, x2 - CTrackBarNotchFromMargin, ATrackBar^.PnlTrack^.BaseProps.Top {- 1});
-    DynTFT_Rectangle(x1 + CTrackBarNotchFromMargin, ATrackBar^.PnlTrack^.BaseProps.Top + ATrackBar^.PnlTrack^.BaseProps.Height {+ 1}, x2 - CTrackBarNotchFromMargin, y2 - CTrackBarPanelFromMargin);
+    DynTFT_Rectangle(x1 + CTrackBarNotchFromMargin, y1 + CTrackBarPanelFromMargin, x2 - CTrackBarNotchFromMargin, ATrackBar^.BtnTrack^.BaseProps.Top {- 1});
+    DynTFT_Rectangle(x1 + CTrackBarNotchFromMargin, ATrackBar^.BtnTrack^.BaseProps.Top + ATrackBar^.BtnTrack^.BaseProps.Height {+ 1}, x2 - CTrackBarNotchFromMargin, y2 - CTrackBarPanelFromMargin);
 
     DynTFT_Set_Pen(CL_DynTFTTrackBar_LightEdge, 1);
     DynTFT_Line(x2 - CTrackBarNotchFromMargin, y1 + CTrackBarPanelFromMargin, x2 - CTrackBarNotchFromMargin, y2 - CTrackBarPanelFromMargin);
@@ -272,11 +273,11 @@ begin
     DynTFT_Rectangle(x1, y1, pxy3 - 1, y2);
     DynTFT_Rectangle(x2 - CTrackBarPanelFromMargin + 1, y1, x2, y2);
 
-    pxy4 := ATrackBar^.PnlTrack^.BaseProps.Left {- 1};
+    pxy4 := ATrackBar^.BtnTrack^.BaseProps.Left {- 1};
     DynTFT_Rectangle(pxy3, y1 + CTrackBarPanelFromMargin, pxy4, y1 + CTrackBarNotchFromMargin - 1);
     DynTFT_Rectangle(pxy3, y2 - CTrackBarNotchFromMargin, pxy4, y2 - CTrackBarPanelFromMargin);
 
-    pxy3 := ATrackBar^.PnlTrack^.BaseProps.Left + ATrackBar^.PnlTrack^.BaseProps.Width {+ 1};
+    pxy3 := ATrackBar^.BtnTrack^.BaseProps.Left + ATrackBar^.BtnTrack^.BaseProps.Width {+ 1};
     pxy4 := x2 - CTrackBarPanelFromMargin;
     DynTFT_Rectangle(pxy3, y1 + CTrackBarPanelFromMargin, pxy4, y1 + CTrackBarNotchFromMargin - 1);
     DynTFT_Rectangle(pxy3, y2 - CTrackBarNotchFromMargin, pxy4, y2 - CTrackBarPanelFromMargin);
@@ -287,11 +288,11 @@ begin
     DynTFT_Rectangle(x1, y1, x2, pxy4 - 1);
     DynTFT_Rectangle(x1, y2 - CTrackBarPanelFromMargin + 1, x2, y2);
 
-    pxy3 := ATrackBar^.PnlTrack^.BaseProps.Top {- 1};
+    pxy3 := ATrackBar^.BtnTrack^.BaseProps.Top {- 1};
     DynTFT_Rectangle(x1 + CTrackBarPanelFromMargin, pxy4, x1 + CTrackBarNotchFromMargin - 1, pxy3);
     DynTFT_Rectangle(x2 - CTrackBarNotchFromMargin, pxy4, x2 - CTrackBarPanelFromMargin, pxy3);
 
-    pxy4 := ATrackBar^.PnlTrack^.BaseProps.Top + ATrackBar^.PnlTrack^.BaseProps.Height {+ 1};
+    pxy4 := ATrackBar^.BtnTrack^.BaseProps.Top + ATrackBar^.BtnTrack^.BaseProps.Height {+ 1};
     pxy3 := y2 - CTrackBarPanelFromMargin;
     DynTFT_Rectangle(x1 + CTrackBarPanelFromMargin, pxy4, x1 + CTrackBarNotchFromMargin - 1, pxy3);
     DynTFT_Rectangle(x2 - CTrackBarNotchFromMargin, pxy4, x2 - CTrackBarPanelFromMargin, pxy3);
@@ -347,17 +348,17 @@ begin
 
   if ATrackBar^.Orientation = CTrackBarHorizDir then
   begin
-    ATrackBar^.PnlTrack^.BaseProps.Left := ATrackBar^.BaseProps.Left + TrbBarPosToPnlPos(ATrackBar);  //panel
-    ATrackBar^.PnlTrack^.BaseProps.Top := ATrackBar^.BaseProps.Top + CTrackBarPanelFromMargin;
-    ATrackBar^.PnlTrack^.BaseProps.Width := CTrackBarPnlWidthHeight;
-    ATrackBar^.PnlTrack^.BaseProps.Height := ATrackBar^.BaseProps.Height - CTrackBarPanelFromMarginDbl;
+    ATrackBar^.BtnTrack^.BaseProps.Left := ATrackBar^.BaseProps.Left + TrbBarPosToPnlPos(ATrackBar);  //panel
+    ATrackBar^.BtnTrack^.BaseProps.Top := ATrackBar^.BaseProps.Top + CTrackBarPanelFromMargin;
+    ATrackBar^.BtnTrack^.BaseProps.Width := CTrackBarPnlWidthHeight;
+    ATrackBar^.BtnTrack^.BaseProps.Height := ATrackBar^.BaseProps.Height - CTrackBarPanelFromMarginDbl;
   end
   else
   begin  
-    ATrackBar^.PnlTrack^.BaseProps.Left := ATrackBar^.BaseProps.Left + CTrackBarPanelFromMargin;  //panel
-    ATrackBar^.PnlTrack^.BaseProps.Top := ATrackBar^.BaseProps.Top + TrbBarPosToPnlPos(ATrackBar);
-    ATrackBar^.PnlTrack^.BaseProps.Width := ATrackBar^.BaseProps.Width - CTrackBarPanelFromMarginDbl;
-    ATrackBar^.PnlTrack^.BaseProps.Height := CTrackBarPnlWidthHeight;
+    ATrackBar^.BtnTrack^.BaseProps.Left := ATrackBar^.BaseProps.Left + CTrackBarPanelFromMargin;  //panel
+    ATrackBar^.BtnTrack^.BaseProps.Top := ATrackBar^.BaseProps.Top + TrbBarPosToPnlPos(ATrackBar);
+    ATrackBar^.BtnTrack^.BaseProps.Width := ATrackBar^.BaseProps.Width - CTrackBarPanelFromMarginDbl;
+    ATrackBar^.BtnTrack^.BaseProps.Height := CTrackBarPnlWidthHeight;
   end;
 
   if FullRedraw then    
@@ -389,8 +390,8 @@ begin
   DynTFT_Set_Brush(1, NotchCol, 0, 0, 0, 0);
   DrawNotch(ATrackBar, x1, y1, x2, y2);
 
-  if ATrackBar^.PnlTrack^.BaseProps.Visible > CHIDDEN then
-    DynTFTDrawPanel(ATrackBar^.PnlTrack, True); //always full redraw
+  if ATrackBar^.BtnTrack^.BaseProps.Visible > CHIDDEN then
+    DynTFTDrawArrowButton(ATrackBar^.BtnTrack, True); //always full redraw
 end;
 
 
@@ -421,8 +422,8 @@ end;
 procedure DynTFTEnableTrackBar(ATrackBar: PDynTFTTrackBar);
 begin
   ATrackBar^.BaseProps.Enabled := CENABLED;
-  ATrackBar^.PnlTrack^.BaseProps.Enabled := CENABLED;
-  ATrackBar^.PnlTrack^.Color := CL_DynTFTTrackBar_PanelBackground;
+  ATrackBar^.BtnTrack^.BaseProps.Enabled := CENABLED;
+  ATrackBar^.BtnTrack^.Color := CL_DynTFTTrackBar_PanelBackground;
   DynTFTDrawTrackBar(ATrackBar, True);
 end;
 
@@ -430,17 +431,17 @@ end;
 procedure DynTFTDisableTrackBar(ATrackBar: PDynTFTTrackBar);
 begin
   ATrackBar^.BaseProps.Enabled := CDISABLED;
-  ATrackBar^.PnlTrack^.BaseProps.Enabled := CDISABLED;
-  ATrackBar^.PnlTrack^.Color := CL_DynTFTTrackBar_DisabledBackground;
+  ATrackBar^.BtnTrack^.BaseProps.Enabled := CDISABLED;
+  ATrackBar^.BtnTrack^.Color := CL_DynTFTTrackBar_DisabledBackground;
   DynTFTDrawTrackBar(ATrackBar, True);
 end;
 
 
 procedure DynTFTUpdateTrackbarEventHandlers(ATrbBar: PDynTFTTrackBar);
 begin
-  ATrbBar^.PnlTrack^.BaseProps.OnMouseDownUser := ATrbBar^.BaseProps.OnMouseDownUser;
-  ATrbBar^.PnlTrack^.BaseProps.OnMouseMoveUser := ATrbBar^.BaseProps.OnMouseMoveUser;
-  ATrbBar^.PnlTrack^.BaseProps.OnMouseUpUser := ATrbBar^.BaseProps.OnMouseUpUser;
+  ATrbBar^.BtnTrack^.BaseProps.OnMouseDownUser := ATrbBar^.BaseProps.OnMouseDownUser;
+  ATrbBar^.BtnTrack^.BaseProps.OnMouseMoveUser := ATrbBar^.BaseProps.OnMouseMoveUser;
+  ATrbBar^.BtnTrack^.BaseProps.OnMouseUpUser := ATrbBar^.BaseProps.OnMouseUpUser;
 end;
 
 
@@ -448,15 +449,15 @@ procedure TDynTFTTrackBar_OnDynTFTChildPanelInternalMouseDown(ABase: PDynTFTBase
 var
   ATrbBar: PDynTFTTrackBar;
 begin
-  if PDynTFTBaseComponent(TPtrRec(PDynTFTPanel(TPtrRec(ABase))^.BaseProps.Parent))^.BaseProps.ComponentType = ComponentType then
+  if PDynTFTBaseComponent(TPtrRec(PDynTFTArrowButton(TPtrRec(ABase))^.BaseProps.Parent))^.BaseProps.ComponentType = ComponentType then
   begin
-    ATrbBar := PDynTFTTrackBar(TPtrRec(PDynTFTPanel(TPtrRec(ABase))^.BaseProps.Parent));
+    ATrbBar := PDynTFTTrackBar(TPtrRec(PDynTFTArrowButton(TPtrRec(ABase))^.BaseProps.Parent));
     ATrbBar^.PnlDragging := 1;
-    DynTFTDragOffsetX := DynTFTMCU_XMouse - PDynTFTPanel(TPtrRec(ABase))^.BaseProps.Left;
-    DynTFTDragOffsetY := DynTFTMCU_YMouse - PDynTFTPanel(TPtrRec(ABase))^.BaseProps.Top;
+    DynTFTDragOffsetX := DynTFTMCU_XMouse - PDynTFTArrowButton(TPtrRec(ABase))^.BaseProps.Left;
+    DynTFTDragOffsetY := DynTFTMCU_YMouse - PDynTFTArrowButton(TPtrRec(ABase))^.BaseProps.Top;
   end
   else
-    DynTFTDrawPanel(PDynTFTPanel(TPtrRec(ABase)), False);  //line added 2017.11.30  (to repaint the panel on focus change)
+    DynTFTDrawArrowButton(PDynTFTArrowButton(TPtrRec(ABase)), False);  //line added 2017.11.30  (to repaint the panel on focus change)
 end;
 
 
@@ -464,9 +465,9 @@ procedure TDynTFTTrackBar_OnDynTFTChildPanelInternalMouseMove(ABase: PDynTFTBase
 var
   ATrbBar: PDynTFTTrackBar;
 begin
-  if PDynTFTBaseComponent(TPtrRec(PDynTFTPanel(TPtrRec(ABase))^.BaseProps.Parent))^.BaseProps.ComponentType = ComponentType then
+  if PDynTFTBaseComponent(TPtrRec(PDynTFTArrowButton(TPtrRec(ABase))^.BaseProps.Parent))^.BaseProps.ComponentType = ComponentType then
   begin
-    ATrbBar := PDynTFTTrackBar(TPtrRec(PDynTFTPanel(TPtrRec(ABase))^.BaseProps.Parent));
+    ATrbBar := PDynTFTTrackBar(TPtrRec(PDynTFTArrowButton(TPtrRec(ABase))^.BaseProps.Parent));
 
     ///
     ///  DragOffsetX := IsMCU_XMouse - PDynTFTPanel(TPtrRec(ABase))^.Left;
@@ -525,9 +526,9 @@ procedure TDynTFTTrackBar_OnDynTFTChildPanelInternalMouseUp(ABase: PDynTFTBaseCo
 var
   ATrbBar: PDynTFTTrackBar;
 begin
-  if PDynTFTBaseComponent(TPtrRec(PDynTFTPanel(TPtrRec(ABase))^.BaseProps.Parent))^.BaseProps.ComponentType = ComponentType then
+  if PDynTFTBaseComponent(TPtrRec(PDynTFTArrowButton(TPtrRec(ABase))^.BaseProps.Parent))^.BaseProps.ComponentType = ComponentType then
   begin
-    ATrbBar := PDynTFTTrackBar(TPtrRec(PDynTFTPanel(TPtrRec(ABase))^.BaseProps.Parent));
+    ATrbBar := PDynTFTTrackBar(TPtrRec(PDynTFTArrowButton(TPtrRec(ABase))^.BaseProps.Parent));
     ATrbBar^.PnlDragging := 0;
   end;
 end;
@@ -553,8 +554,10 @@ begin
   Result^.Orientation := TrbDir;
   Result^.PnlDragging := 0; //not dragging
 
-  Result^.PnlTrack := DynTFTPanel_Create(ScreenIndex, 500, 280, 0, 0);
-  Result^.PnlTrack^.Color := CL_DynTFTTrackBar_PanelBackground;
+  Result^.BtnTrack := DynTFTArrowButton_Create(ScreenIndex, 500, 280, 0, 0);
+  Result^.BtnTrack^.Color := CL_DynTFTTrackBar_PanelBackground;
+  Result^.BtnTrack^.ArrowDir := CNoArrow;
+  Result^.BtnTrack^.BaseProps.CompState := CDISABLEPRESSING;
 
   {$IFDEF IsDesktop}
     New(Result^.OnOwnerInternalMouseDown);
@@ -565,16 +568,16 @@ begin
     New(Result^.OnOwnerInternalAfterAdjustTrackBar);
   {$ENDIF}
 
-  Result^.PnlTrack^.BaseProps.Parent := PPtrRec(TPtrRec(Result));
+  Result^.BtnTrack^.BaseProps.Parent := PPtrRec(TPtrRec(Result));
 
   {$IFDEF IsDesktop}
-    Result^.PnlTrack^.OnOwnerInternalMouseDown^ := TDynTFTTrackBar_OnDynTFTChildPanelInternalMouseDown;
-    Result^.PnlTrack^.OnOwnerInternalMouseMove^ := TDynTFTTrackBar_OnDynTFTChildPanelInternalMouseMove;
-    Result^.PnlTrack^.OnOwnerInternalMouseUp^ := TDynTFTTrackBar_OnDynTFTChildPanelInternalMouseUp;
+    Result^.BtnTrack^.OnOwnerInternalMouseDown^ := TDynTFTTrackBar_OnDynTFTChildPanelInternalMouseDown;
+    Result^.BtnTrack^.OnOwnerInternalMouseMove^ := TDynTFTTrackBar_OnDynTFTChildPanelInternalMouseMove;
+    Result^.BtnTrack^.OnOwnerInternalMouseUp^ := TDynTFTTrackBar_OnDynTFTChildPanelInternalMouseUp;
   {$ELSE}
-    Result^.PnlTrack^.OnOwnerInternalMouseDown := @TDynTFTTrackBar_OnDynTFTChildPanelInternalMouseDown;
-    Result^.PnlTrack^.OnOwnerInternalMouseMove := @TDynTFTTrackBar_OnDynTFTChildPanelInternalMouseMove;
-    Result^.PnlTrack^.OnOwnerInternalMouseUp := @TDynTFTTrackBar_OnDynTFTChildPanelInternalMouseUp;
+    Result^.BtnTrack^.OnOwnerInternalMouseDown := @TDynTFTTrackBar_OnDynTFTChildPanelInternalMouseDown;
+    Result^.BtnTrack^.OnOwnerInternalMouseMove := @TDynTFTTrackBar_OnDynTFTChildPanelInternalMouseMove;
+    Result^.BtnTrack^.OnOwnerInternalMouseUp := @TDynTFTTrackBar_OnDynTFTChildPanelInternalMouseUp;
   {$ENDIF}
 
   Result^.Min := 0;
@@ -632,14 +635,14 @@ begin
   {$ENDIF}
 
   {$IFDEF IsDesktop}
-    DynTFTComponent_Destroy(PDynTFTBaseComponent(TPtrRec(ATrackBar^.PnlTrack)), SizeOf(ATrackBar^.PnlTrack^));
+    DynTFTComponent_Destroy(PDynTFTBaseComponent(TPtrRec(ATrackBar^.BtnTrack)), SizeOf(ATrackBar^.BtnTrack^));
 
     DynTFTComponent_Destroy(PDynTFTBaseComponent(TPtrRec(ATrackBar)), SizeOf(ATrackBar^));
   {$ELSE}
     //without temp var, mikroPascal gives an error:  289 341 Operator "@" not applicable to these operands "?T222"
-    ATemp := PDynTFTBaseComponent(TPtrRec(ATrackBar^.PnlTrack));
-    DynTFTComponent_Destroy(ATemp, SizeOf(ATrackBar^.PnlTrack^));
-    ATrackBar^.PnlTrack := PDynTFTPanel(TPtrRec(ATemp));
+    ATemp := PDynTFTBaseComponent(TPtrRec(ATrackBar^.BtnTrack));
+    DynTFTComponent_Destroy(ATemp, SizeOf(ATrackBar^.BtnTrack^));
+    ATrackBar^.BtnTrack := PDynTFTArrowButton(TPtrRec(ATemp));
 
     ATemp := PDynTFTBaseComponent(TPtrRec(ATrackBar));
     DynTFTComponent_Destroy(ATemp, SizeOf(ATrackBar^));
@@ -727,13 +730,13 @@ begin
 
   if Options = CSETSUBCOMPONENTSINVISIBLEONCLEARAREAREPAINT then
   begin
-    DynTFTHideComponent(PDynTFTBaseComponent(TPtrRec(PDynTFTTrackBar(TPtrRec(ABase))^.PnlTrack)));
+    DynTFTHideComponent(PDynTFTBaseComponent(TPtrRec(PDynTFTTrackBar(TPtrRec(ABase))^.BtnTrack)));
     Exit;
   end;
 
   if Options = CSETSUBCOMPONENTSVISIBLEONSHOWREPAINT then
   begin
-    DynTFTShowComponent(PDynTFTBaseComponent(TPtrRec(PDynTFTTrackBar(TPtrRec(ABase))^.PnlTrack)));
+    DynTFTShowComponent(PDynTFTBaseComponent(TPtrRec(PDynTFTTrackBar(TPtrRec(ABase))^.BtnTrack)));
     Exit;
   end;
 

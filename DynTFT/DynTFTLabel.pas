@@ -55,6 +55,9 @@ type
     Caption: string[CMaxLabelStringLength];
     Color: TColor;      //Negative values means transparent. If changing from color to transparent on run time, call ClearComponentAreaWithScreenColor or RepaintScreenComponentsFromArea to repaint the background under the label.  
     Font_Color: TColor;
+    {$IFDEF DynTFTFontSupport}
+      ActiveFont: PByte;
+    {$ENDIF}
 
     //these events are set by an owner component, e.g. a combo box
     OnOwnerInternalMouseDown: PDynTFTGenericEventHandler;
@@ -110,7 +113,12 @@ begin
     else
       AColor := CL_DynTFTLabel_DisabledFont;
 
-    DynTFT_Set_Font(@TFT_defaultFont, AColor, FO_HORIZONTAL);
+    {$IFDEF DynTFTFontSupport}
+      DynTFT_Set_Font(ALabel^.ActiveFont, AColor, FO_HORIZONTAL);
+    {$ELSE}
+      DynTFT_Set_Font(@TFT_defaultFont, AColor, FO_HORIZONTAL);
+    {$ENDIF}
+
     DynTFT_Write_Text(ALabel^.Caption, x1 + 1, y1 + 1);
   end;
 end;
@@ -136,6 +144,10 @@ begin
   Result^.Font_Color := CL_DynTFTLabel_EnabledFont;
   Result^.Color := CL_DynTFTLabel_Background;
   Result^.Caption := '';
+
+  {$IFDEF DynTFTFontSupport}
+    Result^.ActiveFont := @TFT_defaultFont;
+  {$ENDIF} 
 
   {$IFDEF IsDesktop}
     New(Result^.OnOwnerInternalMouseDown);

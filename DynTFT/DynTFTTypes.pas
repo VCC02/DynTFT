@@ -60,6 +60,14 @@ unit DynTFTTypes;
   {$IFNDEF AppArch16}    //16-bit not defined,
     {$DEFINE AppArch32}  //then it must be 32-bit !
   {$ENDIF}
+
+type
+  //PByte = ^Byte;
+  {$IFDEF AppArch16}
+    PByte = ^far const code Byte;
+  {$ELSE}
+    PByte = ^const code Byte;
+  {$ENDIF}  
 {$ENDIF}
 
 {$IFDEF IsDesktop}
@@ -82,11 +90,7 @@ const
 
 //array limits
   {$IFDEF UseExternalLimits}                 //see description on the $ELSE case
-    CDynTFTMaxGenericStringLength: Word; external;
-
-    CDynTFTMaxComponentsContainer: Byte; external;
-
-    CDynTFTMaxRegisteredComponentTypes: Byte; external;
+     {$I DynTFTExternalLimits.inc}
   {$ELSE}
     CDynTFTMaxGenericStringLength = 19;  //must be longer enough to hold captions. Components which need to store longer strings may define their own constants (see PDynTFTEdit.Text).
 
@@ -100,16 +104,24 @@ type
   TDynTFTCompStr = string[CDynTFTMaxGenericStringLength];  //generic text
   PDynTFTCompStr = ^TDynTFTCompStr;
 
-  {$IFDEF IsDesktop}
-    TSInt = Smallint;
+  {$IFDEF CPU64}
+    TSInt = Longint;
   {$ELSE}
-    TSInt = Integer;  //This must be a 16-bit type on any microcontroller.
+    {$IFDEF IsDesktop}
+      TSInt = Smallint;
+    {$ELSE}
+      TSInt = Integer;  //This must be a 16-bit type on any microcontroller.
+    {$ENDIF}
   {$ENDIF}
 
-
   {$IFDEF IsDesktop}
-    TPtr = DWord;
-    TIntPtr = LongInt;
+    {$IFDEF CPU64}
+      TPtr = QWord;
+      TIntPtr = Int64;
+    {$ELSE}
+      TPtr = DWord;
+      TIntPtr = LongInt;
+    {$ENDIF}
   {$ELSE}
     {$IFDEF AppArch32}
       TPtr = DWord;

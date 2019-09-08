@@ -85,9 +85,9 @@ begin
 end;
 
 
-function PrbBarPosToDrawPos(PrbBar: PDynTFTProgressBar): Word;
+function PrbBarPosToDrawPos(PrbBar: PDynTFTProgressBar): LongInt;
 var
-  TotalDrawSpace: TSInt;
+  TotalDrawSpace: LongInt;
   TotalPositionSpace: LongInt;
 begin
   if PrbBar^.Orientation = CProgressBarHorizDir then
@@ -101,7 +101,7 @@ begin
   {$IFDEF IsDesktop}
     Result := Round(LongInt(TotalDrawSpace) * (PrbBar^.Position - PrbBar^.Min) / TotalPositionSpace);
   {$ELSE}
-    Result := Word(Real(Real(LongInt(TotalDrawSpace)) * Real(PrbBar^.Position - PrbBar^.Min) / Real(TotalPositionSpace)));
+    Result := LongInt(Real(Real(LongInt(TotalDrawSpace)) * Real(PrbBar^.Position - PrbBar^.Min) / Real(TotalPositionSpace)));
   {$ENDIF}
 
   Result := Result + 3;  
@@ -110,15 +110,15 @@ end;
 
 procedure DynTFTDrawProgressBar(AProgressBar: PDynTFTProgressBar; FullRedraw: Boolean);
 var
-  x1, y1, x2, y2, pxy: TSInt;
+  x1, y1, x2, y2, pxy: LongInt;
 begin
   if not DynTFTIsDrawableComponent(PDynTFTBaseComponent(TPtrRec(AProgressBar))) then
     Exit;
     
   x1 := AProgressBar^.BaseProps.Left;
   y1 := AProgressBar^.BaseProps.Top;
-  x2 := x1 + AProgressBar^.BaseProps.Width;
-  y2 := y1 + AProgressBar^.BaseProps.Height;
+  x2 := x1 + LongInt(AProgressBar^.BaseProps.Width);
+  y2 := y1 + LongInt(AProgressBar^.BaseProps.Height);
 
   if AProgressBar^.Position < AProgressBar^.Min then
     AProgressBar^.Position := AProgressBar^.Min;

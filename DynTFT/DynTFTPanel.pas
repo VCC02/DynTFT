@@ -55,6 +55,9 @@ type
     Caption: string[CMaxPanelStringLength];
     Color: TColor;
     Font_Color: TColor;
+    {$IFDEF DynTFTFontSupport}
+      ActiveFont: PByte;
+    {$ENDIF}
 
     //these events are set by an owner component, e.g. a scroll bar
     OnOwnerInternalMouseDown: PDynTFTGenericEventHandler;
@@ -90,6 +93,7 @@ var
   x1, y1, x2, y2: TSInt;
   {$IFDEF CenterTextOnComponent}
     TextXOffset: TSInt; //used to compute the X coord of text on button to make the text centered
+    TextYOffset: TSInt; //used to compute the Y coord of text on button to make the text centered
     HalfWidth, HalfHeight: TSInt;
     TextWidth, TextHeight: Word;
   {$ENDIF}
@@ -136,9 +140,18 @@ begin
   begin
     //Caption
     if APanel^.BaseProps.Enabled = 0 then
-      DynTFT_Set_Font(@TFT_defaultFont, CL_DynTFTPanel_DisabledFont, FO_HORIZONTAL)
+      {$IFDEF DynTFTFontSupport}
+        DynTFT_Set_Font(APanel^.ActiveFont, CL_DynTFTPanel_DisabledFont, FO_HORIZONTAL)
+      {$ELSE}
+        DynTFT_Set_Font(@TFT_defaultFont, CL_DynTFTPanel_DisabledFont, FO_HORIZONTAL)
+      {$ENDIF}
     else
-      DynTFT_Set_Font(@TFT_defaultFont, APanel^.Font_Color, FO_HORIZONTAL);
+      {$IFDEF DynTFTFontSupport}
+        DynTFT_Set_Font(APanel^.ActiveFont, APanel^.Font_Color, FO_HORIZONTAL);
+      {$ELSE}
+        DynTFT_Set_Font(@TFT_defaultFont, APanel^.Font_Color, FO_HORIZONTAL);
+      {$ENDIF}
+      
 
     {$IFDEF CenterTextOnComponent}
       HalfWidth := APanel^.BaseProps.Width shr 1;
@@ -146,7 +159,14 @@ begin
       
       GetTextWidthAndHeight(APanel^.Caption, TextWidth, TextHeight);
       TextXOffset := HalfWidth - TSInt(TextWidth shr 1);
-      DynTFT_Write_Text(APanel^.Caption, x1 + TextXOffset, y1 + HalfHeight - TSInt(TextHeight shr 1));
+      if TextXOffset < 0 then
+        TextXOffset := 0;
+
+      TextYOffset := HalfHeight - TSInt(TextHeight shr 1);
+      if TextYOffset < 0 then
+        TextYOffset := 0;
+      
+      DynTFT_Write_Text(APanel^.Caption, x1 + TextXOffset, y1 + TextYOffset);
     {$ELSE}
       DynTFT_Write_Text(APanel^.Caption, x1 + 4, y1 + HalfHeight - 6);
     {$ENDIF}
@@ -174,6 +194,10 @@ begin
   Result^.Color := CL_DynTFTPanel_Background;
   Result^.Font_Color := CL_DynTFTPanel_EnabledFont;
   Result^.Caption := '';
+
+  {$IFDEF DynTFTFontSupport}
+    Result^.ActiveFont := @TFT_defaultFont;
+  {$ENDIF} 
 
   {$IFDEF IsDesktop}
     New(Result^.OnOwnerInternalMouseDown);

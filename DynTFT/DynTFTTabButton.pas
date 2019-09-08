@@ -55,6 +55,9 @@ type
     Caption: string[CMaxTabButtonStringLength];
     SelectedColor, UnselectedColor: TColor;
     Font_Color: TColor;
+    {$IFDEF DynTFTFontSupport}
+      ActiveFont: PByte;
+    {$ENDIF}
     TabIndex: LongInt;  //button number inside PageControl
 
     //these events are set by an owner component, e.g. a page control, and called by a tab button
@@ -95,6 +98,7 @@ var
 
   {$IFDEF CenterTextOnComponent}
     TextXOffset: TSInt; //used to compute the X coord of text on button to make the text centered
+    TextYOffset: TSInt; //used to compute the Y coord of text on button to make the text centered
     TextWidth, TextHeight: Word;
   {$ENDIF}
 begin
@@ -149,12 +153,23 @@ begin
   else
     ACol := CL_DynTFTTabButton_DisabledFont;
 
+  {$IFDEF DynTFTFontSupport}
+    DynTFT_Set_Font(ATabButton^.ActiveFont, ACol, FO_HORIZONTAL);
+  {$ELSE}
+    DynTFT_Set_Font(@TFT_defaultFont, ACol, FO_HORIZONTAL);
+  {$ENDIF}
 
-  DynTFT_Set_Font(@TFT_defaultFont, ACol, FO_HORIZONTAL);
   {$IFDEF CenterTextOnComponent}
     GetTextWidthAndHeight(ATabButton^.Caption, TextWidth, TextHeight);
     TextXOffset := HalfWidth - TSInt(TextWidth shr 1);
-    DynTFT_Write_Text(ATabButton^.Caption, x1 + TextXOffset, y1 + HalfHeight - TSInt(TextHeight shr 1));
+    if TextXOffset < 0 then
+      TextXOffset := 0;
+
+    TextYOffset := HalfHeight - TSInt(TextHeight shr 1);
+    if TextYOffset < 0 then
+      TextYOffset := 0;
+
+    DynTFT_Write_Text(ATabButton^.Caption, x1 + TextXOffset, y1 + TextYOffset);
   {$ELSE}
     DynTFT_Write_Text(ATabButton^.Caption, x1 + 4, y1 + HalfHeight - 6);
   {$ENDIF}
@@ -183,6 +198,10 @@ begin
   Result^.Font_Color := CL_DynTFTTabButton_EnabledFont;
   Result^.Caption := '';
   Result^.TabIndex := -1;
+
+  {$IFDEF DynTFTFontSupport}
+    Result^.ActiveFont := @TFT_defaultFont;
+  {$ENDIF} 
 
   {$IFDEF IsDesktop}
     New(Result^.OnOwnerInternalMouseDown);

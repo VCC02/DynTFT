@@ -57,6 +57,9 @@ type
     Caption: string[CMaxRadioButtonStringLength];
     Color: TColor;
     Font_Color: TColor;
+    {$IFDEF DynTFTFontSupport}
+      ActiveFont: PByte;
+    {$ENDIF}
 
     //these events are set by an owner component, e.g. a radio group, and called by a radio button
     OnOwnerInternalMouseDown: PDynTFTGenericEventHandler;
@@ -89,6 +92,10 @@ procedure DynTFTDrawRadioButton(ARadioButton: PDynTFTRadioButton; FullRedraw: Bo
 var
   ACol: TColor;
   x1, y1, x2, y2: TSInt;
+  ButtonYOffset: TSInt;
+  {$IFDEF DynTFTFontSupport}
+    TextWidth, TextHeight: Word;
+  {$ENDIF}  
 begin
   if not DynTFTIsDrawableComponent(PDynTFTBaseComponent(TPtrRec(ARadioButton))) then
     Exit;
@@ -107,10 +114,36 @@ begin
     DynTFT_Rectangle(x1, y1, x2, y2);
   end;
 
+  ButtonYOffset := 8;
+
+  if Length(ARadioButton^.Caption) > 0 then
+  begin
+    DynTFT_Set_Brush(0, ACol, 0, 0, 0, 0);
+    
+    if ARadioButton^.BaseProps.Enabled and CENABLED = CENABLED then
+      ACol := ARadioButton^.Font_Color
+    else  
+      ACol := CL_DynTFTRadioButton_DisabledFont;
+      
+    {$IFDEF DynTFTFontSupport}
+      DynTFT_Set_Font(ARadioButton^.ActiveFont, ACol, FO_HORIZONTAL);
+      GetTextWidthAndHeight(ARadioButton^.Caption, TextWidth, TextHeight);
+
+      ButtonYOffset := TextHeight shr 1;
+      if ButtonYOffset < 8 then
+        ButtonYOffset := 8;
+    {$ELSE}
+      DynTFT_Set_Font(@TFT_defaultFont, ACol, FO_HORIZONTAL);
+    {$ENDIF}
+    DynTFT_Write_Text(ARadioButton^.Caption, x1 + 14, y1);
+  end;
+
+  ACol := ARadioButton^.Color;
+  
   //Exterior circle
   DynTFT_Set_Pen(CL_DynTFTRadioButton_ExteriorCircle, 1);
   DynTFT_Set_Brush(0, ACol, 0, 0, 0, 0);
-  DynTFT_Circle(x1 + 7, y1 + 8, 5);
+  DynTFT_Circle(x1 + 7, y1 + ButtonYOffset, 5);
 
   //Dot
   if ARadioButton^.Checked then
@@ -124,18 +157,7 @@ begin
     DynTFT_Set_Brush(1, ACol, 0, 0, 0, 0);
   end;
 
-  DynTFT_Circle(x1 + 7, y1 + 8, 2);
-
-  if Length(ARadioButton^.Caption) > 0 then
-  begin
-    if ARadioButton^.BaseProps.Enabled and CENABLED = CENABLED then
-      ACol := ARadioButton^.Font_Color
-    else  
-      ACol := CL_DynTFTRadioButton_DisabledFont;
-      
-    DynTFT_Set_Font(@TFT_defaultFont, ACol, FO_HORIZONTAL);
-    DynTFT_Write_Text(ARadioButton^.Caption, x1 + 14, y1);
-  end;
+  DynTFT_Circle(x1 + 7, y1 + ButtonYOffset, 2);
 end;
 
 
@@ -178,6 +200,10 @@ begin
   Result^.Color := CL_DynTFTRadioButton_Background;
   Result^.Font_Color := CL_DynTFTRadioButton_EnabledFont;
   Result^.Caption := '';
+
+  {$IFDEF DynTFTFontSupport}
+    Result^.ActiveFont := @TFT_defaultFont;
+  {$ENDIF} 
 end;
 
 
@@ -272,7 +298,6 @@ end;
 
 procedure TDynTFTRadioButton_OnDynTFTBaseInternalMouseUp(ABase: PDynTFTBaseComponent);
 begin
-  (* implement these if RadioButton can be part of a more complex component
   {$IFDEF IsDesktop}
     if Assigned(PDynTFTRadioButton(TPtrRec(ABase))^.OnOwnerInternalMouseUp) then
       if Assigned(PDynTFTRadioButton(TPtrRec(ABase))^.OnOwnerInternalMouseUp^) then
@@ -280,7 +305,6 @@ begin
     if PDynTFTRadioButton(TPtrRec(ABase))^.OnOwnerInternalMouseUp <> nil then
   {$ENDIF}
       PDynTFTRadioButton(TPtrRec(ABase))^.OnOwnerInternalMouseUp^(ABase);
-  *)
 end;
 
 
@@ -304,7 +328,7 @@ begin
   {$IFDEF IsDesktop}
     ABaseEventReg.MouseDownEvent^ := TDynTFTRadioButton_OnDynTFTBaseInternalMouseDown;
     //ABaseEventReg.MouseMoveEvent^ := TDynTFTRadioButton_OnDynTFTBaseInternalMouseMove;
-    //ABaseEventReg.MouseUpEvent^ := TDynTFTRadioButton_OnDynTFTBaseInternalMouseUp;
+    ABaseEventReg.MouseUpEvent^ := TDynTFTRadioButton_OnDynTFTBaseInternalMouseUp;
     ABaseEventReg.Repaint^ := TDynTFRadioButton_OnDynTFTBaseInternalRepaint;
 
     {$IFDEF RTTIREG}
@@ -314,7 +338,7 @@ begin
   {$ELSE}
     ABaseEventReg.MouseDownEvent := @TDynTFTRadioButton_OnDynTFTBaseInternalMouseDown;
     //ABaseEventReg.MouseMoveEvent := @TDynTFTRadioButton_OnDynTFTBaseInternalMouseMove;
-    //ABaseEventReg.MouseUpEvent := @TDynTFTRadioButton_OnDynTFTBaseInternalMouseUp;
+    ABaseEventReg.MouseUpEvent := @TDynTFTRadioButton_OnDynTFTBaseInternalMouseUp;
     ABaseEventReg.Repaint := @TDynTFRadioButton_OnDynTFTBaseInternalRepaint;
 
     {$IFDEF RTTIREG}

@@ -71,6 +71,10 @@ function DynTFTComboBox_Create(ScreenIndex: Byte; Left, Top, Width, Height: TSIn
 procedure DynTFTComboBox_Destroy(var AComboBox: PDynTFTComboBox);
 procedure DynTFTComboBox_DestroyAndPaint(var AComboBox: PDynTFTComboBox);
 
+procedure DynTFTComboBoxSetEnabledState(AComboBox: PDynTFTComboBox; NewState: Byte);
+procedure DynTFTEnableComboBox(AComboBox: PDynTFTComboBox);
+procedure DynTFTDisableComboBox(AComboBox: PDynTFTComboBox);
+
 procedure DynTFTRegisterComboBoxEvents;
 function DynTFTGetComboBoxComponentType: TDynTFTComponentType;
 
@@ -93,6 +97,28 @@ begin
 
   if AComboBox^.DroppedDown then
     DynTFTDrawListBox(AComboBox^.ListBox, FullRedraw);
+end;
+
+
+procedure DynTFTComboBoxSetEnabledState(AComboBox: PDynTFTComboBox; NewState: Byte);
+begin
+  AComboBox^.BaseProps.Enabled := NewState;
+  AComboBox^.Edit^.BaseProps.Enabled := NewState;
+  AComboBox^.ListBox^.BaseProps.Enabled := NewState;
+  AComboBox^.ArrowButton^.BaseProps.Enabled := NewState;
+  DynTFTDrawComboBox(AComboBox, True);
+end;
+
+
+procedure DynTFTEnableComboBox(AComboBox: PDynTFTComboBox);
+begin
+  DynTFTComboBoxSetEnabledState(AComboBox, CENABLED);
+end;
+
+
+procedure DynTFTDisableComboBox(AComboBox: PDynTFTComboBox);
+begin
+  DynTFTComboBoxSetEnabledState(AComboBox, CDISABLED);
 end;
 
 

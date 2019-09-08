@@ -47,10 +47,23 @@ type
   PByte = System.PByte;
   DWord = Cardinal;
 
+  TDynTFTFontSettings = record
+    FontName: string;
+    FontSize: Integer;
+    Bold: Boolean;
+    Italic: Boolean;
+    Underline: Boolean;
+    StrikeOut: Boolean;
+    Charset: Integer;
+    Pitch: TFontPitch;
+  end;
+  PDynTFTFontSettings = ^TDynTFTFontSettings;
+
 procedure TFT_Init(display_width, display_height: Word);
 procedure TFT_Set_Pen(pen_color: TColor; pen_width: Byte);
 procedure TFT_Set_Brush(brush_enabled: Byte; brush_color: TColor; gradient_enabled, gradient_orientation: Byte; gradient_color_from, gradient_color_to: TColor);
 procedure TFT_Set_Font(activeFont: PByte; font_color: TColor; font_orientation: Word);
+procedure TFT_Set_Ext_Font(activeFont: DWord; font_color: TColor; font_orientation: Word);
 procedure TFT_Write_Text(AText: string; x, y: Word);
 procedure TFT_Line(x1, y1, x2, y2: Integer);
 procedure TFT_H_Line(x_start, x_end, y_pos: Integer);
@@ -69,7 +82,6 @@ procedure TFT_Write_Text_Return_Pos(AString: string; x, y: Word);
 
 var
   GCanvas: TCanvas; // global variable, used as TFT screen
-  TFT_defaultFont: Byte;
   TFT_DISP_WIDTH: Word;
   TFT_DISP_HEIGHT: Word;
 
@@ -165,6 +177,23 @@ var
   R2, G2, B2: Word;
   R, G, B: Byte;
 begin
+  TFT_Color16bitToRGB(Color1, @R1, @G1, @B1, False);
+  TFT_Color16bitToRGB(Color2, @R2, @G2, @B2, False);
+
+  R := Word(R1 + R2) shr 1;
+  G := Word(G1 + G2) shr 1;
+  B := Word(B1 + B2) shr 1;
+
+  Result := R shl 11 + G shl 5 + B;
+end;
+
+
+function AvgTwoTrueColors(Color1, Color2: TColor): TColor;
+var
+  R1, G1, B1: Word;
+  R2, G2, B2: Word;
+  R, G, B: Byte;
+begin
   R1 := Color1 and $FF;
   R2 := Color2 and $FF;
 
@@ -179,23 +208,6 @@ begin
   B := Word(B1 + B2) shr 1;
 
   Result := B shl 16 + G shl 8 + R;
-end;
-
-
-function AvgTwoTrueColors(Color1, Color2: TColor): TColor;
-var
-  R1, G1, B1: Word;
-  R2, G2, B2: Word;
-  R, G, B: Byte;
-begin
-  TFT_Color16bitToRGB(Color1, @R1, @G1, @B1, False);
-  TFT_Color16bitToRGB(Color2, @R2, @G2, @B2, False);
-
-  R := Word(R1 + R2) shr 1;
-  G := Word(G1 + G2) shr 1;
-  B := Word(B1 + B2) shr 1;
-
-  Result := R shl 11 + G shl 5 + B;
 end;
 
 
@@ -227,20 +239,42 @@ end;
 
 
 procedure TFT_Set_Font(activeFont: PByte; font_color: TColor; font_orientation: Word);
+var
+  AFontSetting: PDynTFTFontSettings;
 begin
   if activeFont = nil then
-    raise Exception.Create('Please call TFT_Set_Font with @TFT_defaultFont');
+    raise Exception.Create('Please call TFT_Set_Font with @TFT_defaultFont or assign a valid font to component.');
 
-  GCanvas.Font.Name := 'Tahoma';
+  AFontSetting := PDynTFTFontSettings(activeFont);
+  GCanvas.Font.Name := AFontSetting^.FontName;
+  GCanvas.Font.Size := AFontSetting^.FontSize;
+
+  GCanvas.Font.Style := [];
+  if AFontSetting^.Bold then
+    GCanvas.Font.Style := GCanvas.Font.Style + [fsBold];
+
+  if AFontSetting^.Italic then
+    GCanvas.Font.Style := GCanvas.Font.Style + [fsItalic];
+
+  if AFontSetting^.Underline then
+    GCanvas.Font.Style := GCanvas.Font.Style + [fsUnderline];
+
+  if AFontSetting^.StrikeOut then
+    GCanvas.Font.Style := GCanvas.Font.Style + [fsStrikeOut];
+
+  GCanvas.Font.Charset := AFontSetting^.Charset;
+  GCanvas.Font.Pitch := AFontSetting^.Pitch;
+
   if not UseTFTTrueColor then
     GCanvas.Font.Color := U16bitColorToTrueColor(font_color, True)
   else
     GCanvas.Font.Color := font_color;
+end;
 
-  GCanvas.Font.Style := [fsBold];  
-    
-  GCanvas.Font.Size := 10;
-  //GCanvas.Font.Orientation:=;
+
+procedure TFT_Set_Ext_Font(activeFont: DWord; font_color: TColor; font_orientation: Word);
+begin
+  TFT_Set_Font(PByte(activeFont), font_color, font_orientation); // use the same function on desktop
 end;
 
 

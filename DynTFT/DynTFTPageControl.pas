@@ -49,13 +49,18 @@ const
   CMaxPageControlPageCount = 20;
 
 type
+  TOnPageControlChangeEvent = procedure(AComp: PPtrRec);
+  POnPageControlChangeEvent = ^TOnPageControlChangeEvent;
+
   TDynTFTPageControl = record
     BaseProps: TDynTFTBaseProperties;  //inherited properties from TDynTFTBaseProperties - must be the first field of this structure !!!
 
     //PageControl properties
     TabButtons: array[0..CMaxPageControlPageCount - 1] of PDynTFTTabButton;
     PageCount: LongInt;
-    ActiveIndex: LongInt;
+    ActiveIndex, OldActiveIndex: LongInt;
+    
+    OnChange: POnPageControlChangeEvent;
   end;
   PDynTFTPageControl = ^TDynTFTPageControl;
 
@@ -65,6 +70,10 @@ procedure DynTFTPageControl_Destroy(var APageControl: PDynTFTPageControl);
 procedure DynTFTPageControl_DestroyAndPaint(var APageControl: PDynTFTPageControl);
 
 function DynTFTAddTabButtonToPageControl(APageControl: PDynTFTPageControl; ATabButton: PDynTFTTabButton): LongInt; //returns button index  
+
+procedure DynTFTPageControlSetEnabledState(APageControl: PDynTFTPageControl; NewState: Byte);
+procedure DynTFTEnablePageControl(ARadioGroup: PDynTFTPageControl);
+procedure DynTFTDisablePageControl(ARadioGroup: PDynTFTPageControl);
 
 procedure DynTFTRegisterPageControlEvents;
 function DynTFTGetPageControlComponentType: TDynTFTComponentType;
@@ -90,15 +99,51 @@ begin
     Exit;
 
   if FullRedraw then
+  begin
     for i := 0 to APageControl^.PageCount - 1 do
     begin
       if i = APageControl^.ActiveIndex then
         APageControl^.TabButtons[i]^.BaseProps.CompState := CPRESSED
       else
         APageControl^.TabButtons[i]^.BaseProps.CompState := CRELEASED;
-        
+
       DynTFTDrawTabButton(APageControl^.TabButtons[i], True);
     end;
+  end
+  else
+  begin
+    APageControl^.TabButtons[APageControl^.OldActiveIndex]^.BaseProps.CompState := CRELEASED;
+    APageControl^.TabButtons[APageControl^.ActiveIndex]^.BaseProps.CompState := CPRESSED;
+    
+    DynTFTDrawTabButton(APageControl^.TabButtons[APageControl^.OldActiveIndex], True);
+    DynTFTDrawTabButton(APageControl^.TabButtons[APageControl^.ActiveIndex], True);
+  end;
+end;
+
+
+procedure DynTFTPageControlSetEnabledState(APageControl: PDynTFTPageControl; NewState: Byte);
+var
+  n, i: Integer;
+begin
+  APageControl^.BaseProps.Enabled := NewState;
+  n := APageControl^.PageCount - 1;
+  for i := 0 to n do
+  begin
+    APageControl^.TabButtons[i]^.BaseProps.Enabled := NewState;
+    DynTFTDrawTabButton(APageControl^.TabButtons[i], True);
+  end;
+end;
+
+
+procedure DynTFTEnablePageControl(ARadioGroup: PDynTFTPageControl);
+begin
+  DynTFTPageControlSetEnabledState(ARadioGroup, CENABLED);
+end;
+
+
+procedure DynTFTDisablePageControl(ARadioGroup: PDynTFTPageControl);
+begin
+  DynTFTPageControlSetEnabledState(ARadioGroup, CDISABLED);
 end;
 
 
@@ -108,7 +153,20 @@ var
 begin
   APageControl := PDynTFTPageControl(TPtrRec(PDynTFTTabButton(TPtrRec(ABase))^.BaseProps.Parent));
   APageControl^.ActiveIndex := PDynTFTTabButton(TPtrRec(ABase))^.TabIndex;
-  DynTFTDrawPageControl(APageControl, True);
+
+  DynTFTDrawPageControl(APageControl, APageControl^.OldActiveIndex = -1);
+
+  if APageControl^.OldActiveIndex <> APageControl^.ActiveIndex then
+  begin
+    APageControl^.OldActiveIndex := APageControl^.ActiveIndex;
+    {$IFDEF IsDesktop}
+      if Assigned(APageControl^.OnChange) then
+        if Assigned(APageControl^.OnChange^) then
+    {$ELSE}
+      if APageControl^.OnChange <> nil then
+    {$ENDIF}
+        APageControl^.OnChange^(PPtrRec(TPtrRec(APageControl)));
+  end;
 end;
 
 
@@ -171,8 +229,19 @@ begin
 
   Result^.PageCount := 0;
   Result^.ActiveIndex := 0;
+  Result^.OldActiveIndex := -1;
   for i := 0 to CMaxPageControlPageCount - 1 do
     Result^.TabButtons[i] := nil;
+
+  {$IFDEF IsDesktop}
+    New(Result^.OnChange);
+  {$ENDIF}
+
+  {$IFDEF IsDesktop}
+    Result^.OnChange^ := nil;
+  {$ELSE}
+    Result^.OnChange := nil;
+  {$ENDIF}
 end;
 
 
@@ -189,6 +258,10 @@ var
     ATemp: PDynTFTBaseComponent;
   {$ENDIF}
 begin
+  {$IFDEF IsDesktop}
+    Dispose(APageControl^.OnChange);
+  {$ENDIF}
+  
   for i := 0 to APageControl^.PageCount - 1 do
   begin
     {$IFDEF IsDesktop}

@@ -39,7 +39,7 @@ interface
 
 uses
   DynTFTTypes, DynTFTBaseDrawing, DynTFTConsts, DynTFTUtils,
-  DynTFTArrowButton, DynTFTPanel
+  DynTFTArrowButton
 
   {$IFDEF IsDesktop}
     ,SysUtils, Forms
@@ -65,10 +65,10 @@ type
 
     //ScrollBar properties
     BtnInc, BtnDec: PDynTFTArrowButton;
-    PnlScroll: PDynTFTPanel;
+    BtnScroll: PDynTFTArrowButton; 
     Min, Max, Position, OldPosition: LongInt;
     Direction: Byte; //0 = horizontal, 1 = vertical
-    PnlDragging: Byte; //0 = not dragging, 1 = dragging
+    PnlDragging: Byte; //dragging (internal state) 0 = not dragging, 1 = dragging
     
     {$IFNDEF AppArch16}
       Dummy: Word; //keep alignment to 4 bytes
@@ -158,7 +158,7 @@ begin
   {$IFDEF IsDesktop}
     Result := Round(LongInt(PnlPos) * TotalPositionSpace / LongInt(TotalPanelSpace));
   {$ELSE}
-    Result := Word(Real(Real(LongInt(PnlPos)) * Real(TotalPositionSpace) / Real(LongInt(TotalPanelSpace))));
+    Result := LongInt(Real(Real(LongInt(PnlPos)) * Real(TotalPositionSpace) / Real(LongInt(TotalPanelSpace))));
   {$ENDIF}   
 end;
 
@@ -200,12 +200,14 @@ begin
       AScrollBar^.BtnDec^.BaseProps.Height := AScrollBar^.BaseProps.Height;
       AScrollBar^.BtnDec^.ArrowDir := CLeftArrow;
 
-      AScrollBar^.PnlScroll^.BaseProps.Left := AScrollBar^.BaseProps.Left + CScrollBarArrBtnWidthHeight + ScrBarPosToPnlPos(AScrollBar);  //panel
-      AScrollBar^.PnlScroll^.BaseProps.Top := AScrollBar^.BaseProps.Top;
-      AScrollBar^.PnlScroll^.BaseProps.Width := CScrollBarArrBtnWidthHeight;
-      AScrollBar^.PnlScroll^.BaseProps.Height := AScrollBar^.BaseProps.Height;
+      AScrollBar^.BtnScroll^.BaseProps.Left := AScrollBar^.BaseProps.Left + CScrollBarArrBtnWidthHeight + ScrBarPosToPnlPos(AScrollBar);  //panel
+      AScrollBar^.BtnScroll^.BaseProps.Top := AScrollBar^.BaseProps.Top;
+      AScrollBar^.BtnScroll^.BaseProps.Width := CScrollBarArrBtnWidthHeight;
+      AScrollBar^.BtnScroll^.BaseProps.Height := AScrollBar^.BaseProps.Height;
 
-      DynTFT_Rectangle(x1 + CScrollBarArrBtnWidthHeight + 1, y1, x2 - CScrollBarArrBtnWidthHeight - 1, y2);
+      //DynTFT_Rectangle(x1 + CScrollBarArrBtnWidthHeight + 1, y1, x2 - CScrollBarArrBtnWidthHeight - 1, y2);
+      DynTFT_Rectangle(x1 + CScrollBarArrBtnWidthHeight + 1, y1, AScrollBar^.BtnScroll^.BaseProps.Left, y2);
+      DynTFT_Rectangle(AScrollBar^.BtnScroll^.BaseProps.Left + CScrollBarArrBtnWidthHeight + 1, y1, x2 - CScrollBarArrBtnWidthHeight - 1, y2);
     end
     else
     begin         
@@ -221,12 +223,14 @@ begin
       AScrollBar^.BtnDec^.BaseProps.Height := CScrollBarArrBtnWidthHeight;
       AScrollBar^.BtnDec^.ArrowDir := CUpArrow;
 
-      AScrollBar^.PnlScroll^.BaseProps.Left := AScrollBar^.BaseProps.Left;  //panel
-      AScrollBar^.PnlScroll^.BaseProps.Top := AScrollBar^.BaseProps.Top + CScrollBarArrBtnWidthHeight + ScrBarPosToPnlPos(AScrollBar);
-      AScrollBar^.PnlScroll^.BaseProps.Width := AScrollBar^.BaseProps.Width;
-      AScrollBar^.PnlScroll^.BaseProps.Height := CScrollBarArrBtnWidthHeight;
+      AScrollBar^.BtnScroll^.BaseProps.Left := AScrollBar^.BaseProps.Left;  //panel
+      AScrollBar^.BtnScroll^.BaseProps.Top := AScrollBar^.BaseProps.Top + CScrollBarArrBtnWidthHeight + ScrBarPosToPnlPos(AScrollBar);
+      AScrollBar^.BtnScroll^.BaseProps.Width := AScrollBar^.BaseProps.Width;
+      AScrollBar^.BtnScroll^.BaseProps.Height := CScrollBarArrBtnWidthHeight;
 
-      DynTFT_Rectangle(x1, y1 + CScrollBarArrBtnWidthHeight + 1, x2, y2 - CScrollBarArrBtnWidthHeight - 1);
+      //DynTFT_Rectangle(x1, y1 + CScrollBarArrBtnWidthHeight + 1, x2, y2 - CScrollBarArrBtnWidthHeight - 1);
+      DynTFT_Rectangle(x1, y1 + CScrollBarArrBtnWidthHeight + 1, x2, AScrollBar^.BtnScroll^.BaseProps.Top);
+      DynTFT_Rectangle(x1, AScrollBar^.BtnScroll^.BaseProps.Top + CScrollBarArrBtnWidthHeight + 1, x2, y2 - CScrollBarArrBtnWidthHeight - 1);
     end;
   end;
 
@@ -236,8 +240,8 @@ begin
     DynTFTDrawArrowButton(AScrollBar^.BtnDec, FullRedraw);
   end;
 
-  if AScrollBar^.PnlScroll^.BaseProps.Visible > CHIDDEN then
-    DynTFTDrawPanel(AScrollBar^.PnlScroll, True); //always full redraw
+  if AScrollBar^.BtnScroll^.BaseProps.Visible > CHIDDEN then
+    DynTFTDrawArrowButton(AScrollBar^.BtnScroll, True); //always full redraw
 end;
 
 
@@ -250,8 +254,8 @@ end;
 procedure DynTFTEnableScrollBar(AScrollBar: PDynTFTScrollBar);
 begin
   AScrollBar^.BaseProps.Enabled := CENABLED;
-  AScrollBar^.PnlScroll^.BaseProps.Enabled := CENABLED;
-  AScrollBar^.PnlScroll^.Color := CL_DynTFTScrollBar_PanelBackground;
+  AScrollBar^.BtnScroll^.BaseProps.Enabled := CENABLED;
+  AScrollBar^.BtnScroll^.Color := CL_DynTFTScrollBar_PanelBackground;
   AScrollBar^.BtnInc^.BaseProps.Enabled := CENABLED;
   AScrollBar^.BtnDec^.BaseProps.Enabled := CENABLED;
   DynTFTDrawScrollBarWithButtons(AScrollBar, False, True);
@@ -261,8 +265,8 @@ end;
 procedure DynTFTDisableScrollBar(AScrollBar: PDynTFTScrollBar);
 begin
   AScrollBar^.BaseProps.Enabled := CDISABLED;
-  AScrollBar^.PnlScroll^.BaseProps.Enabled := CDISABLED;
-  AScrollBar^.PnlScroll^.Color := CL_DynTFTScrollBar_DisabledBackground;
+  AScrollBar^.BtnScroll^.BaseProps.Enabled := CDISABLED;
+  AScrollBar^.BtnScroll^.Color := CL_DynTFTScrollBar_DisabledBackground;
   AScrollBar^.BtnInc^.BaseProps.Enabled := CDISABLED;
   AScrollBar^.BtnDec^.BaseProps.Enabled := CDISABLED;
   DynTFTDrawScrollBarWithButtons(AScrollBar, False, True);
@@ -279,9 +283,9 @@ begin
   AScrBar^.BtnDec^.BaseProps.OnMouseMoveUser := AScrBar^.BaseProps.OnMouseMoveUser;
   AScrBar^.BtnDec^.BaseProps.OnMouseUpUser := AScrBar^.BaseProps.OnMouseUpUser;
 
-  AScrBar^.PnlScroll^.BaseProps.OnMouseDownUser := AScrBar^.BaseProps.OnMouseDownUser;
-  AScrBar^.PnlScroll^.BaseProps.OnMouseMoveUser := AScrBar^.BaseProps.OnMouseMoveUser;
-  AScrBar^.PnlScroll^.BaseProps.OnMouseUpUser := AScrBar^.BaseProps.OnMouseUpUser;
+  AScrBar^.BtnScroll^.BaseProps.OnMouseDownUser := AScrBar^.BaseProps.OnMouseDownUser;
+  AScrBar^.BtnScroll^.BaseProps.OnMouseMoveUser := AScrBar^.BaseProps.OnMouseMoveUser;
+  AScrBar^.BtnScroll^.BaseProps.OnMouseUpUser := AScrBar^.BaseProps.OnMouseUpUser;
 end;
 
 
@@ -289,15 +293,15 @@ procedure TDynTFTScrollBar_OnDynTFTChildPanelInternalMouseDown(ABase: PDynTFTBas
 var
   AScrBar: PDynTFTScrollBar;
 begin
-  if PDynTFTBaseComponent(TPtrRec(PDynTFTPanel(TPtrRec(ABase))^.BaseProps.Parent))^.BaseProps.ComponentType = ComponentType then
+  if PDynTFTBaseComponent(TPtrRec(PDynTFTArrowButton(TPtrRec(ABase))^.BaseProps.Parent))^.BaseProps.ComponentType = ComponentType then
   begin
-    AScrBar := PDynTFTScrollBar(TPtrRec(PDynTFTPanel(TPtrRec(ABase))^.BaseProps.Parent));
+    AScrBar := PDynTFTScrollBar(TPtrRec(PDynTFTArrowButton(TPtrRec(ABase))^.BaseProps.Parent));
     AScrBar^.PnlDragging := 1;
-    DynTFTDragOffsetX := DynTFTMCU_XMouse - PDynTFTPanel(TPtrRec(ABase))^.BaseProps.Left;
-    DynTFTDragOffsetY := DynTFTMCU_YMouse - PDynTFTPanel(TPtrRec(ABase))^.BaseProps.Top;
+    DynTFTDragOffsetX := DynTFTMCU_XMouse - PDynTFTArrowButton(TPtrRec(ABase))^.BaseProps.Left;
+    DynTFTDragOffsetY := DynTFTMCU_YMouse - PDynTFTArrowButton(TPtrRec(ABase))^.BaseProps.Top;
   end
   else
-    DynTFTDrawPanel(PDynTFTPanel(TPtrRec(ABase)), False);  //line added 2017.11.30  (to repaint the panel on focus change)
+    DynTFTDrawArrowButton(PDynTFTArrowButton(TPtrRec(ABase)), False);  //line added 2017.11.30  (to repaint the panel on focus change)
 end;
 
 
@@ -305,9 +309,9 @@ procedure TDynTFTScrollBar_OnDynTFTChildPanelInternalMouseMove(ABase: PDynTFTBas
 var
   AScrBar: PDynTFTScrollBar;
 begin
-  if PDynTFTBaseComponent(TPtrRec(PDynTFTPanel(TPtrRec(ABase))^.BaseProps.Parent))^.BaseProps.ComponentType = ComponentType then
+  if PDynTFTBaseComponent(TPtrRec(PDynTFTArrowButton(TPtrRec(ABase))^.BaseProps.Parent))^.BaseProps.ComponentType = ComponentType then
   begin
-    AScrBar := PDynTFTScrollBar(TPtrRec(PDynTFTPanel(TPtrRec(ABase))^.BaseProps.Parent));
+    AScrBar := PDynTFTScrollBar(TPtrRec(PDynTFTArrowButton(TPtrRec(ABase))^.BaseProps.Parent));
 
     ///
     ///  DragOffsetX := IsMCU_XMouse - PDynTFTPanel(TPtrRec(ABase))^.Left;
@@ -366,9 +370,9 @@ procedure TDynTFTScrollBar_OnDynTFTChildPanelInternalMouseUp(ABase: PDynTFTBaseC
 var
   AScrBar: PDynTFTScrollBar;
 begin
-  if PDynTFTBaseComponent(TPtrRec(PDynTFTPanel(TPtrRec(ABase))^.BaseProps.Parent))^.BaseProps.ComponentType = ComponentType then
+  if PDynTFTBaseComponent(TPtrRec(PDynTFTArrowButton(TPtrRec(ABase))^.BaseProps.Parent))^.BaseProps.ComponentType = ComponentType then
   begin
-    AScrBar := PDynTFTScrollBar(TPtrRec(PDynTFTPanel(TPtrRec(ABase))^.BaseProps.Parent));
+    AScrBar := PDynTFTScrollBar(TPtrRec(PDynTFTArrowButton(TPtrRec(ABase))^.BaseProps.Parent));
     AScrBar^.PnlDragging := 0;
   end;
 end;
@@ -472,8 +476,10 @@ begin
 
   Result^.BtnInc := DynTFTArrowButton_Create(ScreenIndex, 500, 280, 0, 0);   //Button dimensions are set to 0, to avoid drawing until properly positioned.
   Result^.BtnDec := DynTFTArrowButton_Create(ScreenIndex, 500, 280, 0, 0);
-  Result^.PnlScroll := DynTFTPanel_Create(ScreenIndex, 500, 280, 0, 0);
-  Result^.PnlScroll^.Color := CL_DynTFTScrollBar_PanelBackground;
+  Result^.BtnScroll := DynTFTArrowButton_Create(ScreenIndex, 500, 280, 0, 0);
+  Result^.BtnScroll^.Color := CL_DynTFTScrollBar_PanelBackground;
+  Result^.BtnScroll^.ArrowDir := CNoArrow;
+  Result^.BtnScroll^.BaseProps.CompState := CDISABLEPRESSING;
 
   {$IFDEF IsDesktop}
     New(Result^.OnOwnerInternalMouseDown);
@@ -486,7 +492,7 @@ begin
 
   Result^.BtnInc^.BaseProps.Parent := PPtrRec(TPtrRec(Result));
   Result^.BtnDec^.BaseProps.Parent := PPtrRec(TPtrRec(Result));
-  Result^.PnlScroll^.BaseProps.Parent := PPtrRec(TPtrRec(Result));
+  Result^.BtnScroll^.BaseProps.Parent := PPtrRec(TPtrRec(Result));
 
   {$IFDEF IsDesktop}
     Result^.BtnInc^.OnOwnerInternalMouseDown^ := TDynTFTScrollBar_OnDynTFTChildArrowButtonInternalMouseDown;
@@ -509,13 +515,13 @@ begin
   {$ENDIF}
 
   {$IFDEF IsDesktop}
-    Result^.PnlScroll^.OnOwnerInternalMouseDown^ := TDynTFTScrollBar_OnDynTFTChildPanelInternalMouseDown;
-    Result^.PnlScroll^.OnOwnerInternalMouseMove^ := TDynTFTScrollBar_OnDynTFTChildPanelInternalMouseMove;
-    Result^.PnlScroll^.OnOwnerInternalMouseUp^ := TDynTFTScrollBar_OnDynTFTChildPanelInternalMouseUp;
+    Result^.BtnScroll^.OnOwnerInternalMouseDown^ := TDynTFTScrollBar_OnDynTFTChildPanelInternalMouseDown;
+    Result^.BtnScroll^.OnOwnerInternalMouseMove^ := TDynTFTScrollBar_OnDynTFTChildPanelInternalMouseMove;
+    Result^.BtnScroll^.OnOwnerInternalMouseUp^ := TDynTFTScrollBar_OnDynTFTChildPanelInternalMouseUp;
   {$ELSE}
-    Result^.PnlScroll^.OnOwnerInternalMouseDown := @TDynTFTScrollBar_OnDynTFTChildPanelInternalMouseDown;
-    Result^.PnlScroll^.OnOwnerInternalMouseMove := @TDynTFTScrollBar_OnDynTFTChildPanelInternalMouseMove;
-    Result^.PnlScroll^.OnOwnerInternalMouseUp := @TDynTFTScrollBar_OnDynTFTChildPanelInternalMouseUp;
+    Result^.BtnScroll^.OnOwnerInternalMouseDown := @TDynTFTScrollBar_OnDynTFTChildPanelInternalMouseDown;
+    Result^.BtnScroll^.OnOwnerInternalMouseMove := @TDynTFTScrollBar_OnDynTFTChildPanelInternalMouseMove;
+    Result^.BtnScroll^.OnOwnerInternalMouseUp := @TDynTFTScrollBar_OnDynTFTChildPanelInternalMouseUp;
   {$ENDIF}
 
   Result^.Min := 0;
@@ -576,7 +582,7 @@ begin
   {$IFDEF IsDesktop}
     DynTFTComponent_Destroy(PDynTFTBaseComponent(TPtrRec(AScrollBar^.BtnInc)), SizeOf(AScrollBar^.BtnInc^));
     DynTFTComponent_Destroy(PDynTFTBaseComponent(TPtrRec(AScrollBar^.BtnDec)), SizeOf(AScrollBar^.BtnDec^));
-    DynTFTComponent_Destroy(PDynTFTBaseComponent(TPtrRec(AScrollBar^.PnlScroll)), SizeOf(AScrollBar^.PnlScroll^));
+    DynTFTComponent_Destroy(PDynTFTBaseComponent(TPtrRec(AScrollBar^.BtnScroll)), SizeOf(AScrollBar^.BtnScroll^));
 
     DynTFTComponent_Destroy(PDynTFTBaseComponent(TPtrRec(AScrollBar)), SizeOf(AScrollBar^));
   {$ELSE}
@@ -589,9 +595,9 @@ begin
     DynTFTComponent_Destroy(ATemp, SizeOf(AScrollBar^.BtnDec^));
     AScrollBar^.BtnDec := PDynTFTArrowButton(TPtrRec(ATemp));
 
-    ATemp := PDynTFTBaseComponent(TPtrRec(AScrollBar^.PnlScroll));
-    DynTFTComponent_Destroy(ATemp, SizeOf(AScrollBar^.PnlScroll^));
-    AScrollBar^.PnlScroll := PDynTFTPanel(TPtrRec(ATemp));
+    ATemp := PDynTFTBaseComponent(TPtrRec(AScrollBar^.BtnScroll));
+    DynTFTComponent_Destroy(ATemp, SizeOf(AScrollBar^.BtnScroll^));
+    AScrollBar^.BtnScroll := PDynTFTArrowButton(TPtrRec(ATemp));
 
     ATemp := PDynTFTBaseComponent(TPtrRec(AScrollBar));
     DynTFTComponent_Destroy(ATemp, SizeOf(AScrollBar^));
@@ -681,7 +687,7 @@ begin
   begin
     DynTFTHideComponent(PDynTFTBaseComponent(TPtrRec(PDynTFTScrollBar(TPtrRec(ABase))^.BtnInc)));
     DynTFTHideComponent(PDynTFTBaseComponent(TPtrRec(PDynTFTScrollBar(TPtrRec(ABase))^.BtnDec)));
-    DynTFTHideComponent(PDynTFTBaseComponent(TPtrRec(PDynTFTScrollBar(TPtrRec(ABase))^.PnlScroll)));
+    DynTFTHideComponent(PDynTFTBaseComponent(TPtrRec(PDynTFTScrollBar(TPtrRec(ABase))^.BtnScroll)));
     Exit;
   end;
 
@@ -689,7 +695,7 @@ begin
   begin
     DynTFTShowComponent(PDynTFTBaseComponent(TPtrRec(PDynTFTScrollBar(TPtrRec(ABase))^.BtnInc)));
     DynTFTShowComponent(PDynTFTBaseComponent(TPtrRec(PDynTFTScrollBar(TPtrRec(ABase))^.BtnDec)));
-    DynTFTShowComponent(PDynTFTBaseComponent(TPtrRec(PDynTFTScrollBar(TPtrRec(ABase))^.PnlScroll)));
+    DynTFTShowComponent(PDynTFTBaseComponent(TPtrRec(PDynTFTScrollBar(TPtrRec(ABase))^.BtnScroll)));
     Exit;
   end;
 
