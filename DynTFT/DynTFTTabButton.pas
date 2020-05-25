@@ -191,6 +191,7 @@ begin
   Result^.BaseProps.Top := Top;
   Result^.BaseProps.Width := Width;
   Result^.BaseProps.Height := Height;
+  //DynTFTInitComponentDimensions(PDynTFTBaseComponent(TPtrRec(Result)), ComponentType, True, Left, Top, Width, Height);
   DynTFTInitBasicStatePropertiesToDefault(PDynTFTBaseComponent(TPtrRec(Result)));
 
   Result^.SelectedColor := CL_DynTFTTabButton_SelectedBackground;
@@ -247,6 +248,11 @@ begin
     Dispose(ATabButton^.OnOwnerInternalMouseMove);
     Dispose(ATabButton^.OnOwnerInternalMouseUp);
     Dispose(ATabButton^.OnOwnerInternalBeforeDestroy);
+
+    ATabButton^.OnOwnerInternalMouseDown := nil;
+    ATabButton^.OnOwnerInternalMouseMove := nil;
+    ATabButton^.OnOwnerInternalMouseUp := nil;
+    ATabButton^.OnOwnerInternalBeforeDestroy := nil;
   {$ENDIF}
 
   {$IFDEF IsDesktop}

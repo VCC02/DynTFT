@@ -148,6 +148,8 @@ begin
   lblHeight.Top := trbScreenHeight.Position + imgScreen.Top;
 
   GCanvas := frmDynTFTSimScreen.imgScreen.Canvas;
+
+  DoubleBuffered := True;
 end;
 
 

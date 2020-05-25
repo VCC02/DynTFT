@@ -60,8 +60,11 @@ type
     procedure trbScreenHeightChange(Sender: TObject);
   private
     { Private declarations }
+    FBmpBuffer: TBitmap;
     procedure LoadSettingsFromIni;
     procedure SaveSettingsToIni;
+
+    procedure OnGUICanvasChange(Sender: TObject);
   public
     { Public declarations }
   end;
@@ -121,6 +124,12 @@ begin
 end;
 
 
+procedure TfrmDynTFTSimScreen.OnGUICanvasChange(Sender: TObject);
+begin
+  imgScreen.Canvas.Draw(0, 0, FBmpBuffer);
+end;
+
+
 procedure TfrmDynTFTSimScreen.tmrStartupTimer(Sender: TObject);
 begin
   tmrStartup.Enabled := False;
@@ -148,6 +157,13 @@ begin
   lblHeight.Top := trbScreenHeight.Position + imgScreen.Top;
 
   GCanvas := frmDynTFTSimScreen.imgScreen.Canvas;
+
+  {GCanvas := FBmpBuffer.Canvas;                               //uncomment if it still flickers
+  GCanvas.OnChange := OnGUICanvasChange;
+  FBmpBuffer.Width := frmDynTFTSimScreen.imgScreen.Width;
+  FBmpBuffer.Height := frmDynTFTSimScreen.imgScreen.Height;}
+
+  DoubleBuffered := True;
 end;
 
 
@@ -180,6 +196,7 @@ end;
 procedure TfrmDynTFTSimScreen.FormCreate(Sender: TObject);
 begin
   tmrStartup.Enabled := True;
+  FBmpBuffer := TBitmap.Create;
 end;
 
 
@@ -189,6 +206,8 @@ begin
     SaveSettingsToIni;
   except
   end;
+
+  FBmpBuffer.Free;
 end;
 
 

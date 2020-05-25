@@ -49,6 +49,11 @@ const
   CEditTotalSpacing = CEditSpacing * 2;
   CEditMaxTextLength = 159;
 
+  CDynTFTEditDrawCaret_Color_Hide = 0;
+  CDynTFTEditDrawCaret_Color_Show = 1;
+  CDynTFTEditDrawCaret_Color_Blink = 2;
+  CDynTFTEditDrawCaret_Color_Error = 3;
+
 type
   TEditTextString = string[CEditMaxTextLength];
 
@@ -72,8 +77,8 @@ type
       Dummy: Word; //keep alignment to 4 bytes   (<ArrowDir> + <DummyByte> + <Dummy>)
     {$ENDIF}
 
-    PasswordText: Boolean; //when true, it displays a '*' for every character
-    Readonly: Boolean; //prevents adding or deleting, but does not prevent directly modifying Text property
+    PasswordText: {$IFDEF IsDesktop} LongBool; {$ELSE} Boolean; {$ENDIF} //when true, it displays a '*' for every character
+    Readonly: {$IFDEF IsDesktop} LongBool; {$ELSE} Boolean; {$ENDIF} //prevents adding or deleting, but does not prevent directly modifying Text property
 
     //these events are set by an owner component, e.g. a ComboBox
     OnOwnerInternalMouseDown: PDynTFTGenericEventHandler;
@@ -101,6 +106,7 @@ procedure DynTFTEditAfterSetText(APDynTFTEdit: PDynTFTEdit);  //call this after 
 procedure DynTFTEditDeleteAtCaret(APDynTFTEdit: PDynTFTEdit); //delete one character after the caret  (like pressing Delete key)
 procedure DynTFTEditBackspaceAtCaret(APDynTFTEdit: PDynTFTEdit); //delete one character before the caret  (like pressing Backspace key)
 procedure DynTFTEditInsertTextAtCaret(APDynTFTEdit: PDynTFTEdit; var NewText: string);   // insert a text after the caret (like typing or pasting text)
+procedure DynTFTDrawEditCaret(APDynTFTEdit: PDynTFTEdit; ColorMode: Word);
 
 procedure DynTFTRegisterEditEvents;
 function DynTFTGetEditComponentType: TDynTFTComponentType;
@@ -314,32 +320,37 @@ end;
 procedure DynTFTDrawEditCaret(APDynTFTEdit: PDynTFTEdit; ColorMode: Word);
 var
   x, y1, y2: Integer;
+  CaretColor: TColor;
 begin
   case ColorMode of
-    0: //no caret
-      DynTFT_Set_Pen(APDynTFTEdit^.Color, 1);
+    CDynTFTEditDrawCaret_Color_Hide : //no caret
+      CaretColor := APDynTFTEdit^.Color;
 
-    1: //draw caret
+    CDynTFTEditDrawCaret_Color_Show : //draw caret
     begin
       if APDynTFTEdit^.BaseProps.Focused and CFOCUSED = CFOCUSED then
-        DynTFT_Set_Pen(APDynTFTEdit^.Font_Color, 1)
+        CaretColor := APDynTFTEdit^.Font_Color
       else
-        DynTFT_Set_Pen(APDynTFTEdit^.Color, 1); //clear caret if unfocused
+        CaretColor := APDynTFTEdit^.Color; //clear caret if unfocused
     end;
 
-    2: //use CaretBlinkStatus
+    CDynTFTEditDrawCaret_Color_Blink : //use CaretBlinkStatus
     begin
       if (APDynTFTEdit^.CaretBlinkStatus = 1) and (APDynTFTEdit^.BaseProps.Focused and CFOCUSED = CFOCUSED) then
-        DynTFT_Set_Pen(APDynTFTEdit^.Font_Color, 1)
+        CaretColor := APDynTFTEdit^.Font_Color
       else
-        DynTFT_Set_Pen(APDynTFTEdit^.Color, 1);
+        CaretColor := APDynTFTEdit^.Color;
     end;
 
-    3: //error   (e.g. max number of characters reached)
-      DynTFT_Set_Pen(CL_RED, 1);
+    CDynTFTEditDrawCaret_Color_Error : //error   (e.g. max number of characters reached)
+      CaretColor := CL_RED
+  else
+    CaretColor := CL_LIME; //unusual color, to show that it is an unhandled case
   end; //case
+  
+  DynTFT_Set_Pen(CaretColor, 1);
 
-  if APDynTFTEdit^.CaretBlinkStatus <> 3 then  //no draw
+  if APDynTFTEdit^.CaretBlinkStatus <> CDynTFTEditDrawCaret_Color_Error then  //no draw
   begin
     x := APDynTFTEdit^.BaseProps.Left + 3 + APDynTFTEdit^.CaretPosPx;
 
@@ -386,7 +397,7 @@ begin
     Exit;
     
   DynTFTDrawEditWithoutCaret(APDynTFTEdit, FullRedraw);
-  DynTFTDrawEditCaret(APDynTFTEdit, 2);
+  DynTFTDrawEditCaret(APDynTFTEdit, CDynTFTEditDrawCaret_Color_Blink);
 end;
 
 
@@ -400,11 +411,11 @@ begin
   //{$DEFINE TextRedrawNoCaret}
   {$IFDEF TextRedrawNoCaret}
     if APDynTFTEdit^.CaretBlinkStatus = 1 then
-      DynTFTDrawEditCaret(APDynTFTEdit, 2)
+      DynTFTDrawEditCaret(APDynTFTEdit, CDynTFTEditDrawCaret_Color_Blink)
     else
       DynTFTDrawTFTEditWithoutCaret(APDynTFTEdit); //Redraw the text only, if the caret is erasing pixels from text. It might be a bit of overhead to a microcontroller.
   {$ELSE}
-    DynTFTDrawEditCaret(APDynTFTEdit, 2);
+    DynTFTDrawEditCaret(APDynTFTEdit, CDynTFTEditDrawCaret_Color_Blink);
   {$ENDIF}
 end;
 
@@ -417,7 +428,7 @@ begin
     Exit;
 
   TextLen := Length(APDynTFTEdit^.Text);
-  DynTFTDrawEditCaret(APDynTFTEdit, 0);
+  DynTFTDrawEditCaret(APDynTFTEdit, CDynTFTEditDrawCaret_Color_Hide);
   if APDynTFTEdit^.CaretPosCh < TextLen - Amount + 1 + 1 then    //+2, to allow the caret to go after the last character in string
     APDynTFTEdit^.CaretPosCh := APDynTFTEdit^.CaretPosCh + Amount;
 
@@ -426,7 +437,8 @@ begin
 
   if APDynTFTEdit^.CaretPosCh > APDynTFTEdit^.FirstDispChIndex + APDynTFTEdit^.DisplayableLength - Amount + 1 then
   begin
-    APDynTFTEdit^.FirstDispChIndex := APDynTFTEdit^.FirstDispChIndex + 1;
+    //APDynTFTEdit^.FirstDispChIndex := APDynTFTEdit^.FirstDispChIndex + 1;     //not sure why this is here, but it is buggy with it
+
     NewX := CaretPosChToCaretPosPx(APDynTFTEdit, APDynTFTEdit^.CaretPosCh);
     while NewX > APDynTFTEdit^.BaseProps.Width - CEditTotalSpacing do
     begin
@@ -442,8 +454,8 @@ begin
   end;
 
   ComputeEditCaretPos(APDynTFTEdit);
-  APDynTFTEdit^.CaretBlinkStatus := 1;
-  DynTFTDrawEditCaret(APDynTFTEdit, 1);
+  APDynTFTEdit^.CaretBlinkStatus := CDynTFTEditDrawCaret_Color_Show;
+  DynTFTDrawEditCaret(APDynTFTEdit, CDynTFTEditDrawCaret_Color_Show);
 end;
 
 
@@ -452,7 +464,7 @@ begin
   if Amount = 0 then
     Exit;
 
-  DynTFTDrawEditCaret(APDynTFTEdit, 0);
+  DynTFTDrawEditCaret(APDynTFTEdit, CDynTFTEditDrawCaret_Color_Hide);
   if APDynTFTEdit^.CaretPosCh > 1 + Amount - 1 then //1, because it is 1-indexed
     APDynTFTEdit^.CaretPosCh := APDynTFTEdit^.CaretPosCh - Amount;
 
@@ -468,8 +480,8 @@ begin
     end;
 
   ComputeEditCaretPos(APDynTFTEdit);
-  APDynTFTEdit^.CaretBlinkStatus := 1;
-  DynTFTDrawEditCaret(APDynTFTEdit, 1);
+  APDynTFTEdit^.CaretBlinkStatus := CDynTFTEditDrawCaret_Color_Show;
+  DynTFTDrawEditCaret(APDynTFTEdit, CDynTFTEditDrawCaret_Color_Show);
 end;
 
 
@@ -505,8 +517,8 @@ begin
 
   ComputeEditCaretPos(APDynTFTEdit);
 
-  APDynTFTEdit^.CaretBlinkStatus := 1;
-  DynTFTDrawEditCaret(APDynTFTEdit, 1);
+  APDynTFTEdit^.CaretBlinkStatus := CDynTFTEditDrawCaret_Color_Show;
+  DynTFTDrawEditCaret(APDynTFTEdit, CDynTFTEditDrawCaret_Color_Show);
 end;
 
 
@@ -559,7 +571,7 @@ begin
     
   if Length(APDynTFTEdit^.Text) + Length(NewText) > CEditMaxTextLength then
   begin
-    DynTFTDrawEditCaret(APDynTFTEdit, 3);
+    DynTFTDrawEditCaret(APDynTFTEdit, CDynTFTEditDrawCaret_Color_Error);
     Exit;
   end;
 
@@ -580,7 +592,7 @@ begin
   APDynTFTEdit^.CaretPosCh := APDynTFTEdit^.FirstDispChIndex + CaretPosPxToCaretPosCh(APDynTFTEdit, GlobalMouseX);
 
   TextLen := Length(APDynTFTEdit^.Text);
-  DynTFTDrawEditCaret(APDynTFTEdit, 0);
+  DynTFTDrawEditCaret(APDynTFTEdit, CDynTFTEditDrawCaret_Color_Hide);
   
   if APDynTFTEdit^.CaretPosCh > TextLen + 1 then
     APDynTFTEdit^.CaretPosCh := TextLen + 1;
@@ -589,8 +601,8 @@ begin
     APDynTFTEdit^.CaretPosCh := 1;
 
   ComputeEditCaretPos(APDynTFTEdit);
-  APDynTFTEdit^.CaretBlinkStatus := 1;
-  DynTFTDrawEditCaret(APDynTFTEdit, 1);
+  APDynTFTEdit^.CaretBlinkStatus := CDynTFTEditDrawCaret_Color_Show;
+  DynTFTDrawEditCaret(APDynTFTEdit, CDynTFTEditDrawCaret_Color_Show);
 end;
 
 
@@ -609,6 +621,7 @@ begin
   Result^.BaseProps.Top := Top;
   Result^.BaseProps.Width := Width;
   Result^.BaseProps.Height := Height;
+  //DynTFTInitComponentDimensions(PDynTFTBaseComponent(TPtrRec(Result)), ComponentType, True, Left, Top, Width, Height);
   DynTFTInitBasicStatePropertiesToDefault(PDynTFTBaseComponent(TPtrRec(Result)));
  
   Result^.Color := CL_DynTFTEdit_Background;
@@ -655,6 +668,14 @@ procedure DynTFTEdit_Destroy(var AEdit: PDynTFTEdit);
 {$ENDIF}
 begin
   {$IFDEF IsDesktop}
+    Dispose(AEdit^.OnOwnerInternalMouseDown);
+    Dispose(AEdit^.OnOwnerInternalMouseMove);
+    Dispose(AEdit^.OnOwnerInternalMouseUp);
+    
+    AEdit^.OnOwnerInternalMouseDown := nil;
+    AEdit^.OnOwnerInternalMouseMove := nil;
+    AEdit^.OnOwnerInternalMouseUp := nil;
+
     DynTFTComponent_Destroy(PDynTFTBaseComponent(TPtrRec(AEdit)), SizeOf(AEdit^));
   {$ELSE}
     //without temp var, mikroPascal gives an error:  289 341 Operator "@" not applicable to these operands "?T222"

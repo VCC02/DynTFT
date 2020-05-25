@@ -114,11 +114,25 @@ uses
   {$ENDIF} *)
 {$ENDIF}
 
-{$IFNDEF IsDesktop}
+{$IFNDEF IsDesktop} //then MCU
   procedure DynTFTCopyStr(var S: string; Index: Integer; Count: Integer; var Result: string);
   procedure DynTFTDelete(var S: string; Index: Integer; Count: Integer);
   procedure DynTFTInsert(var Substr: string; var Dest: string; Index: Integer);
 {$ENDIF}
+
+{$IFDEF IsDesktop}
+  procedure memcpy(Dest, Source: PByte; nn: Word);
+
+  function Highest(a: Cardinal): Byte;
+  function Higher(a: Cardinal): Byte;
+  function HiByte(x: DWord): Byte;
+  function LoByte(x: DWord): Byte;
+  function LoWord(ADWord: DWord): Word;
+  function HiWord(ADWord: DWord): Word;
+
+  procedure SetFuncCall(const FuncName);
+{$ENDIF}
+
 
 procedure DynTFT_Init(display_width, display_height: Word);
 procedure DynTFT_Set_Pen(pen_color: TColor; pen_width: Byte);
@@ -142,10 +156,15 @@ procedure DynTFT_Circle(x_center, y_center, radius: Integer);
 
 {$IFDEF IsDesktop}
   procedure DynTFT_AssignDebugConsole(AComp: TComponent); //this should be a TListBox or a TMemo
+  procedure DynTFT_AssignTestConsole(AComp: TComponent);  //this should be a TListBox or a TMemo
   procedure DynTFT_DebugConsole(AText: string);
+  procedure DynTFT_TestConsole(AText: string);
 {$ELSE}
   procedure DynTFT_DebugConsole(var AText: string);
+  procedure DynTFT_TestConsole(var AText: string);
 {$ENDIF}
+procedure DynTFT_ClearTestConsole;
+function DynTFT_GetFullTestConsole: string {$IFDEF IsMCU} [159] {$ENDIF};
 
 
 
@@ -167,10 +186,11 @@ implementation
 
 {$IFDEF IsDesktop}
   var
-    DebugComponent: TComponent;
+    DebugConsoleComponent: TComponent;
+    TestConsoleComponent: TComponent;
 {$ENDIF}
 
-{$IFNDEF IsDesktop}
+{$IFNDEF IsDesktop} //then MCU
   procedure DynTFTCopyStr(var S: string; Index: Integer; Count: Integer; var Result: string);
   var
     i: Integer;
@@ -242,9 +262,62 @@ implementation
 
 
 {$IFDEF IsDesktop}
+  procedure memcpy(Dest, Source: PByte; nn: Word);
+  begin
+    Move(Source^, Dest^, nn);
+  end;
+
+
+  function Highest(a: Cardinal): Byte;
+  begin
+    Result := (a shr 24) and $FF;
+  end;
+
+
+  function Higher(a: Cardinal): Byte;
+  begin
+    Result := (a shr 16) and $FF;
+  end;
+
+
+  function HiByte(x: DWord): Byte;   //Hi works differently between Delphi and FreePascal, so use this one
+  begin
+    Result := (x shr 8) and $FF;
+  end;
+
+
+  function LoByte(x: DWord): Byte;   //Lo works differently between Delphi and FreePascal, so use this one
+  begin
+    Result := x and $FF;
+  end;
+
+
+  function LoWord(ADWord: DWord): Word;
+  begin
+    Result := ADWord and $FFFF;
+  end;
+
+
+  function HiWord(ADWord: DWord): Word;
+  begin
+    Result := (ADWord shr 16) and $FFFF;
+  end;
+
+
+  procedure SetFuncCall(const FuncName);
+  begin
+    // used for linking procedures
+  end;
+
+
   procedure DynTFT_AssignDebugConsole(AComp: TComponent); //this should be a TListBox or a TMemo
   begin
-    DebugComponent := AComp;
+    DebugConsoleComponent := AComp;
+  end;
+
+  procedure DynTFT_AssignTestConsole(AComp: TComponent); //this should be a TListBox or a TMemo
+  begin
+    TestConsoleComponent := AComp;
   end;
 
 
@@ -262,26 +335,26 @@ implementation
   end;
 
 
-  procedure DynTFT_DebugConsole(AText: string);
+  procedure DynTFT_AddToConsole(AText: string; ConsoleComponent: TComponent; ConsoleName: string);
   var
     i: Integer;
     AForm: TForm;
   begin
     try
-      if Assigned(DebugComponent) then
+      if Assigned(ConsoleComponent) then
       begin
-        if DebugComponent is TListBox then
+        if ConsoleComponent is TListBox then
         begin
           if Pos(#13#10, AText) > 0 then
-            AddMultipleItems((DebugComponent as TListBox).Items, AText)
+            AddMultipleItems((ConsoleComponent as TListBox).Items, AText)
           else
-            (DebugComponent as TListBox).Items.Add(AText);
+            (ConsoleComponent as TListBox).Items.Add(AText);
 
-          (DebugComponent as TListBox).ItemIndex := (DebugComponent as TListBox).Count - 1;
+          (ConsoleComponent as TListBox).ItemIndex := (ConsoleComponent as TListBox).Count - 1;
         end
         else
-          if DebugComponent is TMemo then
-            (DebugComponent as TMemo).Lines.Add(AText);
+          if ConsoleComponent is TMemo then
+            (ConsoleComponent as TMemo).Lines.Add(AText);
       end
       else
       begin
@@ -295,15 +368,15 @@ implementation
           begin
             if AForm.Components[i] is TListBox then
             begin
-              DebugComponent := AForm.Components[i];
-              (DebugComponent as TListBox).Items.Add('DebugConsoleItems self assigned to ' + (DebugComponent as TListBox).Name + ' because you didn''t assign it.');
+              ConsoleComponent := AForm.Components[i];
+              (ConsoleComponent as TListBox).Items.Add(ConsoleName + ' self assigned to ' + (ConsoleComponent as TListBox).Name + ' because you didn''t assign it.');
               Break;
             end;
 
             if AForm.Components[i] is TMemo then
             begin
-              DebugComponent := AForm.Components[i];
-              (DebugComponent as TMemo).Lines.Add('DebugConsoleItems self assigned to ' + (DebugComponent as TMemo).Name + ' because you didn''t assign it.');
+              ConsoleComponent := AForm.Components[i];
+              (ConsoleComponent as TMemo).Lines.Add(ConsoleName + ' self assigned to ' + (ConsoleComponent as TMemo).Name + ' because you didn''t assign it.');
               Break;
             end;
           end;
@@ -312,12 +385,82 @@ implementation
     except
     end;
   end;
+
+
+  procedure DynTFT_DebugConsole(AText: string);
+  begin
+    DynTFT_AddToConsole(AText, DebugConsoleComponent, 'DebugConsoleItems')
+  end;
+
+
+  procedure DynTFT_TestConsole(AText: string);
+  begin
+    if Assigned(TestConsoleComponent) then
+      DynTFT_AddToConsole(AText, TestConsoleComponent, 'TestConsoleItems')
+    else
+      DynTFT_DebugConsole('Test console component is not assigned. Please call DynTFT_AssignTestConsole.');
+  end;
+
+
+  function DynTFT_GetFullTestConsole: string;
+  begin
+    if Assigned(TestConsoleComponent) then
+    begin
+      if TestConsoleComponent is TListBox then
+        Result := (TestConsoleComponent as TListBox).Items.Text
+      else
+        if TestConsoleComponent is TMemo then
+           Result := (TestConsoleComponent as TMemo).Lines.Text;
+    end
+    else
+    begin
+      Result := 'Test console component is not assigned.';
+      DynTFT_DebugConsole('Test console component is not assigned. Please call DynTFT_AssignTestConsole.');
+    end;
+  end;
+
+  
+  procedure DynTFT_ClearTestConsole;
+  begin
+    if Assigned(TestConsoleComponent) then
+    begin
+      if TestConsoleComponent is TListBox then
+        (TestConsoleComponent as TListBox).Clear
+      else
+        if TestConsoleComponent is TMemo then
+          (TestConsoleComponent as TMemo).Clear;
+    end
+    else
+      DynTFT_DebugConsole('Test console component is not assigned. Please call DynTFT_AssignTestConsole.');  
+  end;
 {$ELSE}
   procedure DynTFT_DebugConsole(var AText: string);
   begin
     {$IFDEF UseDynTFT_DebugConsole}
       {$I DynTFT_DebugConsole.inc}  //call UART_Write_Text or whatever you want here
     {$ENDIF}
+  end;
+
+
+  procedure DynTFT_TestConsole(var AText: string);
+  begin
+    {$IFDEF UseDynTFT_TestConsole}
+      {$I DynTFT_TestConsole.inc}  //call UART_Write_Text or whatever you want here
+    {$ENDIF}
+  end;
+
+
+  procedure DynTFT_ClearTestConsole;
+  begin
+    {$IFDEF UseDynTFT_TestConsole}
+      {$I DynTFT_ClearTestConsole.inc}  //call UART_Write_Text or whatever you want here, to clear the test console
+    {$ENDIF}
+  end;
+
+
+  function DynTFT_GetFullTestConsole: string[159];
+  begin
+    Result := 'Not implemented';
   end;
 {$ENDIF}
 
@@ -421,11 +564,13 @@ implementation
 
 {$IFDEF IsDesktop}
 begin
-  DebugComponent := nil;
+  DebugConsoleComponent := nil;
+  TestConsoleComponent := nil;
 
   //Please override these default font setting, somewhere in the main window of the simulator (e.g. FormCreate), if needed.
   //Do not modify these settings here!
   TFT_defaultFont.FontName := 'Tahoma';
+  TFT_defaultFont.IdentifierName := 'TFT_defaultFont';
   TFT_defaultFont.FontSize := 10;
   TFT_defaultFont.Bold := True;
   TFT_defaultFont.Italic := False;
@@ -435,6 +580,7 @@ begin
   TFT_defaultFont.Pitch := fpDefault;
 
   TFT_fallbackFont.FontName := 'Tahoma';
+  TFT_fallbackFont.IdentifierName := 'TFT_defaultFont';
   TFT_fallbackFont.FontSize := 8;
   TFT_fallbackFont.Bold := False;
   TFT_fallbackFont.Italic := False;

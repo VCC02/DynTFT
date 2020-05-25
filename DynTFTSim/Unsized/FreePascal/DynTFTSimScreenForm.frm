@@ -1,7 +1,7 @@
 object frmDynTFTSimScreen: TfrmDynTFTSimScreen
-  Left = 0
+  Left = 449
   Height = 984
-  Top = 32
+  Top = 240
   Width = 798
   Caption = 'DynTFT SimScreen'
   ClientHeight = 984
@@ -12,7 +12,7 @@ object frmDynTFTSimScreen: TfrmDynTFTSimScreen
   Font.Name = 'Tahoma'
   OnCreate = FormCreate
   OnDestroy = FormDestroy
-  LCLVersion = '5.9'
+  LCLVersion = '6.5'
   object imgScreen: TImage
     Left = 8
     Height = 929
@@ -115,7 +115,7 @@ object frmDynTFTSimScreen: TfrmDynTFTSimScreen
     Enabled = False
     Interval = 10
     OnTimer = tmrStartupTimer
-    left = 632
-    top = 160
+    Left = 632
+    Top = 160
   end
 end

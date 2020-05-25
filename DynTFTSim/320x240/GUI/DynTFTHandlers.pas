@@ -46,16 +46,37 @@ uses
   DynTFTTypes, DynTFTConsts, DynTFTUtils, DynTFTBaseDrawing, DynTFTControls,
   DynTFTGUIObjects,
   
-  DynTFTButton, DynTFTArrowButton, DynTFTPanel, DynTFTCheckBox, DynTFTScrollBar,
-  DynTFTItems, DynTFTListBox, DynTFTLabel, DynTFTRadioButton, DynTFTRadioGroup,
-  DynTFTTabButton, DynTFTPageControl, DynTFTEdit, DynTFTKeyButton, DynTFTProgressBar,
-  DynTFTVirtualKeyboard, DynTFTComboBox, DynTFTMessageBox, DynTFTTrackBar
+
+//<DynTFTComponents>
+  DynTFTButton,
+  DynTFTArrowButton,
+  DynTFTPanel,
+  DynTFTCheckBox,
+  DynTFTScrollBar,
+  DynTFTItems,
+  DynTFTListBox,
+  DynTFTLabel,
+  DynTFTRadioButton,
+  DynTFTRadioGroup,
+  DynTFTTabButton,
+  DynTFTPageControl,
+  DynTFTEdit,
+  DynTFTKeyButton,
+  DynTFTVirtualKeyboard,
+  DynTFTComboBox,
+  DynTFTTrackBar,
+  DynTFTProgressBar,
+  DynTFTMessageBox
+//<EndOfDynTFTComponents> - Do not remove or modify this line!
 
   {$IFDEF IsDesktop}
     ,SysUtils, Forms, TFT
   {$ENDIF}
   {$I DynTFTHandlersAdditionalUnits.inc}
   ;
+
+//CodegenSym:GroupsBegin
+//CodegenSym:GroupsEnd
 
 procedure VirtualKeyboard_OnCharKey(Sender: PPtrRec; var PressedChar: TVKPressedChar; CurrentShiftState: TPtr); //CodegenSym:header
 procedure VirtualKeyboard_OnSpecialKey(Sender: PPtrRec; SpecialKey: Integer; CurrentShiftState: TPtr); //CodegenSym:header
@@ -69,6 +90,10 @@ procedure TrackBar2_OnTrackBarChange(Sender: PPtrRec); //CodegenSym:header
 implementation
 
 
+
+//CodegenSym:CreationGroups
+
+//CodegenSym:HandlersImplementation
 procedure VirtualKeyboard_OnCharKey(Sender: PPtrRec; var PressedChar: TVKPressedChar; CurrentShiftState: TPtr); //CodegenSym:handler
 var
   AText: string {$IFNDEF IsDesktop}[CMaxKeyButtonStringLength] {$ENDIF};

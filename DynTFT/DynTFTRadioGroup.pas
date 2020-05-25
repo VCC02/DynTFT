@@ -135,7 +135,7 @@ begin
     {$ELSE}
       DynTFT_Set_Font(@TFT_defaultFont, ACol, FO_HORIZONTAL);
     {$ENDIF}
-    DynTFT_Write_Text(ARadioGroup^.Caption, x1 + 6, y1 + 1);
+    DynTFT_Write_Text(ARadioGroup^.Caption, x1 + 7, y1 + 1);
 
     GetTextWidthAndHeight(ARadioGroup^.Caption, TextWidth, TextHeight);
 
@@ -145,7 +145,7 @@ begin
     x2 := x2 - 2;
     y2 := y2 - 2;
 
-    DynTFT_H_Line(x1, x1 + 5, y1);
+    DynTFT_H_Line(x1, x1 + 4, y1);
     DynTFT_H_Line(x1 + 10 + TSInt(TextWidth), x2, y1);
 
     DynTFT_V_Line(y1, y2, x1);
@@ -278,6 +278,7 @@ begin
   Result^.BaseProps.Top := Top;
   Result^.BaseProps.Width := Width;
   Result^.BaseProps.Height := Height;
+  //DynTFTInitComponentDimensions(PDynTFTBaseComponent(TPtrRec(Result)), ComponentType, False, Left, Top, Width, Height);
   DynTFTInitBasicStatePropertiesToDefault(PDynTFTBaseComponent(TPtrRec(Result)));
 
   Result^.ButtonCount := 0;
@@ -321,6 +322,7 @@ var
 begin
   {$IFDEF IsDesktop}
     Dispose(ARadioGroup^.OnSelectionChanged);
+    ARadioGroup^.OnSelectionChanged := nil;
   {$ENDIF}
 
   for i := 0 to ARadioGroup^.ButtonCount - 1 do
@@ -330,15 +332,8 @@ begin
     {$ELSE}
       ARadioGroup^.Buttons[i]^.OnOwnerInternalBeforeDestroy := nil;  //prevent the button from calling the parent's OnOwnerInternalBeforeDestroy event
     {$ENDIF}
-    
-    {$IFDEF IsDesktop}
-      DynTFTComponent_Destroy(PDynTFTBaseComponent(TPtrRec(ARadioGroup^.Buttons[i])), SizeOf(ARadioGroup^.Buttons[i]^));
-    {$ELSE}
-      //without temp var, mikroPascal gives an error:  289 341 Operator "@" not applicable to these operands "?T222"
-      ATemp := PDynTFTBaseComponent(TPtrRec(ARadioGroup^.Buttons[i]));
-      DynTFTComponent_Destroy(ATemp, SizeOf(ARadioGroup^.Buttons[i]^));
-      ARadioGroup^.Buttons[i] := PDynTFTRadioButton(TPtrRec(ATemp));
-    {$ENDIF}
+
+    DynTFTRadioButton_Destroy(ARadioGroup^.Buttons[i]);
   end;
   
   {$IFDEF IsDesktop}

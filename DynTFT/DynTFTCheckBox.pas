@@ -67,6 +67,8 @@ function DynTFTCheckBox_Create(ScreenIndex: Byte; Left, Top, Width, Height: TSIn
 procedure DynTFTCheckBox_Destroy(var ACheckBox: PDynTFTCheckBox);
 procedure DynTFTCheckBox_DestroyAndPaint(var ACheckBox: PDynTFTCheckBox);
 
+procedure DrawTick(Left, Top: Integer); //available for use by other components
+
 procedure DynTFTRegisterCheckBoxEvents;
 function DynTFTGetCheckBoxComponentType: TDynTFTComponentType;
 
@@ -83,27 +85,22 @@ begin
 end;
 
 
-procedure DrawTick(ACheckBox: PDynTFTCheckBox; BoxColor: TColor);
+procedure DrawTick(Left, Top: Integer);
 var
   x1, y1, x2, y2: TSInt;
 begin
-  if ACheckBox^.Checked then
-    DynTFT_Set_Pen(CL_DynTFTCheckBox_Tick, 1)
-  else
-    DynTFT_Set_Pen(BoxColor, 1);
-
-  x1 := ACheckBox^.BaseProps.Left + 3;
-  y1 := ACheckBox^.BaseProps.Top + 5;
-  x2 := ACheckBox^.BaseProps.Left + 5;
-  y2 := ACheckBox^.BaseProps.Top + 7;
+  x1 := Left + 3;
+  y1 := Top + 5;
+  x2 := Left + 5;
+  y2 := Top + 7;
   DynTFT_Line(x1, y1, x2, y2);
   DynTFT_Line(x1, y1 + 1, x2, y2 + 1);
   DynTFT_Line(x1, y1 + 2, x2, y2 + 2);
 
-  x1 := ACheckBox^.BaseProps.Left + 9;   //9
-  y1 := ACheckBox^.BaseProps.Top + 3;    //3
-  x2 := ACheckBox^.BaseProps.Left + 5;   //5
-  y2 := ACheckBox^.BaseProps.Top + 7;    //7
+  x1 := Left + 9;   //9
+  y1 := Top + 3;    //3
+  x2 := Left + 5;   //5
+  y2 := Top + 7;    //7
 
   DynTFT_Line(x1, y1, x2, y2);
   DynTFT_Line(x1, y1 + 1, x2, y2 + 1);
@@ -155,7 +152,7 @@ begin
   DynTFT_V_Line(y1, y3, x3 - 2); //vert
   DynTFT_H_Line(x2 + 2, x3 - 2, y3); //horiz
 
-  //tickbox lines
+  //tickbox lines  (lowered rectangle)
   DynTFT_Set_Pen(CL_DynTFTCheckBox_DarkEdge, 1);
   DynTFT_V_Line(y1, y2, x1); //vert
   DynTFT_H_Line(x1, x2, y1); //horiz
@@ -186,23 +183,31 @@ begin
   DynTFT_H_Line(x1, x2, y2); //horiz
 
   //tick
-  DrawTick(ACheckBox, BoxColor);
-
-  //Caption
-  if ACheckBox^.BaseProps.Enabled = 0 then
-    {$IFDEF DynTFTFontSupport}
-      DynTFT_Set_Font(ACheckBox^.ActiveFont, CL_DynTFTCheckBox_DisabledFont, FO_HORIZONTAL)
-    {$ELSE}
-      DynTFT_Set_Font(@TFT_defaultFont, CL_DynTFTCheckBox_DisabledFont, FO_HORIZONTAL)
-    {$ENDIF}
+  if ACheckBox^.Checked then
+    DynTFT_Set_Pen(CL_DynTFTCheckBox_Tick, 1)
   else
-    {$IFDEF DynTFTFontSupport}
-      DynTFT_Set_Font(ACheckBox^.ActiveFont, ACheckBox^.Font_Color, FO_HORIZONTAL);
-    {$ELSE}
-      DynTFT_Set_Font(@TFT_defaultFont, ACheckBox^.Font_Color, FO_HORIZONTAL);
-    {$ENDIF}
+    DynTFT_Set_Pen(BoxColor, 1);
+
+  DrawTick(ACheckBox^.BaseProps.Left, ACheckBox^.BaseProps.Top);
+
+  if FullRedraw then
+  begin
+    //Caption
+    if ACheckBox^.BaseProps.Enabled = 0 then
+      {$IFDEF DynTFTFontSupport}
+        DynTFT_Set_Font(ACheckBox^.ActiveFont, CL_DynTFTCheckBox_DisabledFont, FO_HORIZONTAL)
+      {$ELSE}
+        DynTFT_Set_Font(@TFT_defaultFont, CL_DynTFTCheckBox_DisabledFont, FO_HORIZONTAL)
+      {$ENDIF}
+    else
+      {$IFDEF DynTFTFontSupport}
+        DynTFT_Set_Font(ACheckBox^.ActiveFont, ACheckBox^.Font_Color, FO_HORIZONTAL);
+      {$ELSE}
+        DynTFT_Set_Font(@TFT_defaultFont, ACheckBox^.Font_Color, FO_HORIZONTAL);
+      {$ENDIF}
         
-  DynTFT_Write_Text(ACheckBox^.Caption, ACheckBox^.BaseProps.Left + 16, ACheckBox^.BaseProps.Top + 1);
+    DynTFT_Write_Text(ACheckBox^.Caption, ACheckBox^.BaseProps.Left + 16, ACheckBox^.BaseProps.Top + 1);
+  end;
 end;
 
 
@@ -221,6 +226,7 @@ begin
   Result^.BaseProps.Top := Top;
   Result^.BaseProps.Width := Width;
   Result^.BaseProps.Height := Height;
+  //DynTFTInitComponentDimensions(PDynTFTBaseComponent(TPtrRec(Result)), ComponentType, True, Left, Top, Width, Height);
   DynTFTInitBasicStatePropertiesToDefault(PDynTFTBaseComponent(TPtrRec(Result)));
 
   Result^.Checked := False;

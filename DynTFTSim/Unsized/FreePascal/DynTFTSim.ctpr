@@ -104,6 +104,11 @@
         </Win32>
       </Options>
     </Linking>
+    <Other>
+      <CustomOptions Value="-dUseExternalItems
+-dItemsVisibility
+-dItemsEnabling"/>
+    </Other>
   </CompilerOptions>
   <Debugging>
     <Exceptions Count="3">

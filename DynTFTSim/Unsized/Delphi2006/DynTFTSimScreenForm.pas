@@ -34,17 +34,18 @@ uses
 
 type
   TfrmDynTFTSimScreen = class(TForm)
-    imgScreen: TImage;
     pnlCoords: TPanel;
     tmrStartup: TTimer;
     trbScreenWidth: TTrackBar;
     lblScreenWidth: TLabel;
     lblScreenHeight: TLabel;
     trbScreenHeight: TTrackBar;
-    lblWidth: TLabel;
-    lblHeight: TLabel;
     chkShowWidthLine: TCheckBox;
     chkShowHeightLine: TCheckBox;
+    ScrollBox1: TScrollBox;
+    lblHeight: TLabel;
+    imgScreen: TImage;
+    lblWidth: TLabel;
     procedure imgScreenMouseDown(Sender: TObject; Button: TMouseButton;
       Shift: TShiftState; X, Y: Integer);
     procedure imgScreenMouseMove(Sender: TObject; Shift: TShiftState; X,

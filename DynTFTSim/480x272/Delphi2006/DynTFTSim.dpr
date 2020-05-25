@@ -59,7 +59,8 @@ uses
   DynTFTHandlers in '..\GUI\DynTFTHandlers.pas',
   DynTFTProgressBar in 'D:\DynTFT\DynTFTProgressBar.pas',
   DynTFTTrackBar in 'D:\DynTFT\DynTFTTrackBar.pas',
-  DynTFTMessageBox in 'D:\DynTFT\DynTFTMessageBox.pas';
+  DynTFTMessageBox in 'D:\DynTFT\DynTFTMessageBox.pas',
+  DynTFTFonts in '..\GUI\DynTFTFonts.pas';
 
 {$R *.res}
 

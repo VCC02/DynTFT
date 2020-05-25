@@ -170,11 +170,11 @@ begin
     HalfHeight := AKeyButton^.BaseProps.Height shr 1;
 
     TextXOffset := HalfWidth - TSInt(TextWidth shr 1);
-    DynTFT_Write_Text(AKeyButton^.UpCaption, x1 + TextXOffset, y1 + HalfHeight - TSInt(TextHeight {shr 1} + 0));
-    DynTFT_Write_Text(AKeyButton^.DownCaption, x1 + TextXOffset, y1 + HalfHeight + TSInt({TextHeight {shr 1} + 0));
+    DynTFT_Write_Text(AKeyButton^.UpCaption, x1 + TextXOffset, y1 + HalfHeight - TSInt(TextHeight {shr 1} + 1));
+    DynTFT_Write_Text(AKeyButton^.DownCaption, x1 + TextXOffset, y1 + HalfHeight + TSInt({TextHeight {shr 1} + 1));
   {$ELSE}
-    DynTFT_Write_Text(AKeyButton^.UpCaption, x1 + 2, y1);
-    DynTFT_Write_Text(AKeyButton^.DownCaption, x1 + 2, y1 + TextHeight);
+    DynTFT_Write_Text(AKeyButton^.UpCaption, x1 + 2, y1 + 1);
+    DynTFT_Write_Text(AKeyButton^.DownCaption, x1 + 2, y1 + TextHeight + 1);
   {$ENDIF}
 
   {$IFDEF IsDesktop}
@@ -202,6 +202,7 @@ begin
   Result^.BaseProps.Top := Top;
   Result^.BaseProps.Width := Width;
   Result^.BaseProps.Height := Height;
+  //DynTFTInitComponentDimensions(PDynTFTBaseComponent(TPtrRec(Result)), ComponentType, True, Left, Top, Width, Height);
   DynTFTInitBasicStatePropertiesToDefault(PDynTFTBaseComponent(TPtrRec(Result)));
  
   Result^.Color := CL_DynTFTKeyButton_Background;
@@ -237,6 +238,7 @@ procedure DynTFTKeyButton_Destroy(var AKeyButton: PDynTFTKeyButton);
 {$ENDIF}
 begin
   {$IFDEF IsDesktop}
+    Dispose(AKeyButton^.OnGenerateDrawingUser);
     DynTFTComponent_Destroy(PDynTFTBaseComponent(TPtrRec(AKeyButton)), SizeOf(AKeyButton^));
   {$ELSE}
     //without temp var, mikroPascal gives an error:  289 341 Operator "@" not applicable to these operands "?T222"

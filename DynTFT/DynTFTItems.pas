@@ -52,18 +52,24 @@ const
   {$ELSE}
     CMaxItemsStringLength = 19; //n * 4 - 1
   {$ENDIF}
-  //CItemHeight = 15; //13 pixels for text and 2 pixels for box
 
 type
   TItemsString = string[CMaxItemsStringLength];
 
+  {$IFDEF IsMCU}
+    PBoolean = ^Boolean;
+  {$ENDIF}
+
   TOnGetItemEvent = procedure(AItems: PPtrRec; Index: LongInt; var ItemText: string);
   POnGetItemEvent = ^TOnGetItemEvent;
+
+  TOnGetItemVisibilityEvent = procedure(AItems: PPtrRec; Index: LongInt; var ItemText: string {$IFDEF ItemsVisibility}; IsVisible: PBoolean {$ENDIF} {$IFDEF ItemsEnabling}; IsEnabled: PBoolean {$ENDIF});
+  POnGetItemVisibilityEvent = ^TOnGetItemVisibilityEvent;
 
   TDynTFTItems = record
     BaseProps: TDynTFTBaseProperties;  //inherited properties from TDynTFTBaseProperties - must be the first field of this structure !!!
 
-    FirstVisibleIndex, Count, ItemIndex: LongInt;
+    FirstDisplayablePosition, Count, ItemIndex: LongInt;   //FirstDisplayablePosition is the position of the first item, displayed on the screen
 
     //Items properties
     Font_Color, BackgroundColor: TColor;
@@ -76,6 +82,10 @@ type
       Dummy: Word; //keep alignment to 4 bytes   (<ArrowDir> + <DummyByte> + <Dummy>)
     {$ENDIF}
 
+    {$IFDEF ItemsVisibility}
+      TotalVisibleCount: LongInt;
+    {$ENDIF}
+    
     //these events are set by an owner component, e.g. a list box, and called by Items
     OnOwnerInternalMouseDown: PDynTFTGenericEventHandler;
     OnOwnerInternalMouseMove: PDynTFTGenericEventHandler;
@@ -83,9 +93,16 @@ type
 
     {$IFDEF UseExternalItems}
       OnGetItem: POnGetItemEvent;
+      OnGetItemVisibility: POnGetItemVisibilityEvent;
     {$ELSE}
       Strings: array[0..CMaxItemItemCount - 1] of string[CMaxItemsStringLength];
-    {$ENDIF}  
+      {$IFDEF ItemsVisibility}
+        ItemsVisible: array[0..CMaxItemItemCount - 1] of {$IFDEF IsDesktop} LongBool; {$ELSE} Boolean; {$ENDIF}
+      {$ENDIF}
+      {$IFDEF ItemsEnabling}
+        ItemsEnabled: array[0..CMaxItemItemCount - 1] of {$IFDEF IsDesktop} LongBool; {$ELSE} Boolean; {$ENDIF}
+      {$ENDIF}
+    {$ENDIF}
   end;
   PDynTFTItems = ^TDynTFTItems;  
 
@@ -94,11 +111,19 @@ function DynTFTItems_Create(ScreenIndex: Byte; Left, Top, Width, Height: TSInt):
 procedure DynTFTItems_Destroy(var AItems: PDynTFTItems);
 procedure DynTFTItems_DestroyAndPaint(var AItems: PDynTFTItems);
 
-function DynTFTGetNumberOfItemsToDraw(AItems: PDynTFTItems): Word;
+function DynTFTGetNumberOfItemsToDraw(AItems: PDynTFTItems): LongInt;
 procedure DynTFTItemsGetItemText(AItems: PDynTFTItems; Index: LongInt; var ItemText: string);
+
+function GetIndexOfFirstDrawingItem(AItems: PDynTFTItems; var VisibleCount: LongInt; var ItemText: string): Longint;
+function GetMaxDrawingPosition(AItems: PDynTFTItems): Longint;
+function GoToNextVisibleItemFromIndex(AItems: PDynTFTItems; IndexOfDrawingItem: LongInt; var ItemText: string {$IFDEF ItemsVisibility}; IsVisible: PBoolean {$ENDIF} {$IFDEF ItemsEnabling}; IsEnabled: PBoolean {$ENDIF}): LongInt;
 
 procedure DynTFTRegisterItemsEvents;
 function DynTFTGetItemsComponentType: TDynTFTComponentType;
+
+{$IFDEF ItemsEnabling}
+  function DynTFTItemsGetItemEnabling(AItems: PDynTFTItems; Index: LongInt; var ItemText: string): Boolean;
+{$ENDIF}  
 
 implementation
 
@@ -111,7 +136,7 @@ begin
 end;
 
 
-function DynTFTGetNumberOfItemsToDraw(AItems: PDynTFTItems): Word;   // Do not calculate based on Items.Count !!!
+function DynTFTGetNumberOfItemsToDraw(AItems: PDynTFTItems): LongInt;   // Do not calculate based on Items.Count !!!
 begin                     //bug for height < 3                 // Do not calculate based on Items.Count !!!
   Result := (AItems^.BaseProps.Height - 3) div AItems^.ItemHeight;  //Add one more pixel between rows.
 end;
@@ -126,27 +151,195 @@ begin
     {$ELSE}
       if AItems^.OnGetItem <> nil then
     {$ENDIF}
-        AItems^.OnGetItem^(PPtrRec(TPtrRec(AItems)), Index, ItemText);
+        AItems^.OnGetItem^(PPtrRec(TPtrRec(AItems)), Index, ItemText)
+      {else
+        ItemText := 'OnGetItem is nil'};
   {$ELSE}
     ItemText := AItems^.Strings[Index];
   {$ENDIF}
 end;
 
 
+{$IFDEF ItemsVisibility}
+  function DynTFTItemsGetItemVisibility(AItems: PDynTFTItems; Index: LongInt; var ItemText: string): Boolean;
+  {$IFDEF UseExternalItems}
+    {$IFDEF ItemsEnabling}
+      var
+        IsEnabled: Boolean;
+    {$ENDIF}
+  {$ENDIF}
+  begin
+    {$IFDEF UseExternalItems}
+      Result := True;
+      {$IFDEF ItemsEnabling}
+        IsEnabled := True;
+      {$ENDIF}
+          
+      {$IFDEF IsDesktop}
+        if Assigned(AItems^.OnGetItemVisibility) then
+          if Assigned(AItems^.OnGetItemVisibility^) then
+      {$ELSE}
+        if AItems^.OnGetItemVisibility <> nil then
+      {$ENDIF}
+          AItems^.OnGetItemVisibility^(PPtrRec(TPtrRec(AItems)), Index, ItemText, @Result {$IFDEF ItemsEnabling}, @IsEnabled {$ENDIF})
+        {else
+          ItemText := 'OnGetItem is nil'};
+    {$ELSE}
+      Result := AItems^.ItemsVisible[Index];
+    {$ENDIF}
+  end;
+{$ENDIF}
+
+
+{$IFDEF ItemsEnabling}
+  function DynTFTItemsGetItemEnabling(AItems: PDynTFTItems; Index: LongInt; var ItemText: string): Boolean;
+  {$IFDEF UseExternalItems}
+    {$IFDEF ItemsVisibility}
+      var
+        IsVisible: Boolean;
+    {$ENDIF}
+  {$ENDIF}
+  begin
+    {$IFDEF UseExternalItems}
+      Result := True;
+      {$IFDEF ItemsVisibility}
+        IsVisible := True;
+      {$ENDIF}
+          
+      {$IFDEF IsDesktop}
+        if Assigned(AItems^.OnGetItemVisibility) then
+          if Assigned(AItems^.OnGetItemVisibility^) then
+      {$ELSE}
+        if AItems^.OnGetItemVisibility <> nil then           //OnGetItemVisibility also used for Enabling
+      {$ENDIF}
+          AItems^.OnGetItemVisibility^(PPtrRec(TPtrRec(AItems)), Index, ItemText, {$IFDEF ItemsVisibility} @IsVisible, {$ENDIF} @Result)
+        {else
+          ItemText := 'OnGetItem is nil'};
+    {$ELSE}
+      Result := AItems^.ItemsEnabled[Index];
+    {$ENDIF}
+  end;
+{$ENDIF}
+
+
+function GoToNextVisibleItemFromIndex(AItems: PDynTFTItems; IndexOfDrawingItem: LongInt; var ItemText: string {$IFDEF ItemsVisibility}; IsVisible: PBoolean {$ENDIF} {$IFDEF ItemsEnabling}; IsEnabled: PBoolean {$ENDIF}): LongInt;
+var
+  NewIndexOfDrawingItem: LongInt;
+begin
+  NewIndexOfDrawingItem := IndexOfDrawingItem;
+  repeat
+    DynTFTItemsGetItemText(AItems, NewIndexOfDrawingItem, ItemText);
+
+    {$IFDEF ItemsVisibility}
+      IsVisible^ := DynTFTItemsGetItemVisibility(AItems, NewIndexOfDrawingItem, ItemText);
+    {$ENDIF}
+    {$IFDEF ItemsEnabling}
+      IsEnabled^ := DynTFTItemsGetItemEnabling(AItems, NewIndexOfDrawingItem, ItemText);
+    {$ENDIF}  
+     
+    Inc(NewIndexOfDrawingItem);
+  until {$IFDEF ItemsVisibility}IsVisible^ or (NewIndexOfDrawingItem >= AItems^.Count) {$ELSE} True {$ENDIF};
+
+  Result := NewIndexOfDrawingItem;
+end;
+
+
+{$IFDEF ItemsVisibility}
+  function GetIndexOfVisibleItemFromDisplayablePosition(AItems: PDynTFTItems; var VisibleCount: LongInt; var ItemText: string): LongInt;
+  var
+    IsVisible: Boolean;
+    {$IFDEF ItemsEnabling}
+      IsEnabled: Boolean;
+    {$ENDIF}
+    i: LongInt;
+    IndexOfDrawingItem: LongInt;
+  begin
+    IndexOfDrawingItem := 0;
+    i := 0;
+    while i < AItems^.FirstDisplayablePosition do
+    begin
+      IndexOfDrawingItem := GoToNextVisibleItemFromIndex(AItems, IndexOfDrawingItem, ItemText, @IsVisible {$IFDEF ItemsEnabling}, @IsEnabled {$ENDIF});
+
+      if IsVisible then
+        Inc(VisibleCount);
+
+      if IndexOfDrawingItem >= AItems^.Count then
+        Break;
+
+      Inc(i);  
+    end;
+
+    Result := IndexOfDrawingItem;
+  end;
+
+
+  function GetRemainingVisibleCount(AItems: PDynTFTItems; IndexOfDrawingItemStart: LongInt; var ItemText: string): LongInt;
+  var
+    IsVisible: Boolean;
+    {$IFDEF ItemsEnabling}
+      IsEnabled: Boolean;
+    {$ENDIF}
+    IndexOfDrawingItem: LongInt;
+  begin
+    Result := 0;
+    IndexOfDrawingItem := IndexOfDrawingItemStart;
+    repeat
+      IndexOfDrawingItem := GoToNextVisibleItemFromIndex(AItems, IndexOfDrawingItem, ItemText, @IsVisible {$IFDEF ItemsEnabling}, @IsEnabled {$ENDIF});
+
+      if IsVisible then
+        Inc(Result);
+
+      if IndexOfDrawingItem >= AItems^.Count then
+        Break;
+    until not IsVisible;
+  end;
+{$ENDIF}
+
+
+function GetIndexOfFirstDrawingItem(AItems: PDynTFTItems; var VisibleCount: LongInt; var ItemText: string): Longint;
+begin
+  {$IFDEF ItemsVisibility}
+    Result := GetIndexOfVisibleItemFromDisplayablePosition(AItems, VisibleCount, ItemText);
+  {$ELSE}
+    Result := AItems^.FirstDisplayablePosition;
+  {$ENDIF}
+end;
+
+
+function GetMaxDrawingPosition(AItems: PDynTFTItems): Longint;    //seems weird
+begin
+  Result := DynTFTGetNumberOfItemsToDraw(AItems);
+  if Result > AItems^.Count then
+  begin
+    Result := AItems^.Count;
+    AItems^.FirstDisplayablePosition := 0;
+  end;
+
+  Result := Result - 1;
+end;
+
+
 procedure DynTFTDrawItems(AItems: PDynTFTItems; FullRedraw: Boolean);
 var
   x1, y1, x2, y2: TSInt;
-  i: Integer;
-  NumberOfItemsToDraw: LongInt;
+  i: LongInt;
+  MaxDrawingPosition: LongInt;
   IndexOfDrawingItem: LongInt;
-  FocusRectangleY: LongInt;
+  VisibleCount: LongInt;
+  
+  FocusRectangleY, ItemY: LongInt;
   FontCol: TColor;
-  {$IFDEF UseExternalItems}
-    {$IFDEF IsDesktop}
-      ATempString: string;
-    {$ELSE}
-      ATempString: string[CMaxItemsStringLength];
-    {$ENDIF}
+  ATempString: string {$IFDEF IsMCU}[CMaxItemsStringLength] {$ENDIF};
+
+  {$IFDEF ItemsVisibility}
+    IsVisible: Boolean;
+  {$ENDIF}
+  {$IFDEF ItemsEnabling}
+    IsEnabled: Boolean;
+  {$ENDIF}
+
+  {$IFDEF ItemsEnabling}
+    EnabledFontCol: TColor;
   {$ENDIF}
 begin
   if not DynTFTIsDrawableComponent(PDynTFTBaseComponent(TPtrRec(AItems))) then
@@ -169,12 +362,6 @@ begin
   DynTFT_V_Line(y1, y2, x1); //vert
   DynTFT_H_Line(x1, x2, y1); //horiz
 
-  NumberOfItemsToDraw := DynTFTGetNumberOfItemsToDraw(AItems);
-  if NumberOfItemsToDraw > AItems^.Count then
-  begin
-    NumberOfItemsToDraw := AItems^.Count;
-    AItems^.FirstVisibleIndex := 0;
-  end;
   FocusRectangleY := -1;
 
   if AItems^.BaseProps.Enabled and CENABLED = CENABLED then
@@ -182,52 +369,77 @@ begin
   else
     FontCol := CL_DynTFTItems_DisabledFont;
 
-  Dec(NumberOfItemsToDraw);  //to avoid using NumberOfItemsToDraw in the next for, because it is computed at every iteration :(
-  for i := 0 to NumberOfItemsToDraw do
+  VisibleCount := 0; 
+
+  IndexOfDrawingItem := GetIndexOfFirstDrawingItem(AItems, VisibleCount, ATempString);
+  MaxDrawingPosition := GetMaxDrawingPosition(AItems);
+
+  for i := 0 to MaxDrawingPosition do
   begin
-    IndexOfDrawingItem := i + AItems^.FirstVisibleIndex;
-    if IndexOfDrawingItem = AItems^.ItemIndex then
-    begin
-      {$IFDEF DynTFTFontSupport}
-        DynTFT_Set_Font(AItems^.ActiveFont, AItems^.BackgroundColor, FO_HORIZONTAL);
-      {$ELSE}
-        DynTFT_Set_Font(@TFT_defaultFont, AItems^.BackgroundColor, FO_HORIZONTAL);
-      {$ENDIF}
-      DynTFT_Set_Brush(1, CL_DynTFTItems_SelectedItem, 0, 0, 0, 0);                    //selected
-      FocusRectangleY := y1 + i * AItems^.ItemHeight;
+    if IndexOfDrawingItem >= AItems^.Count then
+      Break;
 
-      DynTFT_Set_Pen(CL_DynTFTItems_SelectedItem, 1);
-      DynTFT_Rectangle(x1 + 1, FocusRectangleY, x2 - 2, FocusRectangleY + AItems^.ItemHeight);
-      DynTFT_Set_Brush(0, CL_DynTFTItems_SelectedItem, 0, 0, 0, 0);
-    end
-    else
-    begin
-      {$IFDEF DynTFTFontSupport}
-        DynTFT_Set_Font(AItems^.ActiveFont, FontCol, FO_HORIZONTAL);
-      {$ELSE}
-        DynTFT_Set_Font(@TFT_defaultFont, FontCol, FO_HORIZONTAL);
-      {$ENDIF}
-      DynTFT_Set_Brush(1, AItems^.BackgroundColor, 0, 0, 0, 0);
-    end;
+    IndexOfDrawingItem := GoToNextVisibleItemFromIndex(AItems, IndexOfDrawingItem, ATempString {$IFDEF ItemsVisibility}, @IsVisible {$ENDIF} {$IFDEF ItemsEnabling}, @IsEnabled {$ENDIF});
 
-    {$IFDEF UseExternalItems}
-      ATempString := 'OnGetItem is nil';
-      {$IFDEF IsDesktop}
-        ATempString := ATempString + ' ' + IntToStr(IndexOfDrawingItem); //only on desktop, to provide more debug info 
-
-        if Assigned(AItems^.OnGetItem) then
-          if Assigned(AItems^.OnGetItem^) then
-      {$ELSE}
-        if AItems^.OnGetItem <> nil then
-      {$ENDIF}
-          AItems^.OnGetItem^(PPtrRec(TPtrRec(AItems)), IndexOfDrawingItem, ATempString);
-          
-      DynTFT_Write_Text(ATempString, x1 + 3, y1 - 1 + i * AItems^.ItemHeight);
-    {$ELSE}
-      DynTFT_Write_Text(AItems^.Strings[IndexOfDrawingItem], x1 + 3, y1 - 1 + i * AItems^.ItemHeight);
+    ItemY := y1 + i * AItems^.ItemHeight + 1;
+    {$IFDEF ItemsVisibility}
+      if IsVisible then
     {$ENDIF}
+      begin
+        Inc(VisibleCount);
+        if IndexOfDrawingItem - 1 = AItems^.ItemIndex then     //Selected item - rectangle
+        begin
+          {$IFDEF DynTFTFontSupport}
+            DynTFT_Set_Font(AItems^.ActiveFont, AItems^.BackgroundColor, FO_HORIZONTAL);
+          {$ELSE}
+            DynTFT_Set_Font(@TFT_defaultFont, AItems^.BackgroundColor, FO_HORIZONTAL);
+          {$ENDIF}
+          DynTFT_Set_Brush(1, CL_DynTFTItems_SelectedItem, 0, 0, 0, 0);                    //selected
+          FocusRectangleY := ItemY;
+
+          DynTFT_Set_Pen(CL_DynTFTItems_SelectedItem, 1);
+          DynTFT_Rectangle(x1 + 1, ItemY, x2 - 2, ItemY + AItems^.ItemHeight);
+          DynTFT_Set_Brush(0, CL_DynTFTItems_SelectedItem, 0, 0, 0, 0);
+        end
+        else
+        begin
+          {$IFDEF ItemsEnabling}
+            if IsEnabled then
+              EnabledFontCol := FontCol
+            else
+              EnabledFontCol := CL_DynTFTItems_DisabledFont;
+
+            {$IFDEF DynTFTFontSupport}
+              DynTFT_Set_Font(AItems^.ActiveFont, EnabledFontCol, FO_HORIZONTAL);
+            {$ELSE}
+              DynTFT_Set_Font(@TFT_defaultFont, EnabledFontCol, FO_HORIZONTAL);
+            {$ENDIF}
+          {$ELSE}
+            {$IFDEF DynTFTFontSupport}
+              DynTFT_Set_Font(AItems^.ActiveFont, FontCol, FO_HORIZONTAL);
+            {$ELSE}
+              DynTFT_Set_Font(@TFT_defaultFont, FontCol, FO_HORIZONTAL);
+            {$ENDIF}
+          {$ENDIF}
+          DynTFT_Set_Brush(1, AItems^.BackgroundColor, 0, 0, 0, 0);
+        end;
+
+        DynTFT_Write_Text(ATempString, x1 + 3, ItemY);
+
+        {$IFDEF IsDesktop}
+          //DynTFT_TestConsole(ATempString);
+        {$ENDIF}
+      end; //if IsVisible then
   end;
 
+  {$IFDEF ItemsVisibility}
+    if IsVisible then
+      VisibleCount := VisibleCount + GetRemainingVisibleCount(AItems, IndexOfDrawingItem - 1, ATempString) - 1;
+
+    AItems^.TotalVisibleCount := VisibleCount;  
+    //DynTFT_TestConsole('VisibleCount=' + IntToStr(VisibleCount));
+  {$ENDIF}
+  
   //Draw focus rectangle from lines
   if AItems^.BaseProps.Focused and CFOCUSED = CFOCUSED then
     DynTFT_Set_Pen(CL_DynTFTItems_FocusRectangle, 1)
@@ -266,9 +478,11 @@ begin
   Result^.BaseProps.Top := Top;
   Result^.BaseProps.Width := Width;
   Result^.BaseProps.Height := Height;
+  //DynTFTInitComponentDimensions(PDynTFTBaseComponent(TPtrRec(Result)), ComponentType, True, Left, Top, Width, Height);
   DynTFTInitBasicStatePropertiesToDefault(PDynTFTBaseComponent(TPtrRec(Result)));
 
   GetTextWidthAndHeight('fp', DummyTextWidth, Result^.ItemHeight);    //fp is a text with great height
+  Result^.ItemHeight := Result^.ItemHeight + 3;
 
   {$IFDEF IsDesktop}
     New(Result^.OnOwnerInternalMouseDown);
@@ -276,12 +490,17 @@ begin
     New(Result^.OnOwnerInternalMouseUp);
     {$IFDEF UseExternalItems}
       New(Result^.OnGetItem);
+      Result^.OnGetItem^ := nil;
     {$ENDIF}
 
     Result^.OnOwnerInternalMouseDown^ := nil;
     Result^.OnOwnerInternalMouseMove^ := nil;
     Result^.OnOwnerInternalMouseUp^ := nil;
   {$ELSE}
+    {$IFDEF UseExternalItems}
+      Result^.OnGetItem := nil;
+    {$ENDIF}
+    
     Result^.OnOwnerInternalMouseDown := nil;
     Result^.OnOwnerInternalMouseMove := nil;
     Result^.OnOwnerInternalMouseUp := nil;
@@ -289,13 +508,32 @@ begin
 
   Result^.ItemIndex := -1;
   Result^.Count := 0;
-  Result^.FirstVisibleIndex := 0;
+  Result^.FirstDisplayablePosition := 0;
   Result^.BackgroundColor := CL_DynTFTItems_Background;
   Result^.Font_Color := CL_DynTFTItems_EnabledFont;
 
-  {$IFNDEF UseExternalItems}
+  {$IFDEF UseExternalItems}
+    {$IFDEF IsDesktop}
+      New(Result^.OnGetItemVisibility);
+      Result^.OnGetItemVisibility^ := nil;
+    {$ELSE}
+      Result^.OnGetItemVisibility := nil;
+    {$ENDIF}
+  {$ELSE}
     for i := 0 to CMaxItemItemCount - 1 do
+    begin
       Result^.Strings[i] := '';
+      {$IFDEF ItemsVisibility}
+        Result^.ItemsVisible[i] := True;
+      {$ENDIF}
+      {$IFDEF ItemsEnabling}
+        Result^.ItemsEnabled[i] := True;
+      {$ENDIF}
+    end;
+  {$ENDIF}
+
+  {$IFDEF ItemsVisibility}
+    Result^.TotalVisibleCount := 0;
   {$ENDIF}
 
   {$IFDEF UseExternalItemsStringLength}
@@ -326,6 +564,17 @@ begin
     Dispose(AItems^.OnOwnerInternalMouseDown);
     Dispose(AItems^.OnOwnerInternalMouseMove);
     Dispose(AItems^.OnOwnerInternalMouseUp);
+
+    AItems^.OnOwnerInternalMouseDown := nil;
+    AItems^.OnOwnerInternalMouseMove := nil;
+    AItems^.OnOwnerInternalMouseUp := nil;
+  {$ENDIF}
+  
+  {$IFDEF UseExternalItems}
+    {$IFDEF IsDesktop}
+      Dispose(AItems^.OnGetItem);
+      Dispose(AItems^.OnGetItemVisibility);
+    {$ENDIF}
   {$ENDIF}
 
   {$IFDEF IsDesktop}

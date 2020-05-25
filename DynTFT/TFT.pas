@@ -49,6 +49,7 @@ type
 
   TDynTFTFontSettings = record
     FontName: string;
+    IdentifierName: string;
     FontSize: Integer;
     Bold: Boolean;
     Italic: Boolean;

@@ -193,16 +193,70 @@ begin
 end;
 
 
-procedure DrawTabArrows_OnGenerateDrawingUser(ABase: PDynTFTBaseComponent);
+type
+  TDrawLineCmd = record
+    LineType: Byte;
+    X1_Offset: Byte;
+    Y1_Offset: Byte;
+    X2_Offset: Byte;
+    Y2_Offset: Byte;
+  end;
+
+  TDrawLineCmdArr = array[1..1] of TDrawLineCmd;
+  PDrawLineCmdArr = ^TDrawLineCmdArr;
+
+const
+  C_NormLine = 0;
+  C_HorzLine = 1;
+  C_VertLine = 2;
+
+
+procedure DrawKeyLines(x1, y1: Integer; ListOfLines: PDrawLineCmdArr; LineCount: Integer);
 var
-  x1, y1: Integer;
+  i: Integer;
+begin
+  for i := 1 to LineCount do
+  begin
+    case ListOfLines^[i].LineType of
+      C_NormLine : DynTFT_Line(x1 + ListOfLines^[i].X1_Offset, y1 + ListOfLines^[i].Y1_Offset, x1 + ListOfLines^[i].X2_Offset, y1 + ListOfLines^[i].Y2_Offset);
+      C_HorzLine : DynTFT_H_Line(x1 + ListOfLines^[i].X1_Offset, x1 + ListOfLines^[i].X2_Offset, y1 + ListOfLines^[i].Y1_Offset);
+      C_VertLine : DynTFT_V_Line(y1 + ListOfLines^[i].Y1_Offset, y1 + ListOfLines^[i].Y2_Offset, x1 + ListOfLines^[i].X1_Offset);
+    end;
+  end;
+end;
+
+
+procedure DrawTabArrows_OnGenerateDrawingUser(ABase: PDynTFTBaseComponent);
+const  
+  C_TabArrows_Lines: array[1..10] of TDrawLineCmd = (
+    {$IFDEF IsDesktop}
+      (LineType: C_VertLine; X1_Offset: 2; Y1_Offset: 4; X2_Offset: 2; Y2_Offset: 12),
+      (LineType: C_HorzLine; X1_Offset: 9; Y1_Offset: 8; X2_Offset: 26; Y2_Offset: 8),
+      (LineType: C_NormLine; X1_Offset: 3; Y1_Offset: 8; X2_Offset: 9; Y2_Offset: 5),
+      (LineType: C_NormLine; X1_Offset: 3; Y1_Offset: 8; X2_Offset: 9; Y2_Offset: 11),
+      (LineType: C_VertLine; X1_Offset: 9; Y1_Offset: 5; X2_Offset: 9; Y2_Offset: 11),
+      (LineType: C_VertLine; X1_Offset: 27; Y1_Offset: 20; X2_Offset: 27; Y2_Offset: 28),
+      (LineType: C_HorzLine; X1_Offset: 3; Y1_Offset: 24; X2_Offset: 20; Y2_Offset: 24),
+      (LineType: C_NormLine; X1_Offset: 21; Y1_Offset: 27; X2_Offset: 26; Y2_Offset: 24),
+      (LineType: C_NormLine; X1_Offset: 21; Y1_Offset: 21; X2_Offset: 26; Y2_Offset: 24),
+      (LineType: C_VertLine; X1_Offset: 20; Y1_Offset: 21; X2_Offset: 20; Y2_Offset: 27)
+    {$ELSE}
+      (C_VertLine, 2, 4, 2, 12),
+      (C_HorzLine, 9, 8, 26, 8),
+      (C_NormLine, 3, 8, 9, 5),
+      (C_NormLine, 3, 8, 9, 11),
+      (C_VertLine, 9, 5, 9, 11),
+      (C_VertLine, 27, 20, 27, 28),
+      (C_HorzLine, 3, 24, 20, 24),
+      (C_NormLine, 21, 27, 26, 24),
+      (C_NormLine, 21, 21, 26, 24),
+      (C_VertLine, 20, 21, 20, 27)
+    {$ENDIF}
+  );
 begin
   SetDrawingColorForKeyButton(ABase);
 
-  x1 := ABase^.BaseProps.Left;
-  y1 := ABase^.BaseProps.Top;
-  
-  DynTFT_V_Line(y1 + 4, y1 + 12, x1 + 2);
+  {DynTFT_V_Line(y1 + 4, y1 + 12, x1 + 2);
   DynTFT_H_Line(x1 + 9, x1 + 26, y1 + 8);
   DynTFT_Line(x1 + 3, y1 + 8, x1 + 9, y1 + 5);   //up
   DynTFT_Line(x1 + 3, y1 + 8, x1 + 9, y1 + 11);  //down
@@ -213,139 +267,244 @@ begin
   DynTFT_Line(x1 + 21, y1 + 27, x1 + 26, y1 + 24);  //up
   DynTFT_Line(x1 + 21, y1 + 21, x1 + 26, y1 + 24);  //down
   DynTFT_V_Line(y1 + 21, y1 + 27, x1 + 20);  //vertical
+  }
+  
+  DrawKeyLines(ABase^.BaseProps.Left, ABase^.BaseProps.Top, @C_TabArrows_Lines, 10);
 end;
 
 
 procedure DrawBackSpaceArrow_OnGenerateDrawingUser(ABase: PDynTFTBaseComponent);
-var
-  x1, y1: Integer;
+const  
+  C_BackSpaceArrow_Lines: array[1..4] of TDrawLineCmd = (
+    {$IFDEF IsDesktop}
+      (LineType: C_HorzLine; X1_Offset: 9; Y1_Offset: 8; X2_Offset: 26; Y2_Offset: 8),
+      (LineType: C_NormLine; X1_Offset: 3; Y1_Offset: 8; X2_Offset: 9; Y2_Offset: 3),
+      (LineType: C_NormLine; X1_Offset: 3; Y1_Offset: 8; X2_Offset: 9; Y2_Offset: 13),
+      (LineType: C_VertLine; X1_Offset: 9; Y1_Offset: 4; X2_Offset: 9; Y2_Offset: 12)
+    {$ELSE}
+      (C_HorzLine, 9, 8, 26, 8),
+      (C_NormLine, 3, 8, 9, 3),
+      (C_NormLine, 3, 8, 9, 13),
+      (C_VertLine, 9, 4, 9, 12)
+    {$ENDIF}
+  );
 begin
   SetDrawingColorForKeyButton(ABase);
 
-  x1 := ABase^.BaseProps.Left;
-  y1 := ABase^.BaseProps.Top;
-  
-  DynTFT_H_Line(x1 + 9, x1 + 26, y1 + 8);
+  {DynTFT_H_Line(x1 + 9, x1 + 26, y1 + 8);
   DynTFT_Line(x1 + 3, y1 + 8, x1 + 9, y1 + 3);   //up
   DynTFT_Line(x1 + 3, y1 + 8, x1 + 9, y1 + 13);  //down
   DynTFT_V_Line(y1 + 4, y1 + 12, x1 + 9);  //vertical
+  }
+  
+  DrawKeyLines(ABase^.BaseProps.Left, ABase^.BaseProps.Top, @C_BackSpaceArrow_Lines, 4);
 end;
 
 
 procedure DrawApps_OnGenerateDrawingUser(ABase: PDynTFTBaseComponent);
-var
-  x1, y1: Integer;
+const  
+  C_Apps_Lines: array[1..3] of TDrawLineCmd = (
+    {$IFDEF IsDesktop}
+      (LineType: C_HorzLine; X1_Offset: 5; Y1_Offset: 11; X2_Offset: 11; Y2_Offset: 11),
+      (LineType: C_HorzLine; X1_Offset: 5; Y1_Offset: 14; X2_Offset: 11; Y2_Offset: 14),
+      (LineType: C_HorzLine; X1_Offset: 5; Y1_Offset: 17; X2_Offset: 11; Y2_Offset: 17)
+    {$ELSE}
+      (C_HorzLine, 5, 11, 11, 11),
+      (C_HorzLine, 5, 14, 11, 14),
+      (C_HorzLine, 5, 17, 11, 17)
+    {$ENDIF}
+  );
 begin
   SetDrawingColorForKeyButton(ABase);
 
-  x1 := ABase^.BaseProps.Left;
-  y1 := ABase^.BaseProps.Top;
+  DynTFT_Set_Brush(0, CL_DynTFTVirtualKeyboard_Border, 0, 0, 0, 0);
+  DynTFT_Rectangle(ABase^.BaseProps.Left + 3, ABase^.BaseProps.Top + 7, ABase^.BaseProps.Left + 13, ABase^.BaseProps.Top + 21);
 
-  DynTFT_Set_Brush(0, 0, 0, 0, 0, 0);
-  DynTFT_Rectangle(x1 + 3, y1 + 7, x1 + 13, y1 + 21);
-  DynTFT_H_Line(x1 + 5, x1 + 11, y1 + 11);  //horiz 1
+  {DynTFT_H_Line(x1 + 5, x1 + 11, y1 + 11);  //horiz 1
   DynTFT_H_Line(x1 + 5, x1 + 11, y1 + 14);  //horiz 2
   DynTFT_H_Line(x1 + 5, x1 + 11, y1 + 17);  //horiz 3
+  }
+  DrawKeyLines(ABase^.BaseProps.Left, ABase^.BaseProps.Top, @C_Apps_Lines, 3);
 end;
 
 
 procedure DrawLeftArrow_OnGenerateDrawingUser(ABase: PDynTFTBaseComponent);
-var
-  x1, y1: Integer;
+const  
+  C_LeftArrow_Lines: array[1..4] of TDrawLineCmd = (
+    {$IFDEF IsDesktop}
+      (LineType: C_HorzLine; X1_Offset: 9; Y1_Offset: 8; X2_Offset: 18; Y2_Offset: 8),
+      (LineType: C_NormLine; X1_Offset: 3; Y1_Offset: 8; X2_Offset: 9; Y2_Offset: 3),
+      (LineType: C_NormLine; X1_Offset: 3; Y1_Offset: 8; X2_Offset: 9; Y2_Offset: 13),
+      (LineType: C_VertLine; X1_Offset: 9; Y1_Offset: 4; X2_Offset: 9; Y2_Offset: 12)
+    {$ELSE}
+      (C_HorzLine, 9, 8, 18, 18),
+      (C_NormLine, 3, 8, 9, 3),
+      (C_NormLine, 3, 8, 9, 13),
+      (C_VertLine, 9, 4, 9, 12)
+    {$ENDIF}
+  );
 begin
   SetDrawingColorForKeyButton(ABase);
 
-  x1 := ABase^.BaseProps.Left;
-  y1 := ABase^.BaseProps.Top;
-
-  DynTFT_H_Line(x1 + 9, x1 + 18, y1 + 8);
+  {DynTFT_H_Line(x1 + 9, x1 + 18, y1 + 8);
   DynTFT_Line(x1 + 3, y1 + 8, x1 + 9, y1 + 3);   //up
   DynTFT_Line(x1 + 3, y1 + 8, x1 + 9, y1 + 13);  //down
   DynTFT_V_Line(y1 + 4, y1 + 12, x1 + 9);  //vertical
+  }
+
+  DrawKeyLines(ABase^.BaseProps.Left, ABase^.BaseProps.Top, @C_LeftArrow_Lines, 4);
 end;
 
 
 procedure DrawRightArrow_OnGenerateDrawingUser(ABase: PDynTFTBaseComponent);
-var
-  x1, y1: Integer;
+const
+  C_RightArrow_Lines: array[1..4] of TDrawLineCmd = (
+    {$IFDEF IsDesktop}
+      (LineType: C_HorzLine; X1_Offset: 7; Y1_Offset: 8; X2_Offset: 16; Y2_Offset: 8),
+      (LineType: C_NormLine; X1_Offset: 16; Y1_Offset: 13; X2_Offset: 22; Y2_Offset: 8),
+      (LineType: C_NormLine; X1_Offset: 16; Y1_Offset: 3; X2_Offset: 22; Y2_Offset: 8),
+      (LineType: C_VertLine; X1_Offset: 16; Y1_Offset: 4; X2_Offset: 16; Y2_Offset: 12)
+    {$ELSE}
+      (C_HorzLine, 7, 8, 16, 18),
+      (C_NormLine, 16, 13, 22, 8),
+      (C_NormLine, 16, 3, 22, 8),
+      (C_VertLine, 16, 4, 16, 12)
+    {$ENDIF}
+  );
 begin
   SetDrawingColorForKeyButton(ABase);
 
-  x1 := ABase^.BaseProps.Left;
-  y1 := ABase^.BaseProps.Top;
-
-  DynTFT_H_Line(x1 + 7, x1 + 16, y1 + 8);
+  {DynTFT_H_Line(x1 + 7, x1 + 16, y1 + 8);
   DynTFT_Line(x1 + 16, y1 + 13, x1 + 22, y1 + 8);  //up
   DynTFT_Line(x1 + 16, y1 + 3, x1 + 22, y1 + 8);   //down
   DynTFT_V_Line(y1 + 4, y1 + 12, x1 + 16);  //vertical
+  }
+
+  DrawKeyLines(ABase^.BaseProps.Left, ABase^.BaseProps.Top, @C_RightArrow_Lines, 4);
 end;
 
 
 procedure DrawUpArrow_OnGenerateDrawingUser(ABase: PDynTFTBaseComponent);
-var
-  x1, y1: Integer;
+const
+  C_UpArrow_Lines: array[1..4] of TDrawLineCmd = (
+    {$IFDEF IsDesktop}
+      (LineType: C_VertLine; X1_Offset: 13; Y1_Offset: 8; X2_Offset: 13; Y2_Offset: 13),
+      (LineType: C_HorzLine; X1_Offset: 9; Y1_Offset: 8; X2_Offset: 17; Y2_Offset: 8),
+      (LineType: C_NormLine; X1_Offset: 9; Y1_Offset: 8; X2_Offset: 13; Y2_Offset: 2),
+      (LineType: C_NormLine; X1_Offset: 13; Y1_Offset: 2; X2_Offset: 17; Y2_Offset: 8)
+    {$ELSE}
+      (C_VertLine, 13, 8, 13, 13),
+      (C_HorzLine, 9, 8, 17, 8),
+      (C_NormLine, 9, 8, 13, 2),
+      (C_NormLine, 13, 2, 17, 8)
+    {$ENDIF}
+  );
 begin
   SetDrawingColorForKeyButton(ABase);
 
-  x1 := ABase^.BaseProps.Left;
-  y1 := ABase^.BaseProps.Top;
-
-  DynTFT_V_Line(y1 + 8, y1 + 13, x1 + 13); //vertical
+  {DynTFT_V_Line(y1 + 8, y1 + 13, x1 + 13); //vertical
   DynTFT_H_Line(x1 + 9, x1 + 17, y1 + 8);   //horizontal
   DynTFT_Line(x1 + 9, y1 + 8, x1 + 13, y1 + 2);   //up
   DynTFT_Line(x1 + 13, y1 + 2, x1 + 17, y1 + 8);  //down
+  }
+
+  DrawKeyLines(ABase^.BaseProps.Left, ABase^.BaseProps.Top, @C_UpArrow_Lines, 4);
 end;
 
 
 procedure DrawDownArrow_OnGenerateDrawingUser(ABase: PDynTFTBaseComponent);
-var
-  x1, y1: Integer;
+const
+  C_DownArrow_Lines: array[1..4] of TDrawLineCmd = (
+    {$IFDEF IsDesktop}
+      (LineType: C_VertLine; X1_Offset: 13; Y1_Offset: 2; X2_Offset: 13; Y2_Offset: 7),
+      (LineType: C_HorzLine; X1_Offset: 9; Y1_Offset: 7; X2_Offset: 17; Y2_Offset: 7),
+      (LineType: C_NormLine; X1_Offset: 13; Y1_Offset: 13; X2_Offset: 17; Y2_Offset: 7),
+      (LineType: C_NormLine; X1_Offset: 9; Y1_Offset: 7; X2_Offset: 13; Y2_Offset: 13)
+    {$ELSE}
+      (C_VertLine, 13, 2, 13, 7),
+      (C_HorzLine, 9, 7, 17, 7),
+      (C_NormLine, 13, 13, 17, 7),
+      (C_NormLine, 9, 7, 13, 13)
+    {$ENDIF}
+  );
 begin
   SetDrawingColorForKeyButton(ABase);
 
-  x1 := ABase^.BaseProps.Left;
-  y1 := ABase^.BaseProps.Top;
-
-  DynTFT_V_Line(y1 + 2, y1 + 7, x1 + 13);   //vertical
+  {DynTFT_V_Line(y1 + 2, y1 + 7, x1 + 13);   //vertical
   DynTFT_H_Line(x1 + 9, x1 + 17, y1 + 7);    //horizontal
   DynTFT_Line(x1 + 13, y1 + 13, x1 + 17, y1 + 7);  //up
   DynTFT_Line(x1 + 9, y1 + 7, x1 + 13, y1 + 13);   //down
+  }
+
+  DrawKeyLines(ABase^.BaseProps.Left, ABase^.BaseProps.Top, @C_DownArrow_Lines, 4);
 end;
 
 
 procedure DrawEnterArrow_OnGenerateDrawingUser(ABase: PDynTFTBaseComponent);
-var
-  x1, y1: Integer;
+const
+  C_EnterArrow_Lines: array[1..5] of TDrawLineCmd = (
+    {$IFDEF IsDesktop}
+      (LineType: C_VertLine; X1_Offset: 20; Y1_Offset: 10; X2_Offset: 20; Y2_Offset: 21),
+      (LineType: C_HorzLine; X1_Offset: 12; Y1_Offset: 21; X2_Offset: 20; Y2_Offset: 21),
+      (LineType: C_VertLine; X1_Offset: 12; Y1_Offset: 17; X2_Offset: 12; Y2_Offset: 25),
+      (LineType: C_NormLine; X1_Offset: 7; Y1_Offset: 21; X2_Offset: 12; Y2_Offset: 16),
+      (LineType: C_NormLine; X1_Offset: 7; Y1_Offset: 21; X2_Offset: 12; Y2_Offset: 26)
+    {$ELSE}
+      (C_VertLine, 20, 10, 20, 21),
+      (C_HorzLine, 12, 21, 20, 21),
+      (C_VertLine, 12, 17, 12, 25),
+      (C_NormLine, 7, 21, 12, 16),
+      (C_NormLine, 7, 21, 12, 26)
+    {$ENDIF}
+  );
 begin
   SetDrawingColorForKeyButton(ABase);
 
-  x1 := ABase^.BaseProps.Left;
-  y1 := ABase^.BaseProps.Top;
-
-  DynTFT_V_Line(y1 + 10, y1 + 21, x1 + 20);  //vertical
+  {DynTFT_V_Line(y1 + 10, y1 + 21, x1 + 20);  //vertical
   DynTFT_H_Line(x1 + 12, x1 + 20, y1 + 21);  //horizontal
   DynTFT_V_Line(y1 + 17, y1 + 25, x1 + 12);  //vertical (arrow)
   DynTFT_Line(x1 + 7, y1 + 21, x1 + 12, y1 + 16);   //up (arrow)
   DynTFT_Line(x1 + 7, y1 + 21, x1 + 12, y1 + 26);   //down (arrow)
+  }
+
+  DrawKeyLines(ABase^.BaseProps.Left, ABase^.BaseProps.Top, @C_EnterArrow_Lines, 5);
 end;
 
 
 procedure DrawShift_OnGenerateDrawingUser(ABase: PDynTFTBaseComponent);
-var
-  x1, y1: Integer;
+const
+  C_Shift_Lines: array[1..7] of TDrawLineCmd = (
+    {$IFDEF IsDesktop}
+      (LineType: C_VertLine; X1_Offset: 19; Y1_Offset: 18; X2_Offset: 19; Y2_Offset: 24),
+      (LineType: C_VertLine; X1_Offset: 23; Y1_Offset: 18; X2_Offset: 23; Y2_Offset: 24),
+      (LineType: C_HorzLine; X1_Offset: 19; Y1_Offset: 24; X2_Offset: 23; Y2_Offset: 24),
+      (LineType: C_HorzLine; X1_Offset: 15; Y1_Offset: 18; X2_Offset: 19; Y2_Offset: 18),
+      (LineType: C_HorzLine; X1_Offset: 23; Y1_Offset: 18; X2_Offset: 27; Y2_Offset: 18),
+      (LineType: C_NormLine; X1_Offset: 15; Y1_Offset: 17; X2_Offset: 21; Y2_Offset: 9),
+      (LineType: C_NormLine; X1_Offset: 21; Y1_Offset: 9; X2_Offset: 27; Y2_Offset: 17)
+    {$ELSE}
+      (C_VertLine, 19, 18, 19, 24),
+      (C_VertLine, 23, 18, 23, 24),
+      (C_HorzLine, 19, 24, 23, 24),
+      (C_HorzLine, 15, 18, 19, 18),
+      (C_HorzLine, 23, 18, 27, 18),
+      (C_NormLine, 15, 17, 21, 9),
+      (C_NormLine, 21, 9, 27, 17)
+    {$ENDIF}
+  );
 begin
   SetDrawingColorForKeyButton(ABase);
 
-  x1 := ABase^.BaseProps.Left;
-  y1 := ABase^.BaseProps.Top;
-
-  DynTFT_V_Line(y1 + 18, y1 + 24, x1 + 19);  //vertical l
+  {DynTFT_V_Line(y1 + 18, y1 + 24, x1 + 19);  //vertical l
   DynTFT_V_Line(y1 + 18, y1 + 24, x1 + 23);  //vertical r
   DynTFT_H_Line(x1 + 19, x1 + 23, y1 + 24);  //horizontal bottom
   DynTFT_H_Line(x1 + 15, x1 + 19, y1 + 18);  //horizontal l
   DynTFT_H_Line(x1 + 23, x1 + 27, y1 + 18);  //horizontal r
   DynTFT_Line(x1 + 15, y1 + 17, x1 + 21, y1 + 9);   //up
   DynTFT_Line(x1 + 21, y1 + 9, x1 + 27, y1 + 17);   //down
+  }
+
+  DrawKeyLines(ABase^.BaseProps.Left, ABase^.BaseProps.Top, @C_Shift_Lines, 7);
 end;
 
 
@@ -535,11 +694,40 @@ begin
 end;
 
 
-procedure CreateTwoRowKeys(ScreenIndex: Byte; AVK: PDynTFTVirtualKeyboard; var Row1_Text, Row2Text: string; XOffset, YOffset, KeyWidth, KeyHeight: Integer);
+function CreateSpecialKey(LeftOffset, TopOffset, Width, Height: Integer;
+                          MouseDownHandler: {$IFDEF IsMCU} PDynTFTGenericHandlerProc {$ELSE} TDynTFTGenericHandlerProc {$ENDIF};
+                          DrawingHandler: {$IFDEF IsMCU} PDynTFTGenericEventHandler {$ELSE} TDynTFTGenericEventHandler {$ENDIF};
+                          {$IFDEF IsMCU} var {$ENDIF} AUpCaption: string;
+                          {$IFDEF IsMCU} var {$ENDIF} ADownCaption: string;
+                          AVK: PDynTFTVirtualKeyboard): PDynTFTKeyButton;
+begin
+  Result := DynTFTKeyButton_Create(AVK^.BaseProps.ScreenIndex, AVK^.BaseProps.Left + LeftOffset, AVK^.BaseProps.Top + TopOffset, Width, Height);
+  {$IFDEF IsDesktop}
+    Result^.BaseProps.OnMouseDownUser^ := MouseDownHandler;
+    Result^.OnGenerateDrawingUser^ := DrawingHandler;
+  {$ELSE}
+    Result^.BaseProps.OnMouseDownUser := MouseDownHandler;  //without @
+    Result^.OnGenerateDrawingUser := DrawingHandler; //without @
+  {$ENDIF}
+
+  Result^.UpCaption := AUpCaption;
+  Result^.DownCaption := ADownCaption;
+  DynTFTShowComponent(PDynTFTBaseComponent(TPtrRec(Result)));
+  Result^.BaseProps.Parent := PPtrRec(TPtrRec(AVK));
+end;
+
+
+procedure CreateTwoRowKeys(AVK: PDynTFTVirtualKeyboard; var Row1_Text, Row2_Text: string; XOffset, YOffset: Integer; MouseDownHandler: {$IFDEF IsMCU} PDynTFTGenericHandlerProc {$ELSE} TDynTFTGenericHandlerProc {$ENDIF});
+const
+  CKeyWidth = 16;
+  CKeyHeight = 34;
 var
   i, n: Integer;
   AKeyButton: PDynTFTKeyButton;
 begin
+  XOffset := XOffset + AVK^.BaseProps.Left;
+  YOffset := YOffset + AVK^.BaseProps.Top;
+
   n := Length(Row1_Text);
 {$IFDEF IsDesktop}
   for i := 1 to n do
@@ -548,20 +736,35 @@ begin
   for i := 0 to n do
 {$ENDIF}
   begin
-    AKeyButton := DynTFTKeyButton_Create(ScreenIndex, XOffset + ((KeyWidth + 2) * (i - {$IFDEF IsDesktop} 1 {$ELSE} 0 {$ENDIF})), YOffset, KeyWidth, KeyHeight);
+    AKeyButton := DynTFTKeyButton_Create(AVK^.BaseProps.ScreenIndex, XOffset + ((CKeyWidth + 2) * (i - {$IFDEF IsDesktop} 1 {$ELSE} 0 {$ENDIF})), YOffset, CKeyWidth, CKeyHeight);
 
     {$IFDEF IsDesktop}
-      AKeyButton^.BaseProps.OnMouseDownUser^ := TwoRowsKey_OnMouseDownUser;
+      AKeyButton^.BaseProps.OnMouseDownUser^ := MouseDownHandler;
     {$ELSE}
-      AKeyButton^.BaseProps.OnMouseDownUser := @TwoRowsKey_OnMouseDownUser;
+      AKeyButton^.BaseProps.OnMouseDownUser := MouseDownHandler;  //without @
     {$ENDIF}
 
     {$IFDEF IsDesktop}
-      AKeyButton^.UpCaption := Row1_Text[i];
-      AKeyButton^.DownCaption := Row2Text[i];
+      if Row1_Text <> '' then
+        AKeyButton^.UpCaption := Row1_Text[i]
+      else
+        AKeyButton^.UpCaption := '';
+
+      if Row2_Text <> '' then
+        AKeyButton^.DownCaption := Row2_Text[i]
+      else
+        AKeyButton^.DownCaption := '';
     {$ELSE}
-      AKeyButton^.UpCaption[0] := Row1_Text[i];
-      AKeyButton^.DownCaption[0] := Row2Text[i];
+      if Length(Row1_Text) > 0 then
+        AKeyButton^.UpCaption[0] := Row1_Text[i]
+      else
+        AKeyButton^.UpCaption[0] := #0;
+
+      if Length(Row2_Text) > 0 then
+        AKeyButton^.DownCaption[0] := Row2_Text[i]
+      else
+        AKeyButton^.DownCaption[0] := #0;
+
       AKeyButton^.UpCaption[1] := #0;
       AKeyButton^.DownCaption[1] := #0;
     {$ENDIF}
@@ -572,47 +775,111 @@ begin
 end;
 
 
-procedure CreateOneRowKeys(ScreenIndex: Byte; AVK: PDynTFTVirtualKeyboard; var Row1_Text: string; XOffset, YOffset, KeyWidth, KeyHeight: Integer);
+const
+  CNumbersRow1   = '~!@#$%^&*()_+';
+  CNumbersRow2   = '`1234567890-=';
+  CLettersRow1   = 'QWERTYUIOP';
+  CLettersRow2   = 'ASDFGHJKL';
+  CLettersRow3   = 'ZXCVBNM';
+  CSpecialChars1 = '{}|';
+  CSpecialChars2 = '[]\';
+  CColonRow1     = ':"';
+  CColonRow2     = ';' + #39;
+  CDotRow1       = '<>?';
+  CDotRow2       = ',./';
+  CKeyDelText    = 'Del';
+  CKeyCapsText   = 'Caps';
+  CKeyCtrlText   = 'Ctrl';
+  CKeyAltText    = 'Alt';
+  CKeyPgText     = 'Pg';
+  CKeyUpText     = 'Up';
+  CKeyDnText     = 'Dn';
+  CKeyHomeText   = 'Home';
+  CKeyEndText    = 'End';
+
+  CNullString    = '';
+  CSpaceString   = ' ';
+
+
+type
+  TSpecialKeyInfo = record
+    LeftOffset, TopOffset, Width, Height: Integer;
+    MouseDownHandler: {$IFDEF IsMCU} PDynTFTGenericHandlerProc {$ELSE} TDynTFTGenericHandlerProc {$ENDIF};
+    DrawingHandler: {$IFDEF IsMCU} PDynTFTGenericEventHandler {$ELSE} TDynTFTGenericEventHandler {$ENDIF};
+    AUpCaption, ADownCaption: string[4];
+  end;
+
+
+const
+  CMaxSpecialKeys = 20;
+  C_Special_Keys: array[1..CMaxSpecialKeys] of TSpecialKeyInfo = (
+    {$IFDEF IsDesktop}
+      (LeftOffset: 280; TopOffset: 110; Width: 36; Height: 34; MouseDownHandler: DeleteKey_OnMouseDownUser; DrawingHandler: nil; AUpCaption: CKeyDelText; ADownCaption: CNullString),
+      (LeftOffset: 2; TopOffset: 74; Width: 38; Height: 34; MouseDownHandler: CapsKey_OnMouseDownUser; DrawingHandler: nil; AUpCaption: CKeyCapsText; ADownCaption: CNullString),
+      (LeftOffset: 240; TopOffset: 74; Width: 38; Height: 34; MouseDownHandler: EnterKey_OnMouseDownUser; DrawingHandler: DrawEnterArrow_OnGenerateDrawingUser; AUpCaption: CNullString; ADownCaption: CNullString),
+      (LeftOffset: 2; TopOffset: 110; Width: 47; Height: 34; MouseDownHandler: ShiftKey_OnMouseDownUser; DrawingHandler: DrawShift_OnGenerateDrawingUser; AUpCaption: CNullString; ADownCaption: CNullString),
+      (LeftOffset: 231; TopOffset: 110; Width: 47; Height: 34; MouseDownHandler: ShiftKey_OnMouseDownUser; DrawingHandler: DrawShift_OnGenerateDrawingUser; AUpCaption: CNullString; ADownCaption: CNullString),
+      (LeftOffset: 2; TopOffset: 146; Width: 30; Height: 34; MouseDownHandler: ControlKey_OnMouseDownUser; DrawingHandler: nil; AUpCaption: CKeyCtrlText; ADownCaption: CNullString),
+      (LeftOffset: 199; TopOffset: 146; Width: 30; Height: 34; MouseDownHandler: ControlKey_OnMouseDownUser; DrawingHandler: nil; AUpCaption: CKeyCtrlText; ADownCaption: CNullString),
+      (LeftOffset: 34; TopOffset: 146; Width: 23; Height: 34; MouseDownHandler: AltKey_OnMouseDownUser; DrawingHandler: nil; AUpCaption: CKeyAltText; ADownCaption: CNullString),
+      (LeftOffset: 153; TopOffset: 146; Width: 23; Height: 34; MouseDownHandler: AltKey_OnMouseDownUser; DrawingHandler: nil; AUpCaption: CKeyAltText; ADownCaption: CNullString),
+      (LeftOffset: 59; TopOffset: 146; Width: 92; Height: 34; MouseDownHandler: SpaceKey_OnMouseDownUser; DrawingHandler: nil; AUpCaption: CSpaceString; ADownCaption: CSpaceString),
+      (LeftOffset: 178; TopOffset: 146; Width: 19; Height: 34; MouseDownHandler: AppsKey_OnMouseDownUser; DrawingHandler: DrawApps_OnGenerateDrawingUser; AUpCaption: CNullString; ADownCaption: CNullString),
+      (LeftOffset: 269; TopOffset: 2; Width: 22; Height: 34; MouseDownHandler: PageUpKey_OnMouseDownUser; DrawingHandler: nil; AUpCaption: CKeyPgText; ADownCaption: CKeyUpText),
+      (LeftOffset: 294; TopOffset: 2; Width: 22; Height: 34; MouseDownHandler: PageDownKey_OnMouseDownUser; DrawingHandler: nil; AUpCaption: CKeyPgText; ADownCaption: CKeyDnText),
+      (LeftOffset: 269; TopOffset: 38; Width: 47; Height: 34; MouseDownHandler: HomeKey_OnMouseDownUser; DrawingHandler: nil; AUpCaption: CKeyHomeText; ADownCaption: CNullString),
+      (LeftOffset: 280; TopOffset: 74; Width: 36; Height: 34; MouseDownHandler: EndKey_OnMouseDownUser; DrawingHandler: nil; AUpCaption: CKeyEndText; ADownCaption: CNullString),
+      (LeftOffset: 231; TopOffset: 164; Width: 27; Height: 16; MouseDownHandler: LeftArrowKey_OnMouseDownUser; DrawingHandler: DrawLeftArrow_OnGenerateDrawingUser; AUpCaption: CNullString; ADownCaption: CNullString),
+      (LeftOffset: 289; TopOffset: 164; Width: 27; Height: 16; MouseDownHandler: RightArrowKey_OnMouseDownUser; DrawingHandler: DrawRightArrow_OnGenerateDrawingUser; AUpCaption: CNullString; ADownCaption: CNullString),
+      (LeftOffset: 260; TopOffset: 146; Width: 27; Height: 16; MouseDownHandler: UpArrowKey_OnMouseDownUser; DrawingHandler: DrawUpArrow_OnGenerateDrawingUser; AUpCaption: CNullString; ADownCaption: CNullString),
+      (LeftOffset: 260; TopOffset: 164; Width: 27; Height: 16; MouseDownHandler: DownArrowKey_OnMouseDownUser; DrawingHandler: DrawDownArrow_OnGenerateDrawingUser; AUpCaption: CNullString; ADownCaption: CNullString),
+      (LeftOffset: 236; TopOffset: 2; Width: 31; Height: 34; MouseDownHandler: BackSpaceKey_OnMouseDownUser; DrawingHandler: DrawBackSpaceArrow_OnGenerateDrawingUser; AUpCaption: CNullString; ADownCaption: CNullString)
+    {$ELSE}
+      (280, 110, 36, 34, @DeleteKey_OnMouseDownUser, nil, CKeyDelText, CNullString),
+      (2, 74, 38, 34, @CapsKey_OnMouseDownUser, nil, CKeyCapsText, CNullString),
+      (240, 74, 38, 34, @EnterKey_OnMouseDownUser, @DrawEnterArrow_OnGenerateDrawingUser, CNullString, CNullString),
+      (2, 110, 47, 34, @ShiftKey_OnMouseDownUser, @DrawShift_OnGenerateDrawingUser, CNullString, CNullString),
+      (231, 110, 47, 34, @ShiftKey_OnMouseDownUser, @DrawShift_OnGenerateDrawingUser, CNullString, CNullString),
+      (2, 146, 30, 34, @ControlKey_OnMouseDownUser, nil, CKeyCtrlText, CNullString),
+      (199, 146, 30, 34, @ControlKey_OnMouseDownUser, nil, CKeyCtrlText, CNullString),
+      (34, 146, 23, 34, @AltKey_OnMouseDownUser, nil, CKeyAltText, CNullString),
+      (153, 146, 23, 34, @AltKey_OnMouseDownUser, nil, CKeyAltText, CNullString),
+      (59, 146, 92, 34, @SpaceKey_OnMouseDownUser, nil, CSpaceString, CSpaceString),
+      (178, 146, 19, 34, @AppsKey_OnMouseDownUser, @DrawApps_OnGenerateDrawingUser, CNullString, CNullString),
+      (269, 2, 22, 34, @PageUpKey_OnMouseDownUser, nil, CKeyPgText, CKeyUpText),
+      (294, 2, 22, 34, @PageDownKey_OnMouseDownUser, nil, CKeyPgText, CKeyDnText),
+      (269, 38, 47, 34, @HomeKey_OnMouseDownUser, nil, CKeyHomeText, CNullString),
+      (280, 74, 36, 34, @EndKey_OnMouseDownUser, nil, CKeyEndText, CNullString),
+      (231, 164, 27, 16, @LeftArrowKey_OnMouseDownUser, @DrawLeftArrow_OnGenerateDrawingUser, CNullString, CNullString),
+      (289, 164, 27, 16, @RightArrowKey_OnMouseDownUser, @DrawRightArrow_OnGenerateDrawingUser, CNullString, CNullString),
+      (260, 146, 27, 16, @UpArrowKey_OnMouseDownUser, @DrawUpArrow_OnGenerateDrawingUser, CNullString, CNullString),
+      (260, 164, 27, 16, @DownArrowKey_OnMouseDownUser, @DrawDownArrow_OnGenerateDrawingUser, CNullString, CNullString),
+      (236, 2, 31, 34, @BackSpaceKey_OnMouseDownUser, @DrawBackSpaceArrow_OnGenerateDrawingUser, CNullString, CNullString)
+    {$ENDIF}
+  );
+
+function CreateRemainingSpecialKeys(AVK: PDynTFTVirtualKeyboard): PDynTFTKeyButton;
 var
-  i, n: Integer;
-  AKeyButton: PDynTFTKeyButton;
+  i: Integer;
+  UpCaption, DownCaption: string[4];
 begin
-  n := Length(Row1_Text);
-{$IFDEF IsDesktop}
-  for i := 1 to n do
-{$ELSE}
-  Dec(n);
-  for i := 0 to n do
-{$ENDIF}
+  for i := 1 to CMaxSpecialKeys do
   begin
-    AKeyButton := DynTFTKeyButton_Create(ScreenIndex, XOffset + ((KeyWidth + 2) * (i - {$IFDEF IsDesktop} 1 {$ELSE} 0 {$ENDIF})), YOffset, KeyWidth, KeyHeight);
-
-    {$IFDEF IsDesktop}
-      AKeyButton^.BaseProps.OnMouseDownUser^ := OneRowKey_OnMouseDownUser;
-    {$ELSE}
-      AKeyButton^.BaseProps.OnMouseDownUser := @OneRowKey_OnMouseDownUser;
-    {$ENDIF}
-
-    {$IFDEF IsDesktop}
-      AKeyButton^.UpCaption := Row1_Text[i];
-    {$ELSE}
-      AKeyButton^.UpCaption[0] := Row1_Text[i];
-      AKeyButton^.UpCaption[1] := #0;
-    {$ENDIF}
-
-    AKeyButton^.DownCaption := '';
-
-    DynTFTShowComponent(PDynTFTBaseComponent(TPtrRec(AKeyButton)));
-    AKeyButton^.BaseProps.Parent := PPtrRec(TPtrRec(AVK));
+    UpCaption := C_Special_Keys[i].AUpCaption;
+    DownCaption := C_Special_Keys[i].ADownCaption;
+    
+    Result := CreateSpecialKey(C_Special_Keys[i].LeftOffset, C_Special_Keys[i].TopOffset, C_Special_Keys[i].Width, C_Special_Keys[i].Height,
+                               C_Special_Keys[i].MouseDownHandler,
+                               C_Special_Keys[i].DrawingHandler,
+                               UpCaption, 
+                               DownCaption,
+                               AVK);
   end;
 end;
 
 
 procedure CreateKeyboardKeys(AVK: PDynTFTVirtualKeyboard);
 var
-  ScreenIndex: Byte;
-  Left, Top: TSInt;
-  
   AKeyButton: PDynTFTKeyButton;
   ANumbersRow1: string{$IFNDEF IsDesktop}[13]{$ENDIF};
   ANumbersRow2: string{$IFNDEF IsDesktop}[13]{$ENDIF};
@@ -628,283 +895,46 @@ var
 
   ADotRow1: string{$IFNDEF IsDesktop}[3]{$ENDIF};
   ADotRow2: string{$IFNDEF IsDesktop}[3]{$ENDIF};
+
+  ANullString: string{$IFNDEF IsDesktop}[1]{$ENDIF};
 begin
-  ScreenIndex := AVK^.BaseProps.ScreenIndex;
-  Left := AVK^.BaseProps.Left;
-  Top := AVK^.BaseProps.Top;
+  ANumbersRow1 := CNumbersRow1; //'~!@#$%^&*()_+';
+  ANumbersRow2 := CNumbersRow2; //'`1234567890-=';
+  ALettersRow1 := CLettersRow1; //'QWERTYUIOP';
+  ALettersRow2 := CLettersRow2; //'ASDFGHJKL';
+  ALettersRow3 := CLettersRow3; //'ZXCVBNM';
 
-  ANumbersRow1 := '~!@#$%^&*()_+';
-  ANumbersRow2 := '`1234567890-=';
-  ALettersRow1 := 'QWERTYUIOP';
-  ALettersRow2 := 'ASDFGHJKL';
-  ALettersRow3 := 'ZXCVBNM';
+  ASquareBracketsRow1 := CSpecialChars1; //'{}|';
+  ASquareBracketsRow2 := CSpecialChars2; //'[]\';
 
-  ASquareBracketsRow1 := '{}|';
-  ASquareBracketsRow2 := '[]\';
+  AColonRow1 := CColonRow1; //':"';
+  AColonRow2 := CColonRow2; //';' + #39;
 
-  AColonRow1 := ':"';
-  AColonRow2 := ';' + #39;
+  ADotRow1 := CDotRow1; //'<>?';
+  ADotRow2 := CDotRow2; //',./';
 
-  ADotRow1 := '<>?';
-  ADotRow2 := ',./';
+  ANullString := '';
 
   //This must be the first component of the keyboard - Tab:
-  AKeyButton := DynTFTKeyButton_Create(ScreenIndex, Left + 2, Top + 38, 31, 34);
-  {$IFDEF IsDesktop}
-    AKeyButton^.BaseProps.OnMouseDownUser^ := TabKey_OnMouseDownUser;
-    AKeyButton^.OnGenerateDrawingUser^ := DrawTabArrows_OnGenerateDrawingUser;
-  {$ELSE}
-    AKeyButton^.BaseProps.OnMouseDownUser := @TabKey_OnMouseDownUser;
-    AKeyButton^.OnGenerateDrawingUser := @DrawTabArrows_OnGenerateDrawingUser;
-  {$ENDIF}
-  DynTFTShowComponent(PDynTFTBaseComponent(TPtrRec(AKeyButton)));
+
+  AKeyButton := CreateSpecialKey(2, 38, 31, 34, {$IFDEF IsMCU}@{$ENDIF}TabKey_OnMouseDownUser, {$IFDEF IsMCU}@{$ENDIF}DrawTabArrows_OnGenerateDrawingUser, ANullString, ANullString, AVK);
   AVK^.FirstCreatedKey := PDynTFTBaseComponent(TPtrRec(AKeyButton));
-  AKeyButton^.BaseProps.Parent := PPtrRec(TPtrRec(AVK));
 
   //"middle-created" components
-  CreateTwoRowKeys(ScreenIndex, AVK, ANumbersRow1, ANumbersRow2, Left + 2, Top + 2, 16, 34);
-  CreateOneRowKeys(ScreenIndex, AVK, ALettersRow1, Left + 35, Top + 38, 16, 34);
-  CreateOneRowKeys(ScreenIndex, AVK, ALettersRow2, Left + 42, Top + 74, 16, 34);
-  CreateOneRowKeys(ScreenIndex, AVK, ALettersRow3, Left + 51, Top + 110, 16, 34);
+  CreateTwoRowKeys(AVK, ANumbersRow1, ANumbersRow2, 2, 2, {$IFDEF IsMCU}@{$ENDIF}TwoRowsKey_OnMouseDownUser);
+  CreateTwoRowKeys(AVK, ALettersRow1, ANullString, 35, 38, {$IFDEF IsMCU}@{$ENDIF}OneRowKey_OnMouseDownUser);
+  CreateTwoRowKeys(AVK, ALettersRow2, ANullString, 42, 74, {$IFDEF IsMCU}@{$ENDIF}OneRowKey_OnMouseDownUser);
+  CreateTwoRowKeys(AVK, ALettersRow3, ANullString, 51, 110, {$IFDEF IsMCU}@{$ENDIF}OneRowKey_OnMouseDownUser);
 
-  CreateTwoRowKeys(ScreenIndex, AVK, ASquareBracketsRow1, ASquareBracketsRow2, Left + 215, Top + 38, 16, 34);
-  CreateTwoRowKeys(ScreenIndex, AVK, AColonRow1, AColonRow2, Left + 204, Top + 74, 16, 34);
-  CreateTwoRowKeys(ScreenIndex, AVK, ADotRow1, ADotRow2, Left + 177, Top + 110, 16, 34);
+  CreateTwoRowKeys(AVK, ASquareBracketsRow1, ASquareBracketsRow2, 215, 38, {$IFDEF IsMCU}@{$ENDIF}TwoRowsKey_OnMouseDownUser);
+  CreateTwoRowKeys(AVK, AColonRow1, AColonRow2, 204, 74, {$IFDEF IsMCU}@{$ENDIF}TwoRowsKey_OnMouseDownUser);
+  CreateTwoRowKeys(AVK, ADotRow1, ADotRow2, 177, 110, {$IFDEF IsMCU}@{$ENDIF}TwoRowsKey_OnMouseDownUser);
 
-  ////////////////////////////////////////////////////// Delete:
-  AKeyButton := DynTFTKeyButton_Create(ScreenIndex, Left + 280, Top + 110, 36, 34);
-  {$IFDEF IsDesktop}
-    AKeyButton^.BaseProps.OnMouseDownUser^ := DeleteKey_OnMouseDownUser;
-  {$ELSE}  
-    AKeyButton^.BaseProps.OnMouseDownUser := @DeleteKey_OnMouseDownUser;
-  {$ENDIF}
-  AKeyButton^.UpCaption := 'Del';
-  DynTFTShowComponent(PDynTFTBaseComponent(TPtrRec(AKeyButton)));
-  AKeyButton^.BaseProps.Parent := PPtrRec(TPtrRec(AVK));
+  AKeyButton := CreateRemainingSpecialKeys(AVK);
 
-  //////////////////////////////////////////////////////Caps:
-  AKeyButton := DynTFTKeyButton_Create(ScreenIndex, Left + 2, Top + 74, 38, 34);
-  {$IFDEF IsDesktop}
-    AKeyButton^.BaseProps.OnMouseDownUser^ := CapsKey_OnMouseDownUser;
-  {$ELSE}
-    AKeyButton^.BaseProps.OnMouseDownUser := @CapsKey_OnMouseDownUser;
-  {$ENDIF}
-  AKeyButton^.UpCaption := 'Caps';
-  //AKeyButton^.DownCaption := 'Lock';
-  DynTFTShowComponent(PDynTFTBaseComponent(TPtrRec(AKeyButton)));
-  AKeyButton^.BaseProps.Parent := PPtrRec(TPtrRec(AVK));
-
-  //////////////////////////////////////////////////////Enter:
-  AKeyButton := DynTFTKeyButton_Create(ScreenIndex, Left + 240, Top + 74, 38, 34);
-  {$IFDEF IsDesktop}
-    AKeyButton^.BaseProps.OnMouseDownUser^ := EnterKey_OnMouseDownUser;
-    AKeyButton^.OnGenerateDrawingUser^ := DrawEnterArrow_OnGenerateDrawingUser;
-  {$ELSE}
-    AKeyButton^.BaseProps.OnMouseDownUser := @EnterKey_OnMouseDownUser;
-    AKeyButton^.OnGenerateDrawingUser := @DrawEnterArrow_OnGenerateDrawingUser;
-  {$ENDIF}
-  DynTFTShowComponent(PDynTFTBaseComponent(TPtrRec(AKeyButton)));
-  AKeyButton^.BaseProps.Parent := PPtrRec(TPtrRec(AVK));
-
-  ////////////////////////////////////////////////////// Left Shift:
-  AKeyButton := DynTFTKeyButton_Create(ScreenIndex, Left + 2, Top + 110, 47, 34);
-  {$IFDEF IsDesktop}
-    AKeyButton^.BaseProps.OnMouseDownUser^ := ShiftKey_OnMouseDownUser;
-    AKeyButton^.OnGenerateDrawingUser^ := DrawShift_OnGenerateDrawingUser;
-  {$ELSE}
-    AKeyButton^.BaseProps.OnMouseDownUser := @ShiftKey_OnMouseDownUser;
-    AKeyButton^.OnGenerateDrawingUser := @DrawShift_OnGenerateDrawingUser;
-  {$ENDIF}
-  DynTFTShowComponent(PDynTFTBaseComponent(TPtrRec(AKeyButton)));
-  AKeyButton^.BaseProps.Parent := PPtrRec(TPtrRec(AVK));
-
-  ////////////////////////////////////////////////////// Right Shift:
-  AKeyButton := DynTFTKeyButton_Create(ScreenIndex, Left + 231, Top + 110, 47, 34);
-  {$IFDEF IsDesktop}
-    AKeyButton^.BaseProps.OnMouseDownUser^ := ShiftKey_OnMouseDownUser;
-    AKeyButton^.OnGenerateDrawingUser^ := DrawShift_OnGenerateDrawingUser;
-  {$ELSE}
-    AKeyButton^.BaseProps.OnMouseDownUser := @ShiftKey_OnMouseDownUser;
-    AKeyButton^.OnGenerateDrawingUser := @DrawShift_OnGenerateDrawingUser;
-  {$ENDIF}
-  DynTFTShowComponent(PDynTFTBaseComponent(TPtrRec(AKeyButton)));
-  AKeyButton^.BaseProps.Parent := PPtrRec(TPtrRec(AVK));
-
-  //////////////////////////////////////////////////////Left Ctrl:
-  AKeyButton := DynTFTKeyButton_Create(ScreenIndex, Left + 2, Top + 146, 30, 34);
-  {$IFDEF IsDesktop}
-    AKeyButton^.BaseProps.OnMouseDownUser^ := ControlKey_OnMouseDownUser;
-  {$ELSE}
-    AKeyButton^.BaseProps.OnMouseDownUser := @ControlKey_OnMouseDownUser;
-  {$ENDIF}
-  AKeyButton^.UpCaption := 'Ctrl';
-  DynTFTShowComponent(PDynTFTBaseComponent(TPtrRec(AKeyButton)));
-  AKeyButton^.BaseProps.Parent := PPtrRec(TPtrRec(AVK));
-
-  //////////////////////////////////////////////////////Right Ctrl:
-  AKeyButton := DynTFTKeyButton_Create(ScreenIndex, Left + 199, Top + 146, 30, 34);
-  {$IFDEF IsDesktop}
-    AKeyButton^.BaseProps.OnMouseDownUser^ := ControlKey_OnMouseDownUser;
-  {$ELSE}
-    AKeyButton^.BaseProps.OnMouseDownUser := @ControlKey_OnMouseDownUser;
-  {$ENDIF}
-  AKeyButton^.UpCaption := 'Ctrl';
-  DynTFTShowComponent(PDynTFTBaseComponent(TPtrRec(AKeyButton)));
-  AKeyButton^.BaseProps.Parent := PPtrRec(TPtrRec(AVK));
-
-  //////////////////////////////////////////////////////Left Alt:
-  AKeyButton := DynTFTKeyButton_Create(ScreenIndex, Left + 34, Top + 146, 23, 34);
-  {$IFDEF IsDesktop}
-    AKeyButton^.BaseProps.OnMouseDownUser^ := AltKey_OnMouseDownUser;
-  {$ELSE}
-    AKeyButton^.BaseProps.OnMouseDownUser := @AltKey_OnMouseDownUser;
-  {$ENDIF}
-  AKeyButton^.UpCaption := 'Alt';
-  DynTFTShowComponent(PDynTFTBaseComponent(TPtrRec(AKeyButton)));
-  AKeyButton^.BaseProps.Parent := PPtrRec(TPtrRec(AVK));
-
-  //////////////////////////////////////////////////////Right Alt:
-  AKeyButton := DynTFTKeyButton_Create(ScreenIndex, Left + 153, Top + 146, 23, 34);
-  {$IFDEF IsDesktop}
-    AKeyButton^.BaseProps.OnMouseDownUser^ := AltKey_OnMouseDownUser;
-  {$ELSE}
-    AKeyButton^.BaseProps.OnMouseDownUser := @AltKey_OnMouseDownUser;
-  {$ENDIF}
-  AKeyButton^.UpCaption := 'Alt';
-  DynTFTShowComponent(PDynTFTBaseComponent(TPtrRec(AKeyButton)));
-  AKeyButton^.BaseProps.Parent := PPtrRec(TPtrRec(AVK));
-
-  //////////////////////////////////////////////////////Space:
-  AKeyButton := DynTFTKeyButton_Create(ScreenIndex, Left + 59, Top + 146, 92, 34);
-  {$IFDEF IsDesktop}
-    AKeyButton^.BaseProps.OnMouseDownUser^ := SpaceKey_OnMouseDownUser;
-  {$ELSE}
-    AKeyButton^.BaseProps.OnMouseDownUser := @SpaceKey_OnMouseDownUser;
-  {$ENDIF}
-  AKeyButton^.UpCaption := ' ';    //set both captions, because of shift state
-  AKeyButton^.DownCaption := ' ';
-  DynTFTShowComponent(PDynTFTBaseComponent(TPtrRec(AKeyButton)));
-  AKeyButton^.BaseProps.Parent := PPtrRec(TPtrRec(AVK));
-
-  ////////////////////////////////////////////////////// Apps:
-  AKeyButton := DynTFTKeyButton_Create(ScreenIndex, Left + 178, Top + 146, 19, 34);
-  {$IFDEF IsDesktop}
-    AKeyButton^.BaseProps.OnMouseDownUser^ := AppsKey_OnMouseDownUser;
-    AKeyButton^.OnGenerateDrawingUser^ := DrawApps_OnGenerateDrawingUser;
-  {$ELSE}
-    AKeyButton^.BaseProps.OnMouseDownUser := @AppsKey_OnMouseDownUser;
-    AKeyButton^.OnGenerateDrawingUser := @DrawApps_OnGenerateDrawingUser;
-  {$ENDIF}
-  DynTFTShowComponent(PDynTFTBaseComponent(TPtrRec(AKeyButton)));
-  AKeyButton^.BaseProps.Parent := PPtrRec(TPtrRec(AVK));
-
-  ////////////////////////////////////////////////////// PageUp:
-  AKeyButton := DynTFTKeyButton_Create(ScreenIndex, Left + 269, Top + 2, 22, 34);
-  {$IFDEF IsDesktop}
-    AKeyButton^.BaseProps.OnMouseDownUser^ := PageUpKey_OnMouseDownUser;
-  {$ELSE}
-    AKeyButton^.BaseProps.OnMouseDownUser := @PageUpKey_OnMouseDownUser;
-  {$ENDIF}
-  AKeyButton^.UpCaption := 'Pg';
-  AKeyButton^.DownCaption := 'Up';
-  DynTFTShowComponent(PDynTFTBaseComponent(TPtrRec(AKeyButton)));
-  AKeyButton^.BaseProps.Parent := PPtrRec(TPtrRec(AVK));
-
-  ////////////////////////////////////////////////////// PageDown:
-  AKeyButton := DynTFTKeyButton_Create(ScreenIndex, Left + 294, Top + 2, 22, 34);
-  {$IFDEF IsDesktop}
-    AKeyButton^.BaseProps.OnMouseDownUser^ := PageDownKey_OnMouseDownUser;
-  {$ELSE}
-    AKeyButton^.BaseProps.OnMouseDownUser := @PageDownKey_OnMouseDownUser;
-  {$ENDIF}
-  AKeyButton^.UpCaption := 'Pg';
-  AKeyButton^.DownCaption := 'Dn';
-  DynTFTShowComponent(PDynTFTBaseComponent(TPtrRec(AKeyButton)));
-  AKeyButton^.BaseProps.Parent := PPtrRec(TPtrRec(AVK));
-
-  ////////////////////////////////////////////////////// Home:
-  AKeyButton := DynTFTKeyButton_Create(ScreenIndex, Left + 269, Top + 38, 47, 34);
-  {$IFDEF IsDesktop}
-    AKeyButton^.BaseProps.OnMouseDownUser^ := HomeKey_OnMouseDownUser;
-  {$ELSE}
-    AKeyButton^.BaseProps.OnMouseDownUser := @HomeKey_OnMouseDownUser;
-  {$ENDIF}
-  AKeyButton^.UpCaption := 'Home';
-  DynTFTShowComponent(PDynTFTBaseComponent(TPtrRec(AKeyButton)));
-  AKeyButton^.BaseProps.Parent := PPtrRec(TPtrRec(AVK));
-
-  ////////////////////////////////////////////////////// End:
-  AKeyButton := DynTFTKeyButton_Create(ScreenIndex, Left + 280, Top + 74, 36, 34);
-  {$IFDEF IsDesktop}
-    AKeyButton^.BaseProps.OnMouseDownUser^ := EndKey_OnMouseDownUser;
-  {$ELSE}
-    AKeyButton^.BaseProps.OnMouseDownUser := @EndKey_OnMouseDownUser;
-  {$ENDIF}
-  AKeyButton^.UpCaption := 'End';
-  DynTFTShowComponent(PDynTFTBaseComponent(TPtrRec(AKeyButton)));
-  AKeyButton^.BaseProps.Parent := PPtrRec(TPtrRec(AVK));
-
-  ////////////////////////////////////////////////////// Left Arrow:
-  AKeyButton := DynTFTKeyButton_Create(ScreenIndex, Left + 231, Top + 164, 27, 16);
-  {$IFDEF IsDesktop}
-    AKeyButton^.BaseProps.OnMouseDownUser^ := LeftArrowKey_OnMouseDownUser;
-    AKeyButton^.OnGenerateDrawingUser^ := DrawLeftArrow_OnGenerateDrawingUser;
-  {$ELSE}
-    AKeyButton^.BaseProps.OnMouseDownUser := @LeftArrowKey_OnMouseDownUser;
-    AKeyButton^.OnGenerateDrawingUser := @DrawLeftArrow_OnGenerateDrawingUser;
-  {$ENDIF}
-  DynTFTShowComponent(PDynTFTBaseComponent(TPtrRec(AKeyButton)));
-  AKeyButton^.BaseProps.Parent := PPtrRec(TPtrRec(AVK));
-
-  ////////////////////////////////////////////////////// Right Arrow:
-  AKeyButton := DynTFTKeyButton_Create(ScreenIndex, Left + 289, Top + 164, 27, 16);
-  {$IFDEF IsDesktop}
-    AKeyButton^.BaseProps.OnMouseDownUser^ := RightArrowKey_OnMouseDownUser;
-    AKeyButton^.OnGenerateDrawingUser^ := DrawRightArrow_OnGenerateDrawingUser;
-  {$ELSE}
-    AKeyButton^.BaseProps.OnMouseDownUser := @RightArrowKey_OnMouseDownUser;
-    AKeyButton^.OnGenerateDrawingUser := @DrawRightArrow_OnGenerateDrawingUser;
-  {$ENDIF}
-  DynTFTShowComponent(PDynTFTBaseComponent(TPtrRec(AKeyButton)));
-  AKeyButton^.BaseProps.Parent := PPtrRec(TPtrRec(AVK));
-
-  ////////////////////////////////////////////////////// Up Arrow:
-  AKeyButton := DynTFTKeyButton_Create(ScreenIndex, Left + 260, Top + 146, 27, 16);
-  {$IFDEF IsDesktop}
-    AKeyButton^.BaseProps.OnMouseDownUser^ := UpArrowKey_OnMouseDownUser;
-    AKeyButton^.OnGenerateDrawingUser^ := DrawUpArrow_OnGenerateDrawingUser;
-  {$ELSE}
-    AKeyButton^.BaseProps.OnMouseDownUser := @UpArrowKey_OnMouseDownUser;
-    AKeyButton^.OnGenerateDrawingUser := @DrawUpArrow_OnGenerateDrawingUser;
-  {$ENDIF}
-  DynTFTShowComponent(PDynTFTBaseComponent(TPtrRec(AKeyButton)));
-  AKeyButton^.BaseProps.Parent := PPtrRec(TPtrRec(AVK));
-
-  ////////////////////////////////////////////////////// Down Arrow:
-  AKeyButton := DynTFTKeyButton_Create(ScreenIndex, Left + 260, Top + 164, 27, 16);
-  {$IFDEF IsDesktop}
-    AKeyButton^.BaseProps.OnMouseDownUser^ := DownArrowKey_OnMouseDownUser;
-    AKeyButton^.OnGenerateDrawingUser^ := DrawDownArrow_OnGenerateDrawingUser;
-  {$ELSE}
-    AKeyButton^.BaseProps.OnMouseDownUser := @DownArrowKey_OnMouseDownUser;
-    AKeyButton^.OnGenerateDrawingUser := @DrawDownArrow_OnGenerateDrawingUser;
-  {$ENDIF}
-  DynTFTShowComponent(PDynTFTBaseComponent(TPtrRec(AKeyButton)));
-  AKeyButton^.BaseProps.Parent := PPtrRec(TPtrRec(AVK));
-
-  //This must be the last component of the keyboard - Backspace:
-  AKeyButton := DynTFTKeyButton_Create(ScreenIndex, Left + 236, Top + 2, 31, 34);
-  {$IFDEF IsDesktop}
-    AKeyButton^.BaseProps.OnMouseDownUser^ := BackSpaceKey_OnMouseDownUser;
-    AKeyButton^.OnGenerateDrawingUser^ := DrawBackSpaceArrow_OnGenerateDrawingUser;
-  {$ELSE}
-    AKeyButton^.BaseProps.OnMouseDownUser := @BackSpaceKey_OnMouseDownUser;
-    AKeyButton^.OnGenerateDrawingUser := @DrawBackSpaceArrow_OnGenerateDrawingUser;
-  {$ENDIF}
-  DynTFTShowComponent(PDynTFTBaseComponent(TPtrRec(AKeyButton)));
+  //This must be the last component of the keyboard:
   AVK^.LastCreatedKey := PDynTFTBaseComponent(TPtrRec(AKeyButton));
-  AKeyButton^.BaseProps.Parent := PPtrRec(TPtrRec(AVK));
-end;  
+end;
 
 
 function DynTFTVirtualKeyboard_Create(ScreenIndex: Byte; Left, Top, Width, Height: TSInt): PDynTFTVirtualKeyboard;
@@ -922,6 +952,7 @@ begin
   Result^.BaseProps.Top := Top;
   Result^.BaseProps.Width := Width;
   Result^.BaseProps.Height := Height;
+  //DynTFTInitComponentDimensions(PDynTFTBaseComponent(TPtrRec(Result)), ComponentType, True, Left, Top, Width, Height);
   DynTFTInitBasicStatePropertiesToDefault(PDynTFTBaseComponent(TPtrRec(Result)));
 
   Result^.Color := CL_DynTFTVirtualKeyboard_Background;
@@ -959,6 +990,9 @@ begin
   {$IFDEF IsDesktop}
     Dispose(AVirtualKeyboard^.OnCharKey);
     Dispose(AVirtualKeyboard^.OnSpecialKey);
+
+    AVirtualKeyboard^.OnCharKey := nil;
+    AVirtualKeyboard^.OnSpecialKey := nil;
   {$ENDIF}
 
   DynTFTComponent_DestroyMultiple(AVirtualKeyboard^.FirstCreatedKey, AVirtualKeyboard^.LastCreatedKey, SizeOf(TDynTFTKeyButton));

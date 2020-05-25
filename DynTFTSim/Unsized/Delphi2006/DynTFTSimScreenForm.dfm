@@ -19,16 +19,6 @@ object frmDynTFTSimScreen: TfrmDynTFTSimScreen
     984)
   PixelsPerInch = 96
   TextHeight = 13
-  object imgScreen: TImage
-    Left = 8
-    Top = 47
-    Width = 782
-    Height = 929
-    Anchors = [akLeft, akTop, akRight, akBottom]
-    OnMouseDown = imgScreenMouseDown
-    OnMouseMove = imgScreenMouseMove
-    OnMouseUp = imgScreenMouseUp
-  end
   object lblScreenWidth: TLabel
     Left = 160
     Top = 2
@@ -42,26 +32,6 @@ object frmDynTFTSimScreen: TfrmDynTFTSimScreen
     Width = 71
     Height = 13
     Caption = 'Screen Height:'
-  end
-  object lblWidth: TLabel
-    Left = 176
-    Top = 27
-    Width = 10
-    Height = 41
-    AutoSize = False
-    Color = clRed
-    ParentColor = False
-    Visible = False
-  end
-  object lblHeight: TLabel
-    Left = 547
-    Top = 27
-    Width = 52
-    Height = 14
-    AutoSize = False
-    Color = clRed
-    ParentColor = False
-    Visible = False
   end
   object pnlCoords: TPanel
     Left = 8
@@ -110,6 +80,45 @@ object frmDynTFTSimScreen: TfrmDynTFTSimScreen
     State = cbChecked
     TabOrder = 4
     OnClick = chkShowHeightLineClick
+  end
+  object ScrollBox1: TScrollBox
+    Left = 8
+    Top = 44
+    Width = 785
+    Height = 932
+    HorzScrollBar.Tracking = True
+    VertScrollBar.Tracking = True
+    Anchors = [akLeft, akTop, akRight, akBottom]
+    TabOrder = 5
+    object imgScreen: TImage
+      Left = 0
+      Top = 0
+      Width = 782
+      Height = 929
+      OnMouseDown = imgScreenMouseDown
+      OnMouseMove = imgScreenMouseMove
+      OnMouseUp = imgScreenMouseUp
+    end
+    object lblHeight: TLabel
+      Left = 564
+      Top = 44
+      Width = 52
+      Height = 14
+      AutoSize = False
+      Color = clRed
+      ParentColor = False
+      Visible = False
+    end
+    object lblWidth: TLabel
+      Left = 193
+      Top = 44
+      Width = 10
+      Height = 41
+      AutoSize = False
+      Color = clRed
+      ParentColor = False
+      Visible = False
+    end
   end
   object tmrStartup: TTimer
     Enabled = False

@@ -139,6 +139,7 @@ begin
   Result^.BaseProps.Top := Top;
   Result^.BaseProps.Width := Width;
   Result^.BaseProps.Height := Height;
+  //DynTFTInitComponentDimensions(PDynTFTBaseComponent(TPtrRec(Result)), ComponentType, True, Left, Top, Width, Height);
   DynTFTInitBasicStatePropertiesToDefault(PDynTFTBaseComponent(TPtrRec(Result)));
 
   Result^.Font_Color := CL_DynTFTLabel_EnabledFont;
@@ -162,6 +163,14 @@ begin
     Result^.OnOwnerInternalMouseMove := nil;
     Result^.OnOwnerInternalMouseUp := nil;
   {$ENDIF}
+
+  {$IFDEF ComponentsHaveName}
+        {DynTFT_DebugConsole('--- Allocating user event handlers of label $' + IntToHex(TPTr(Result), 8) +
+                            '  Addr(Down) = $' + IntToHex(TPTr(Result^.OnOwnerInternalMouseDown), 8) +
+                            '  Addr(Move) = $' + IntToHex(TPTr(Result^.OnOwnerInternalMouseMove), 8) +
+                            '  Addr(Up) = $' + IntToHex(TPTr(Result^.OnOwnerInternalMouseUp), 8)
+                            );}
+  {$ENDIF}
 end;
 
 
@@ -177,7 +186,23 @@ procedure DynTFTLabel_Destroy(var ALabel: PDynTFTLabel);
     ATemp: PDynTFTBaseComponent;
 {$ENDIF}
 begin
+  {$IFDEF ComponentsHaveName}
+    {DynTFT_DebugConsole('/// Disposing internal event handlers of label: ' + ALabel^.BaseProps.Name +
+                        '  Addr(Down) = $' + IntToHex(TPTr(ALabel^.OnOwnerInternalMouseDown), 8) +
+                        '  Addr(Move) = $' + IntToHex(TPTr(ALabel^.OnOwnerInternalMouseMove), 8) +
+                        '  Addr(Up) = $' + IntToHex(TPTr(ALabel^.OnOwnerInternalMouseUp), 8)
+                        );}
+  {$ENDIF}
+
   {$IFDEF IsDesktop}
+    Dispose(ALabel^.OnOwnerInternalMouseDown);
+    Dispose(ALabel^.OnOwnerInternalMouseMove);
+    Dispose(ALabel^.OnOwnerInternalMouseUp);
+    
+    ALabel^.OnOwnerInternalMouseDown := nil;
+    ALabel^.OnOwnerInternalMouseMove := nil;
+    ALabel^.OnOwnerInternalMouseUp := nil;
+
     DynTFTComponent_Destroy(PDynTFTBaseComponent(TPtrRec(ALabel)), SizeOf(ALabel^));
   {$ELSE}
     //without temp var, mikroPascal gives an error:  289 341 Operator "@" not applicable to these operands "?T222"

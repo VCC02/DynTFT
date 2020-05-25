@@ -120,10 +120,10 @@ begin
 
   DynTFT_Set_Pen(BkCol, 1);
 
-  DynTFT_V_Line(y1 + 3, y2 - 3, x1 + 4); //vert
-  DynTFT_H_Line(x1 + 4, x2 - 4, y1 + 3); //horiz
-  DynTFT_V_Line(y1 + 3, y2 - 3, x2 - 4); //vert
-  DynTFT_H_Line(x1 + 4, x2 - 4, y2 - 3); //horiz
+  DynTFT_V_Line(y1 + 3, y2 - 3, x1 + 3); //vert
+  DynTFT_H_Line(x1 + 3, x2 - 3, y1 + 3); //horiz
+  DynTFT_V_Line(y1 + 3, y2 - 3, x2 - 3); //vert
+  DynTFT_H_Line(x1 + 3, x2 - 3, y2 - 3); //horiz
 
   if AButton^.BaseProps.CompState and CPRESSED = CPRESSED then
   begin
@@ -197,6 +197,7 @@ begin
   Result^.BaseProps.Top := Top;
   Result^.BaseProps.Width := Width;
   Result^.BaseProps.Height := Height;
+  //DynTFTInitComponentDimensions(PDynTFTBaseComponent(TPtrRec(Result)), ComponentType, True, Left, Top, Width, Height);
   DynTFTInitBasicStatePropertiesToDefault(PDynTFTBaseComponent(TPtrRec(Result)));
  
   Result^.Color := CL_DynTFTButton_Background;

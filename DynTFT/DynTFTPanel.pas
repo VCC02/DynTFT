@@ -189,6 +189,7 @@ begin
   Result^.BaseProps.Top := Top;
   Result^.BaseProps.Width := Width;
   Result^.BaseProps.Height := Height;
+  //DynTFTInitComponentDimensions(PDynTFTBaseComponent(TPtrRec(Result)), ComponentType, True, Left, Top, Width, Height);
   DynTFTInitBasicStatePropertiesToDefault(PDynTFTBaseComponent(TPtrRec(Result)));
 
   Result^.Color := CL_DynTFTPanel_Background;
@@ -231,6 +232,10 @@ begin
     Dispose(APanel^.OnOwnerInternalMouseDown);
     Dispose(APanel^.OnOwnerInternalMouseMove);
     Dispose(APanel^.OnOwnerInternalMouseUp);
+
+    APanel^.OnOwnerInternalMouseDown := nil;
+    APanel^.OnOwnerInternalMouseMove := nil;
+    APanel^.OnOwnerInternalMouseUp := nil;
   {$ENDIF}
 
   {$IFDEF IsDesktop}

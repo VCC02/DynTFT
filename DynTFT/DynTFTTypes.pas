@@ -104,13 +104,15 @@ type
   TDynTFTCompStr = string[CDynTFTMaxGenericStringLength];  //generic text
   PDynTFTCompStr = ^TDynTFTCompStr;
 
+  TDynTFTCompDebugStr = string[50];
+
   {$IFDEF CPU64}
     TSInt = Longint;
   {$ELSE}
     {$IFDEF IsDesktop}
       TSInt = Smallint;
     {$ELSE}
-      TSInt = Integer;  //This must be a 16-bit type on any microcontroller.
+      TSInt = Integer;  //This must be a 16-bit type on any microcontroller (well, PIC32 and PIC24/dsPIC).
     {$ENDIF}
   {$ENDIF}
 
@@ -199,7 +201,7 @@ type
     //Please update InitBaseHandlersAndProperties and FreeBaseHandlersAndProperties from DynTFTBaseDrawing, if adding pointers (like events)
 
     {$IFDEF ComponentsHaveName}
-      Name: PCompStr;
+      Name: TDynTFTCompDebugStr;
     {$ENDIF}
     
     {$IFDEF IncludeUserBaseProps}
@@ -217,6 +219,22 @@ type
   PDynTFTBaseComponent = ^TDynTFTBaseComponent;
 
 
+  TByteArray = array[0..32767] of Byte;
+  PByteArray = ^TByteArray;              //from SysUtils
+
+  TDWordArray = array[0..8191] of DWord;
+  PDWordArray = ^TDWordArray;
+
+  TTPtrArray = array[0..8191] of TPtr; //architecture dependent pointer size
+  PTPtrArray = ^TTPtrArray;
+
+  TAllCreatedDynTFTComponents = array[0..8191] of ^PDynTFTBaseComponent;
+  PAllCreatedDynTFTComponents = ^TAllCreatedDynTFTComponents;
+
+  
+  TDynTFTGenericHandlerProc = procedure(Sender: PPtrRec);
+  PDynTFTGenericHandlerProc = ^TDynTFTGenericHandlerProc;
+
   TDynTFTGenericEventHandler = procedure(ABase: PDynTFTBaseComponent);
   PDynTFTGenericEventHandler = ^TDynTFTGenericEventHandler;
 
@@ -228,6 +246,12 @@ type
 
   TDynTFTDestroyHandler = procedure(var ABaseComp: PDynTFTBaseComponent);
   PDynTFTDestroyHandler = ^TDynTFTDestroyHandler;
+
+  TDynTFTGetPropertyAddressProc = function(AComp: PDynTFTBaseComponent; PropertyIndex: Byte): PPtrRec;
+  PDynTFTGetPropertyAddressProc = ^TDynTFTGetPropertyAddressProc;
+
+  TDynTFTExecRTTIInstructionCallback = procedure(ABinaryComponentsData: PDWordArray; ByteCount: TPtr);  //using TPtr for optimization only. It is not expected that datalength would be longer than 64KB.
+  PDynTFTExecRTTIInstructionCallback = ^TDynTFTExecRTTIInstructionCallback;
 
   //These events allow internal handlers to call dedicated registered handlers. 
   TDynTFTBaseEventReg = record
@@ -241,6 +265,7 @@ type
       CompSize: TPtr;
       CompCreate: PDynTFTCreateHandler;
       CompDestroy: PDynTFTDestroyHandler;
+      CompGetPropertyAddress: {$IFDEF IsMCU} PDynTFTGetPropertyAddressProc {$ELSE} TDynTFTGetPropertyAddressProc {$ENDIF};
     {$ENDIF}
 
     //when adding events, please update SetComponentTypeInRegistry function and AllocateInternalHandlers, DisposeInternalHandlers, InitComponentTypeRegistration and RegisterComponentContainerEvents procedures.
@@ -266,7 +291,6 @@ type
   //PDynTFTScreenComponentInfo = ^TDynTFTScreenComponentInfo;
 
   TDynTFTComponentsContainer = array[0..CDynTFTMaxComponentsContainer - 1] of TDynTFTScreenComponentInfo;  //this array keeps all components in simple linked lists (one list / screen)
-  
 
 implementation
 

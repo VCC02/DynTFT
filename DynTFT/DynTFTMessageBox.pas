@@ -82,7 +82,7 @@ type
 
     BtnOK, BtnCancel: PDynTFTButton;   //Yes, No
     ExteriorLabel: PDynTFTLabel;
-    Done: Boolean;
+    Done: {$IFDEF IsDesktop} LongBool; {$ELSE} Boolean; {$ENDIF}
     ButtonsType: Integer;
     CloseResult: Integer;
   end;
@@ -167,6 +167,7 @@ begin
   DynTFT_Write_Text(AMessageBox^.Title, x1 + 10, y1 + 2);
 
   //draw text
+  DynTFT_Set_Brush(1, CL_DynTFTMessageBox_Background, 0, 0, 0, 0);
   DynTFT_Set_Font(@TFT_defaultFont, CL_DynTFTMessageBox_MessageFont, FO_HORIZONTAL);
   DynTFT_Write_Text(AMessageBox^.Text, x1 + 10, y1 + 30);
 
@@ -271,6 +272,7 @@ begin
   Result^.BaseProps.Top := Top;
   Result^.BaseProps.Width := Width;
   Result^.BaseProps.Height := Height;
+  //DynTFTInitComponentDimensions(PDynTFTBaseComponent(TPtrRec(Result)), ComponentType, False, Left, Top, Width, Height);
   DynTFTInitBasicStatePropertiesToDefault(PDynTFTBaseComponent(TPtrRec(Result)));
 
 
@@ -317,25 +319,14 @@ procedure DynTFTMessageBox_Destroy(var AMessageBox: PDynTFTMessageBox);
     ATemp: PDynTFTBaseComponent;
 {$ENDIF}
 begin
-  {$IFDEF IsDesktop}
-    DynTFTComponent_Destroy(PDynTFTBaseComponent(TPtrRec(AMessageBox^.BtnOK)), SizeOf(AMessageBox^.BtnOK^));
-    DynTFTComponent_Destroy(PDynTFTBaseComponent(TPtrRec(AMessageBox^.BtnCancel)), SizeOf(AMessageBox^.BtnCancel^));
-    DynTFTComponent_Destroy(PDynTFTBaseComponent(TPtrRec(AMessageBox^.ExteriorLabel)), SizeOf(AMessageBox^.ExteriorLabel^));
+  DynTFTButton_Destroy(AMessageBox^.BtnOK);
+  DynTFTButton_Destroy(AMessageBox^.BtnCancel);
+  DynTFTLabel_Destroy(AMessageBox^.ExteriorLabel);
 
+  {$IFDEF IsDesktop}
     DynTFTComponent_Destroy(PDynTFTBaseComponent(TPtrRec(AMessageBox)), SizeOf(AMessageBox^));
   {$ELSE}
     //without temp var, mikroPascal gives an error:  289 341 Operator "@" not applicable to these operands "?T222"
-    ATemp := PDynTFTBaseComponent(TPtrRec(AMessageBox^.BtnOK));
-    DynTFTComponent_Destroy(ATemp, SizeOf(AMessageBox^.BtnOK^));
-    AMessageBox^.BtnOK := PDynTFTButton(TPtrRec(ATemp));
-
-    ATemp := PDynTFTBaseComponent(TPtrRec(AMessageBox^.BtnCancel));
-    DynTFTComponent_Destroy(ATemp, SizeOf(AMessageBox^.BtnCancel^));
-    AMessageBox^.BtnCancel := PDynTFTButton(TPtrRec(ATemp));
-
-    ATemp := PDynTFTBaseComponent(TPtrRec(AMessageBox^.ExteriorLabel));
-    DynTFTComponent_Destroy(ATemp, SizeOf(AMessageBox^.ExteriorLabel^));
-    AMessageBox^.ExteriorLabel := PDynTFTLabel(TPtrRec(ATemp));
 
     ATemp := PDynTFTBaseComponent(TPtrRec(AMessageBox));
     DynTFTComponent_Destroy(ATemp, SizeOf(AMessageBox^));

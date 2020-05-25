@@ -135,7 +135,7 @@ begin
     {$ELSE}
       DynTFT_Set_Font(@TFT_defaultFont, ACol, FO_HORIZONTAL);
     {$ENDIF}
-    DynTFT_Write_Text(ARadioButton^.Caption, x1 + 14, y1);
+    DynTFT_Write_Text(ARadioButton^.Caption, x1 + 15, y1);
   end;
 
   ACol := ARadioButton^.Color;
@@ -176,6 +176,7 @@ begin
   Result^.BaseProps.Top := Top;
   Result^.BaseProps.Width := Width;
   Result^.BaseProps.Height := Height;
+  //DynTFTInitComponentDimensions(PDynTFTBaseComponent(TPtrRec(Result)), ComponentType, True, Left, Top, Width, Height);
   DynTFTInitBasicStatePropertiesToDefault(PDynTFTBaseComponent(TPtrRec(Result)));
 
   {$IFDEF IsDesktop}
@@ -232,6 +233,11 @@ begin
     Dispose(ARadioButton^.OnOwnerInternalMouseMove);
     Dispose(ARadioButton^.OnOwnerInternalMouseUp);
     Dispose(ARadioButton^.OnOwnerInternalBeforeDestroy);
+
+    ARadioButton^.OnOwnerInternalMouseDown := nil;
+    ARadioButton^.OnOwnerInternalMouseMove := nil;
+    ARadioButton^.OnOwnerInternalMouseUp := nil;
+    ARadioButton^.OnOwnerInternalBeforeDestroy := nil;
   {$ENDIF}
 
 

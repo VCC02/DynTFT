@@ -117,8 +117,10 @@ end;
 
 
 procedure DrawArrow(x, y: TSInt; Dir: Byte);
+var
+  x1, y1, x2, y2, x3, y3: TSInt;
 begin
-  case Dir of
+  {case Dir of
     CUpArrow :
       DrawTrianglePartForArrow(x + CHalfArrowSize, y, x, y + CHalfArrowSize, x + CArrowSize, y + CHalfArrowSize);
 
@@ -135,8 +137,68 @@ begin
     begin
       DrawTrianglePartForArrow(x, y + CHalfArrowSize, x + CHalfArrowSize, y, x + CHalfArrowSize, y + CArrowSize);
       DrawTrianglePartForArrow(x + CArrowSize, y + CHalfArrowSize, x + CHalfArrowSize, y, x + CHalfArrowSize, y + CArrowSize);
-    end;  
+    end;
+  end;}
+
+  x1 := x;
+  y1 := y;
+  x2 := x;
+  y2 := y;
+  //x3 := x;
+  //y3 := y;
+
+  case Dir of
+    CUpArrow :
+    begin
+      x1 := x + CHalfArrowSize;
+      //y1 := y;
+      //x2 := x;
+      y2 := y + CHalfArrowSize;
+      x3 := x + CArrowSize;
+      y3 := y + CHalfArrowSize;
+    end;
+
+    CDownArrow :
+    begin
+      x1 := x + CHalfArrowSize;
+      y1 := y + CArrowSize;
+      //x2 := x;
+      y2 := y + CHalfArrowSize;
+      x3 := x + CArrowSize;
+      y3 := y + CHalfArrowSize;
+    end;
+
+    CLeftArrow :
+    begin
+      //x1 := x;
+      y1 := y + CHalfArrowSize;
+      x2 := x + CHalfArrowSize;
+      //y2 := y;
+      x3 := x + CHalfArrowSize;
+      y3 := y + CArrowSize;
+    end;
+
+    CRightArrow :
+    begin
+      x1 := x + CArrowSize;
+      y1 := y + CHalfArrowSize;
+      x2 := x + CHalfArrowSize;
+      //y2 := y;
+      x3 := x + CHalfArrowSize;
+      y3 := y + CArrowSize;
+    end;
+
+    CUndefinedArrow :
+    begin
+      DrawArrow(x, y, CLeftArrow);
+      DrawArrow(x, y, CRightArrow);
+      Exit;
+    end
+  else
+    Exit;  
   end;
+
+  DrawTrianglePartForArrow(x1, y1, x2, y2, x3, y3);
 end;
 
 
@@ -213,22 +275,26 @@ begin
 
   //Draw focus rectangle from lines
   if AArrowButton^.BaseProps.Focused and CFOCUSED = CFOCUSED then
-    DynTFT_Set_Pen(CL_DynTFTArrowButton_FocusRectangle, 1)
+    Col1 := CL_DynTFTArrowButton_FocusRectangle
   else
-    DynTFT_Set_Pen(AArrowButton^.Color, 1);
+    Col1 := AArrowButton^.Color;
 
-  DynTFT_V_Line(y1 + 3, y2 - 3, x1 + 4); //vert
-  DynTFT_H_Line(x1 + 4, x2 - 4, y1 + 3); //horiz
-  DynTFT_V_Line(y1 + 3, y2 - 3, x2 - 4); //vert
-  DynTFT_H_Line(x1 + 4, x2 - 4, y2 - 3); //horiz
+  DynTFT_Set_Pen(Col1, 1);  
+
+  DynTFT_V_Line(y1 + 3, y2 - 3, x1 + 3); //vert
+  DynTFT_H_Line(x1 + 3, x2 - 3, y1 + 3); //horiz
+  DynTFT_V_Line(y1 + 3, y2 - 3, x2 - 3); //vert
+  DynTFT_H_Line(x1 + 3, x2 - 3, y2 - 3); //horiz
 
   //draw arrow
   PressOffset := DynTFTOrdBoolWord(Pressed);
   
   if AArrowButton^.BaseProps.Enabled and CENABLED = CDISABLED then
-    DynTFT_Set_Pen(CL_DynTFTArrowButton_DisabledArrow, 1)
+    Col1 := CL_DynTFTArrowButton_DisabledArrow
   else
-    DynTFT_Set_Pen(CL_DynTFTArrowButton_EnabledArrow, 1);
+    Col1 := CL_DynTFTArrowButton_EnabledArrow;
+
+  DynTFT_Set_Pen(Col1, 1);  
     
   DrawArrow(XRef + PressOffset, YRef + PressOffset, AArrowButton^.ArrowDir);
 end;
@@ -249,6 +315,7 @@ begin
   Result^.BaseProps.Top := Top;
   Result^.BaseProps.Width := Width;
   Result^.BaseProps.Height := Height;
+  //DynTFTInitComponentDimensions(PDynTFTBaseComponent(TPtrRec(Result)), ComponentType, True, Left, Top, Width, Height);
   DynTFTInitBasicStatePropertiesToDefault(PDynTFTBaseComponent(TPtrRec(Result)));
 
   Result^.ArrowDir := ArrowDir;
@@ -267,12 +334,20 @@ begin
     Result^.OnOwnerInternalMouseMove := nil;
     Result^.OnOwnerInternalMouseUp := nil;
   {$ENDIF}
+
+  {$IFDEF ComponentsHaveName}
+        {DynTFT_DebugConsole('--- Allocating user event handlers of arrow button $' + IntToHex(TPTr(Result), 8) +
+                            '  Addr(Down) = $' + IntToHex(TPTr(Result^.OnOwnerInternalMouseDown), 8) +
+                            '  Addr(Move) = $' + IntToHex(TPTr(Result^.OnOwnerInternalMouseMove), 8) +
+                            '  Addr(Up) = $' + IntToHex(TPTr(Result^.OnOwnerInternalMouseUp), 8)
+                            );}
+  {$ENDIF}
 end;
 
 
 function DynTFTArrowButton_Create(ScreenIndex: Byte; Left, Top, Width, Height: TSInt): PDynTFTArrowButton;
 begin
-  Result := DynTFTArrowButton_CreateWithArrow(ScreenIndex, Left, Top, Width, Height, CUndefinedArrow);
+  Result := DynTFTArrowButton_CreateWithArrow(ScreenIndex, Left, Top, Width, Height, CUpArrow);
 end;
 
 
@@ -288,10 +363,22 @@ procedure DynTFTArrowButton_Destroy(var AArrowButton: PDynTFTArrowButton);
     ATemp: PDynTFTBaseComponent;
 {$ENDIF}
 begin
+  {$IFDEF ComponentsHaveName}
+    {DynTFT_DebugConsole('/// Disposing internal event handlers of arrow button: ' + AArrowButton^.BaseProps.Name +
+                        '  Addr(Down) = $' + IntToHex(TPTr(AArrowButton^.OnOwnerInternalMouseDown), 8) +
+                        '  Addr(Move) = $' + IntToHex(TPTr(AArrowButton^.OnOwnerInternalMouseMove), 8) +
+                        '  Addr(Up) = $' + IntToHex(TPTr(AArrowButton^.OnOwnerInternalMouseUp), 8)
+                        );}
+  {$ENDIF}
+
   {$IFDEF IsDesktop}
     Dispose(AArrowButton^.OnOwnerInternalMouseDown);
     Dispose(AArrowButton^.OnOwnerInternalMouseMove);
     Dispose(AArrowButton^.OnOwnerInternalMouseUp);
+
+    AArrowButton^.OnOwnerInternalMouseDown := nil;
+    AArrowButton^.OnOwnerInternalMouseMove := nil;
+    AArrowButton^.OnOwnerInternalMouseUp := nil;
   {$ENDIF}
 
   {$IFDEF IsDesktop}

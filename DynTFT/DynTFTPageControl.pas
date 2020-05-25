@@ -158,7 +158,6 @@ begin
 
   if APageControl^.OldActiveIndex <> APageControl^.ActiveIndex then
   begin
-    APageControl^.OldActiveIndex := APageControl^.ActiveIndex;
     {$IFDEF IsDesktop}
       if Assigned(APageControl^.OnChange) then
         if Assigned(APageControl^.OnChange^) then
@@ -166,6 +165,8 @@ begin
       if APageControl^.OnChange <> nil then
     {$ENDIF}
         APageControl^.OnChange^(PPtrRec(TPtrRec(APageControl)));
+        
+    APageControl^.OldActiveIndex := APageControl^.ActiveIndex;
   end;
 end;
 
@@ -225,6 +226,7 @@ begin
   Result^.BaseProps.Top := Top;
   Result^.BaseProps.Width := Width;
   Result^.BaseProps.Height := Height;
+  //DynTFTInitComponentDimensions(PDynTFTBaseComponent(TPtrRec(Result)), ComponentType, False, Left, Top, Width, Height);
   DynTFTInitBasicStatePropertiesToDefault(PDynTFTBaseComponent(TPtrRec(Result)));
 
   Result^.PageCount := 0;
@@ -260,6 +262,7 @@ var
 begin
   {$IFDEF IsDesktop}
     Dispose(APageControl^.OnChange);
+    APageControl^.OnChange := nil;
   {$ENDIF}
   
   for i := 0 to APageControl^.PageCount - 1 do
@@ -270,15 +273,7 @@ begin
       APageControl^.TabButtons[i]^.OnOwnerInternalBeforeDestroy := nil;  //prevent the button from calling the parent's OnOwnerInternalBeforeDestroy event
     {$ENDIF}
     
-
-    {$IFDEF IsDesktop}
-      DynTFTComponent_Destroy(PDynTFTBaseComponent(TPtrRec(APageControl^.TabButtons[i])), SizeOf(APageControl^.TabButtons[i]^));
-    {$ELSE}
-      //without temp var, mikroPascal gives an error:  289 341 Operator "@" not applicable to these operands "?T222"
-      ATemp := PDynTFTBaseComponent(TPtrRec(APageControl^.TabButtons[i]));
-      DynTFTComponent_Destroy(ATemp, SizeOf(APageControl^.TabButtons[i]^));
-      APageControl^.TabButtons[i] := PDynTFTTabButton(TPtrRec(ATemp));
-    {$ENDIF}
+    DynTFTTabButton_Destroy(APageControl^.TabButtons[i]);
   end;
 
   {$IFDEF IsDesktop}

@@ -127,6 +127,12 @@ begin
 
   TotalPanelSpace := TotalPanelSpace - CTrackBarPnlWidthHeight - 2;
   TotalPositionSpace := TrbBar^.Max - TrbBar^.Min;
+  
+  if TotalPositionSpace = 0 then
+  begin
+    Result := 1;
+    Exit;
+  end;
 
   {$IFDEF IsDesktop}
     Result := Round(LongInt(TotalPanelSpace) * (TrbBar^.Position - TrbBar^.Min) / TotalPositionSpace);
@@ -439,9 +445,15 @@ end;
 
 procedure DynTFTUpdateTrackbarEventHandlers(ATrbBar: PDynTFTTrackBar);
 begin
-  ATrbBar^.BtnTrack^.BaseProps.OnMouseDownUser := ATrbBar^.BaseProps.OnMouseDownUser;
-  ATrbBar^.BtnTrack^.BaseProps.OnMouseMoveUser := ATrbBar^.BaseProps.OnMouseMoveUser;
-  ATrbBar^.BtnTrack^.BaseProps.OnMouseUpUser := ATrbBar^.BaseProps.OnMouseUpUser;
+  {$IFDEF IsDesktop}
+    ATrbBar^.BtnTrack^.BaseProps.OnMouseDownUser^ := ATrbBar^.BaseProps.OnMouseDownUser^;     // content := content, not pointer !!!
+    ATrbBar^.BtnTrack^.BaseProps.OnMouseMoveUser^ := ATrbBar^.BaseProps.OnMouseMoveUser^;
+    ATrbBar^.BtnTrack^.BaseProps.OnMouseUpUser^ := ATrbBar^.BaseProps.OnMouseUpUser^;
+  {$ELSE}
+    ATrbBar^.BtnTrack^.BaseProps.OnMouseDownUser := ATrbBar^.BaseProps.OnMouseDownUser;       // pointer := pointer, not content !!!
+    ATrbBar^.BtnTrack^.BaseProps.OnMouseMoveUser := ATrbBar^.BaseProps.OnMouseMoveUser;
+    ATrbBar^.BtnTrack^.BaseProps.OnMouseUpUser := ATrbBar^.BaseProps.OnMouseUpUser;
+  {$ENDIF}  
 end;
 
 
@@ -549,6 +561,7 @@ begin
   Result^.BaseProps.Top := Top;
   Result^.BaseProps.Width := Width;
   Result^.BaseProps.Height := Height;
+  //DynTFTInitComponentDimensions(PDynTFTBaseComponent(TPtrRec(Result)), ComponentType, False, Left, Top, Width, Height);
   DynTFTInitBasicStatePropertiesToDefault(PDynTFTBaseComponent(TPtrRec(Result)));
 
   Result^.Orientation := TrbDir;
@@ -632,18 +645,21 @@ begin
     Dispose(ATrackBar^.OnTrackBarChange);
     Dispose(ATrackBar^.OnOwnerInternalAdjustTrackBar);
     Dispose(ATrackBar^.OnOwnerInternalAfterAdjustTrackBar);
+
+    ATrackBar^.OnOwnerInternalMouseDown := nil;
+    ATrackBar^.OnOwnerInternalMouseMove := nil;
+    ATrackBar^.OnOwnerInternalMouseUp := nil;
+    ATrackBar^.OnTrackBarChange := nil;
+    ATrackBar^.OnOwnerInternalAdjustTrackBar := nil;
+    ATrackBar^.OnOwnerInternalAfterAdjustTrackBar := nil;
   {$ENDIF}
 
-  {$IFDEF IsDesktop}
-    DynTFTComponent_Destroy(PDynTFTBaseComponent(TPtrRec(ATrackBar^.BtnTrack)), SizeOf(ATrackBar^.BtnTrack^));
+  DynTFTArrowButton_Destroy(ATrackBar^.BtnTrack);
 
+  {$IFDEF IsDesktop}
     DynTFTComponent_Destroy(PDynTFTBaseComponent(TPtrRec(ATrackBar)), SizeOf(ATrackBar^));
   {$ELSE}
     //without temp var, mikroPascal gives an error:  289 341 Operator "@" not applicable to these operands "?T222"
-    ATemp := PDynTFTBaseComponent(TPtrRec(ATrackBar^.BtnTrack));
-    DynTFTComponent_Destroy(ATemp, SizeOf(ATrackBar^.BtnTrack^));
-    ATrackBar^.BtnTrack := PDynTFTArrowButton(TPtrRec(ATemp));
-
     ATemp := PDynTFTBaseComponent(TPtrRec(ATrackBar));
     DynTFTComponent_Destroy(ATemp, SizeOf(ATrackBar^));
     ATrackBar := PDynTFTTrackBar(TPtrRec(ATemp));

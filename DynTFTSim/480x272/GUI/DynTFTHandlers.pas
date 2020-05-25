@@ -1,3 +1,4 @@
+
 {   DynTFT  - graphic components for microcontrollers
     Copyright (C) 2017 VCC
     release date: 29 Dec 2017
@@ -46,16 +47,45 @@ uses
   DynTFTTypes, DynTFTConsts, DynTFTUtils, DynTFTBaseDrawing, DynTFTControls,
   DynTFTGUIObjects,
   
-  DynTFTButton, DynTFTArrowButton, DynTFTPanel, DynTFTCheckBox, DynTFTScrollBar,
-  DynTFTItems, DynTFTListBox, DynTFTLabel, DynTFTRadioButton, DynTFTRadioGroup,
-  DynTFTTabButton, DynTFTPageControl, DynTFTEdit, DynTFTKeyButton, DynTFTProgressBar,
-  DynTFTVirtualKeyboard, DynTFTComboBox, DynTFTMessageBox, DynTFTTrackBar
+
+//<DynTFTComponents>
+  DynTFTButton,
+  DynTFTArrowButton,
+  DynTFTPanel,
+  DynTFTCheckBox,
+  DynTFTScrollBar,
+  DynTFTItems,
+  DynTFTListBox,
+  DynTFTLabel,
+  DynTFTRadioButton,
+  DynTFTRadioGroup,
+  DynTFTTabButton,
+  DynTFTPageControl,
+  DynTFTEdit,
+  DynTFTKeyButton,
+  DynTFTVirtualKeyboard,
+  DynTFTComboBox,
+  DynTFTTrackBar,
+  DynTFTProgressBar,
+  DynTFTMessageBox
+//<EndOfDynTFTComponents> - Do not remove or modify this line!
 
   {$IFDEF IsDesktop}
-    ,SysUtils, Forms, TFT
+    ,SysUtils, Forms
+    {$IFDEF DynTFTFontSupport}, DynTFTFonts {$ENDIF}
   {$ENDIF}
+
+  {$IFNDEF UserTFTCommands}
+    {$IFDEF IsDesktop} , TFT {$ENDIF}
+  {$ELSE}
+    , {$I UserDrawingUnits.inc}
+  {$ENDIF}
+
   {$I DynTFTHandlersAdditionalUnits.inc}
   ;
+
+//CodegenSym:GroupsBegin
+//CodegenSym:GroupsEnd
 
 procedure VirtualKeyboard_OnCharKey(Sender: PPtrRec; var PressedChar: TVKPressedChar; CurrentShiftState: TPtr); //CodegenSym:header
 procedure VirtualKeyboard_OnSpecialKey(Sender: PPtrRec; SpecialKey: Integer; CurrentShiftState: TPtr); //CodegenSym:header
@@ -66,8 +96,37 @@ procedure PageControl1_OnChange(Sender: PPtrRec); //CodegenSym:header
 procedure TrackBar1_OnTrackBarChange(Sender: PPtrRec); //CodegenSym:header
 procedure TrackBar2_OnTrackBarChange(Sender: PPtrRec); //CodegenSym:header
 
+//CodegenSym:AllBinHandlersBegin
+
+{$IFDEF RTTIREG}
+
+      var
+        AllBinHandlersStr: array[0..0] of string;  // No handlers found. Using a dummy entry.
+        AllBinHandlersAddresses: array[0..0] of TPtr;  // No handlers found. Using a dummy entry.
+
+        AllBinIdentifiersStr: array[0..0] of string;  // No identifiers found. Using a dummy entry.
+        AllBinIdentifiersAddresses: array[0..0] of TPtr;  // No identifiers found. Using a dummy entry.
+
+      procedure UpdateAllBinHandlerStrArray;
+{$ENDIF} // RTTIREG
+
+//CodegenSym:AllBinHandlersEnd
+
 implementation
 
+//CodegenSym:UpdateBinHandlersProcBegin
+{$IFDEF RTTIREG}
+
+      procedure UpdateAllBinHandlerStrArray;
+      begin
+        // Desktop profile not found. No handler names are available.
+      end;
+{$ENDIF} // RTTIREG
+
+//CodegenSym:UpdateBinHandlersProcEnd
+//CodegenSym:CreationGroups
+
+//CodegenSym:HandlersImplementation
 
 procedure VirtualKeyboard_OnCharKey(Sender: PPtrRec; var PressedChar: TVKPressedChar; CurrentShiftState: TPtr); //CodegenSym:handler
 var

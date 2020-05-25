@@ -59,8 +59,8 @@ type
     ExteriorLabel: PDynTFTLabel;
     ListBox: PDynTFTListBox;
     ArrowButton: PDynTFTArrowButton; //this should be the last created item in the combo box, for an easy bringing these to front
-    DroppedDown: Boolean;
-    Editable: Boolean;
+    DroppedDown: {$IFDEF IsDesktop} LongBool; {$ELSE} Boolean; {$ENDIF}
+    Editable: {$IFDEF IsDesktop} LongBool; {$ELSE} Boolean; {$ENDIF}
 
     OnComboBoxCloseUp: POnComboBoxCloseUpEvent;
   end;
@@ -222,6 +222,7 @@ begin
     SetEditReadonlyState(AComboBox);
 
     AComboBox^.DroppedDown := False;
+
     HideListBoxAndRepaintUnderIt(AComboBox);
 
     if AComboBox^.ListBox^.Items^.ItemIndex > -1 then
@@ -320,12 +321,20 @@ begin
   Result^.BaseProps.Top := Top;
   Result^.BaseProps.Width := Width;
   Result^.BaseProps.Height := Height;
+  //DynTFTInitComponentDimensions(PDynTFTBaseComponent(TPtrRec(Result)), ComponentType, False, Left, Top, Width, Height);
   DynTFTInitBasicStatePropertiesToDefault(PDynTFTBaseComponent(TPtrRec(Result)));
 
   Result^.Edit := DynTFTEdit_Create(ScreenIndex, Left, Top, Width - Height, Height);
   Result^.ListBox := DynTFTListBox_Create(ScreenIndex, Left, Top + Height + 1, Width, 100);    //all these dimensions and positions can be changed by user
   Result^.ArrowButton := DynTFTArrowButton_Create(ScreenIndex, Left + Width - Height + 1, Top + 1, Height - 1, Height - 1);
   Result^.ExteriorLabel := DynTFTLabel_Create(ScreenIndex, 0, 0, 32767, 32767);     //bigger than any screen
+
+  {$IFDEF ComponentsHaveName}
+    Result^.Edit^.BaseProps.Name := 'cmb.Edit';
+    Result^.ListBox^.BaseProps.Name := 'cmb.ListBox';
+    Result^.ArrowButton^.BaseProps.Name := 'cmb.ArrowButton';
+    Result^.ExteriorLabel^.BaseProps.Name := 'cmb.ExteriorLabel';
+  {$ENDIF}
 
   Result^.ArrowButton^.ArrowDir := CDownArrow;
 
@@ -339,43 +348,43 @@ begin
   Result^.ExteriorLabel^.BaseProps.Parent := PPtrRec(TPtrRec(Result));
 
   {$IFDEF IsDesktop}
-    Result^.Edit^.OnOwnerInternalMouseDown^ := nil; //TDynTFTComboBox_OnDynTFTChildEditInternalMouseDown;
-    Result^.Edit^.OnOwnerInternalMouseMove^ := nil; //TDynTFTComboBox_OnDynTFTChildEditInternalMouseMove;
+    //Result^.Edit^.OnOwnerInternalMouseDown^ := nil; //TDynTFTComboBox_OnDynTFTChildEditInternalMouseDown;
+    //Result^.Edit^.OnOwnerInternalMouseMove^ := nil; //TDynTFTComboBox_OnDynTFTChildEditInternalMouseMove;
     Result^.Edit^.OnOwnerInternalMouseUp^ := TDynTFTComboBox_OnDynTFTChildEditInternalMouseUp;
   {$ELSE}
-    Result^.Edit^.OnOwnerInternalMouseDown := nil; //@TDynTFTComboBox_OnDynTFTChildEditInternalMouseDown;
-    Result^.Edit^.OnOwnerInternalMouseMove := nil; //@TDynTFTComboBox_OnDynTFTChildEditInternalMouseMove;
+    //Result^.Edit^.OnOwnerInternalMouseDown := nil; //@TDynTFTComboBox_OnDynTFTChildEditInternalMouseDown;
+    //Result^.Edit^.OnOwnerInternalMouseMove := nil; //@TDynTFTComboBox_OnDynTFTChildEditInternalMouseMove;
     Result^.Edit^.OnOwnerInternalMouseUp := @TDynTFTComboBox_OnDynTFTChildEditInternalMouseUp;
   {$ENDIF}
 
   {$IFDEF IsDesktop}
-    Result^.ListBox^.OnOwnerInternalMouseDown^ := nil; //TDynTFTComboBox_OnDynTFTChildListBoxInternalMouseDown;
-    Result^.ListBox^.OnOwnerInternalMouseMove^ := nil; //TDynTFTComboBox_OnDynTFTChildListBoxInternalMouseMove;
+    //Result^.ListBox^.OnOwnerInternalMouseDown^ := nil; //TDynTFTComboBox_OnDynTFTChildListBoxInternalMouseDown;
+    //Result^.ListBox^.OnOwnerInternalMouseMove^ := nil; //TDynTFTComboBox_OnDynTFTChildListBoxInternalMouseMove;
     Result^.ListBox^.OnOwnerInternalMouseUp^ := TDynTFTComboBox_OnDynTFTChildListBoxInternalMouseUp;
   {$ELSE}
-    Result^.ListBox^.OnOwnerInternalMouseDown := nil; //@TDynTFTComboBox_OnDynTFTChildListBoxInternalMouseDown;
-    Result^.ListBox^.OnOwnerInternalMouseMove := nil; //@TDynTFTComboBox_OnDynTFTChildListBoxInternalMouseMove;
+    //Result^.ListBox^.OnOwnerInternalMouseDown := nil; //@TDynTFTComboBox_OnDynTFTChildListBoxInternalMouseDown;
+    //Result^.ListBox^.OnOwnerInternalMouseMove := nil; //@TDynTFTComboBox_OnDynTFTChildListBoxInternalMouseMove;
     Result^.ListBox^.OnOwnerInternalMouseUp := @TDynTFTComboBox_OnDynTFTChildListBoxInternalMouseUp;
   {$ENDIF}
 
   {$IFDEF IsDesktop}
-    Result^.ArrowButton^.OnOwnerInternalMouseDown^ := nil; //TDynTFTComboBox_OnDynTFTChildArrowButtonInternalMouseDown;
-    Result^.ArrowButton^.OnOwnerInternalMouseMove^ := nil; //TDynTFTComboBox_OnDynTFTChildArrowButtonInternalMouseMove;
+    //Result^.ArrowButton^.OnOwnerInternalMouseDown^ := nil; //TDynTFTComboBox_OnDynTFTChildArrowButtonInternalMouseDown;
+    //Result^.ArrowButton^.OnOwnerInternalMouseMove^ := nil; //TDynTFTComboBox_OnDynTFTChildArrowButtonInternalMouseMove;
     Result^.ArrowButton^.OnOwnerInternalMouseUp^ := TDynTFTComboBox_OnDynTFTChildArrowButtonInternalMouseUp;
   {$ELSE}
-    Result^.ArrowButton^.OnOwnerInternalMouseDown := nil; //@TDynTFTComboBox_OnDynTFTChildArrowButtonInternalMouseDown;
-    Result^.ArrowButton^.OnOwnerInternalMouseMove := nil; //@TDynTFTComboBox_OnDynTFTChildArrowButtonInternalMouseMove;
+    //Result^.ArrowButton^.OnOwnerInternalMouseDown := nil; //@TDynTFTComboBox_OnDynTFTChildArrowButtonInternalMouseDown;
+    //Result^.ArrowButton^.OnOwnerInternalMouseMove := nil; //@TDynTFTComboBox_OnDynTFTChildArrowButtonInternalMouseMove;
     Result^.ArrowButton^.OnOwnerInternalMouseUp := @TDynTFTComboBox_OnDynTFTChildArrowButtonInternalMouseUp;
   {$ENDIF}
 
   {$IFDEF IsDesktop}
     Result^.ExteriorLabel^.OnOwnerInternalMouseDown^ := TDynTFTComboBox_OnDynTFTChildExteriorLabelInternalMouseDown;
-    Result^.ExteriorLabel^.OnOwnerInternalMouseMove^ := nil; //TDynTFTComboBox_OnDynTFTChildExteriorLabelInternalMouseMove;
-    Result^.ExteriorLabel^.OnOwnerInternalMouseUp^ := nil; //TDynTFTComboBox_OnDynTFTChildExteriorLabelInternalMouseUp;
+    //Result^.ExteriorLabel^.OnOwnerInternalMouseMove^ := nil; //TDynTFTComboBox_OnDynTFTChildExteriorLabelInternalMouseMove;
+    //Result^.ExteriorLabel^.OnOwnerInternalMouseUp^ := nil; //TDynTFTComboBox_OnDynTFTChildExteriorLabelInternalMouseUp;
   {$ELSE}
     Result^.ExteriorLabel^.OnOwnerInternalMouseDown := @TDynTFTComboBox_OnDynTFTChildExteriorLabelInternalMouseDown;
-    Result^.ExteriorLabel^.OnOwnerInternalMouseMove := nil; //@TDynTFTComboBox_OnDynTFTChildExteriorLabelInternalMouseMove;
-    Result^.ExteriorLabel^.OnOwnerInternalMouseUp := nil; //@TDynTFTComboBox_OnDynTFTChildExteriorLabelInternalMouseUp;
+    //Result^.ExteriorLabel^.OnOwnerInternalMouseMove := nil; //@TDynTFTComboBox_OnDynTFTChildExteriorLabelInternalMouseMove;
+    //Result^.ExteriorLabel^.OnOwnerInternalMouseUp := nil; //@TDynTFTComboBox_OnDynTFTChildExteriorLabelInternalMouseUp;
   {$ENDIF}
 
   Result^.DroppedDown := False;
@@ -411,32 +420,25 @@ procedure DynTFTComboBox_Destroy(var AComboBox: PDynTFTComboBox);
 begin
   {$IFDEF IsDesktop}
     Dispose(AComboBox^.OnComboBoxCloseUp);
+    AComboBox^.OnComboBoxCloseUp := nil;
   {$ENDIF}
 
-  {$IFDEF IsDesktop}
-    DynTFTComponent_Destroy(PDynTFTBaseComponent(TPtrRec(AComboBox^.Edit)), SizeOf(AComboBox^.Edit^));
-    DynTFTComponent_Destroy(PDynTFTBaseComponent(TPtrRec(AComboBox^.ListBox)), SizeOf(AComboBox^.ListBox^));
-    DynTFTComponent_Destroy(PDynTFTBaseComponent(TPtrRec(AComboBox^.ArrowButton)), SizeOf(AComboBox^.ArrowButton^));
-    DynTFTComponent_Destroy(PDynTFTBaseComponent(TPtrRec(AComboBox^.ExteriorLabel)), SizeOf(AComboBox^.ExteriorLabel^));
+  {$IFDEF ComponentsHaveName}
+    AComboBox^.Edit^.BaseProps.Name := AComboBox^.BaseProps.Name + '.Edit';
+    AComboBox^.ListBox^.BaseProps.Name := AComboBox^.BaseProps.Name + '.ListBox';
+    AComboBox^.ArrowButton^.BaseProps.Name := AComboBox^.BaseProps.Name + '.ArrowButton';
+    AComboBox^.ExteriorLabel^.BaseProps.Name := AComboBox^.BaseProps.Name + '.ExteriorLabel';
+  {$ENDIF}
 
+  DynTFTEdit_Destroy(AComboBox^.Edit);
+  DynTFTListBox_Destroy(AComboBox^.ListBox);
+  DynTFTArrowButton_Destroy(AComboBox^.ArrowButton);
+  DynTFTLabel_Destroy(AComboBox^.ExteriorLabel);
+  
+  {$IFDEF IsDesktop}
     DynTFTComponent_Destroy(PDynTFTBaseComponent(TPtrRec(AComboBox)), SizeOf(AComboBox^));
   {$ELSE}
     //without temp var, mikroPascal gives an error:  289 341 Operator "@" not applicable to these operands "?T222"
-    ATemp := PDynTFTBaseComponent(TPtrRec(AComboBox^.Edit));
-    DynTFTComponent_Destroy(ATemp, SizeOf(AComboBox^.Edit^));
-    AComboBox^.Edit := PDynTFTEdit(TPtrRec(ATemp));
-
-    ATemp := PDynTFTBaseComponent(TPtrRec(AComboBox^.ListBox));
-    DynTFTComponent_Destroy(ATemp, SizeOf(AComboBox^.ListBox^));
-    AComboBox^.ListBox := PDynTFTListBox(TPtrRec(ATemp));
-
-    ATemp := PDynTFTBaseComponent(TPtrRec(AComboBox^.ArrowButton));
-    DynTFTComponent_Destroy(ATemp, SizeOf(AComboBox^.ArrowButton^));
-    AComboBox^.ArrowButton := PDynTFTArrowButton(TPtrRec(ATemp));
-
-    ATemp := PDynTFTBaseComponent(TPtrRec(AComboBox^.ExteriorLabel));
-    DynTFTComponent_Destroy(ATemp, SizeOf(AComboBox^.ExteriorLabel^));
-    AComboBox^.ExteriorLabel := PDynTFTLabel(TPtrRec(ATemp));
 
     ATemp := PDynTFTBaseComponent(TPtrRec(AComboBox));
     DynTFTComponent_Destroy(ATemp, SizeOf(AComboBox^));

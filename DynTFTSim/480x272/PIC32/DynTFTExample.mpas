@@ -212,7 +212,7 @@ begin
   
   Init_MCU();
   InitializeTouchPanel();
-  
+
   if (STMPE610_Config() = STMPE610_OK) then
   begin
   end
@@ -239,6 +239,7 @@ begin
   TFT_Rectangle(0, 0, 480, 272);
   
   DynTFT_GUI_Start;
+  DynTFTSetScreenSizeForMessageBox(TFT_DISP_WIDTH, TFT_DISP_HEIGHT);
   DynTFTMessageBoxMainLoopHandler := @HandleMessageBox; //use this if you want modal MessageBox
               {
   IntToStr(TPConstsStruct.X_Min, AText);   TFT_Write_Text(AText, 330, 10);

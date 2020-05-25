@@ -46,6 +46,14 @@ uses
   {$ENDIF}
   ;
 
+{$IFDEF ItemsVisibility}
+  {$DEFINE ItemsVisibility_Or_UseExternalItems}
+{$ENDIF}
+
+{$IFDEF UseExternalItems}
+  {$DEFINE ItemsVisibility_Or_UseExternalItems}
+{$ENDIF}
+
 type
   TDynTFTListBox = record
     BaseProps: TDynTFTBaseProperties;  //inherited properties from TDynTFTBaseProperties - must be the first field of this structure !!!
@@ -66,6 +74,9 @@ function DynTFTListBox_Create(ScreenIndex: Byte; Left, Top, Width, Height: TSInt
 procedure DynTFTListBox_Destroy(var AListBox: PDynTFTListBox);
 procedure DynTFTListBox_DestroyAndPaint(var AListBox: PDynTFTListBox);
 
+procedure SetScrollBarMaxBasedOnVisibility(AListBox: PDynTFTListBox);
+procedure DynTFTUpdateListBoxEventHandlers(AListBox: PDynTFTListBox);
+                                                                     
 procedure DynTFTRegisterListBoxEvents;
 function DynTFTGetListBoxComponentType: TDynTFTComponentType;
 
@@ -128,21 +139,53 @@ begin
     DynTFT_V_Line(y1, y2, x1);
     DynTFT_V_Line(y1, y2, x2);
 
-    //DrawScrollBar(AListBox^.VertScrollBar, FullRedraw, True);
-    //DrawItems(AListBox^.Items, FullRedraw);
+    DynTFTDrawScrollBar(AListBox^.VertScrollBar, FullRedraw);
+    //DynTFTDrawItems(AListBox^.Items, FullRedraw);
   end;
 end;
 
 
-procedure TDynTFTListBox_OnDynTFTChildScrollBarInternalAdjust(AScrollBar: PDynTFTBaseComponent);
+procedure SetScrollBarMaxBasedOnVisibility(AListBox: PDynTFTListBox);
 var
-  AListBox: PDynTFTListBox;
+  AScrBar: PDynTFTScrollBar;
+begin
+  AScrBar := PDynTFTScrollBar(AListBox^.VertScrollBar);
+  AScrBar^.Max := {$IFDEF ItemsVisibility} AListBox^.Items^.TotalVisibleCount {$ELSE} AListBox^.Items^.Count {$ENDIF} - DynTFTGetNumberOfItemsToDraw(AListBox^.Items);
+
+  if AScrBar^.Max < 0 then
+    AScrBar^.Max := 0;
+
+  if ConstrainPositionToBounds(AScrBar) then
+    DynTFTDrawScrollBar(AScrBar, True);
+end;
+
+
+procedure DynTFTUpdateListBoxEventHandlers(AListBox: PDynTFTListBox);
+begin
+  {$IFDEF IsDesktop}
+    AListBox^.Items^.BaseProps.OnMouseDownUser^ := AListBox^.BaseProps.OnMouseDownUser^;     // content := content, not pointer !!!
+    AListBox^.Items^.BaseProps.OnMouseMoveUser^ := AListBox^.BaseProps.OnMouseMoveUser^;
+    AListBox^.Items^.BaseProps.OnMouseUpUser^ := AListBox^.BaseProps.OnMouseUpUser^;
+
+    AListBox^.VertScrollBar^.BaseProps.OnMouseDownUser^ := AListBox^.BaseProps.OnMouseDownUser^;     // content := content, not pointer !!!
+    AListBox^.VertScrollBar^.BaseProps.OnMouseMoveUser^ := AListBox^.BaseProps.OnMouseMoveUser^;
+    AListBox^.VertScrollBar^.BaseProps.OnMouseUpUser^ := AListBox^.BaseProps.OnMouseUpUser^;
+  {$ELSE}
+    AListBox^.Items^.BaseProps.OnMouseDownUser := AListBox^.BaseProps.OnMouseDownUser;       // pointer := pointer, not content !!!
+    AListBox^.Items^.BaseProps.OnMouseMoveUser := AListBox^.BaseProps.OnMouseMoveUser;
+    AListBox^.Items^.BaseProps.OnMouseUpUser := AListBox^.BaseProps.OnMouseUpUser;
+
+    AListBox^.VertScrollBar^.BaseProps.OnMouseDownUser := AListBox^.BaseProps.OnMouseDownUser;       // pointer := pointer, not content !!!
+    AListBox^.VertScrollBar^.BaseProps.OnMouseMoveUser := AListBox^.BaseProps.OnMouseMoveUser;
+    AListBox^.VertScrollBar^.BaseProps.OnMouseUpUser := AListBox^.BaseProps.OnMouseUpUser;
+  {$ENDIF} 
+end;
+
+
+procedure TDynTFTListBox_OnDynTFTChildScrollBarInternalAdjust(AScrollBar: PDynTFTBaseComponent);
 begin
   if PDynTFTBaseComponent(TPtrRec(AScrollBar^.BaseProps.Parent))^.BaseProps.ComponentType = ComponentType then //scroll bar belongs to a listbox
-  begin
-    AListBox := PDynTFTListBox(TPtrRec(AScrollBar^.BaseProps.Parent));
-    PDynTFTScrollBar(TPtrRec(AScrollBar))^.Max := AListBox^.Items^.Count - DynTFTGetNumberOfItemsToDraw(AListBox^.Items);
-  end;
+    SetScrollBarMaxBasedOnVisibility(PDynTFTListBox(TPtrRec(AScrollBar^.BaseProps.Parent)));
 end;
 
 
@@ -150,7 +193,7 @@ procedure TDynTFTListBox_OnDynTFTChildScrollBarInternalAfterAdjust(AScrollBar: P
 var
   AScrBar: PDynTFTScrollBar;
   AListBox: PDynTFTListBox;
-  NewFirstVisibleIndex: Integer;
+  NewFirstDisplayableIndex: Longint;
 begin
   if PDynTFTBaseComponent(TPtrRec(AScrollBar^.BaseProps.Parent))^.BaseProps.ComponentType = ComponentType then //scroll bar belongs to a listbox
   begin
@@ -158,18 +201,21 @@ begin
     AListBox := PDynTFTListBox(TPtrRec(AScrollBar^.BaseProps.Parent));
 
     if AScrBar^.Position < 0 then
-      AScrBar^.Position := 0;
-
-    NewFirstVisibleIndex := AListBox^.Items^.FirstVisibleIndex;
-    if NewFirstVisibleIndex <> AScrBar^.Position then
     begin
-      NewFirstVisibleIndex := AScrBar^.Position;
-      if NewFirstVisibleIndex > AScrBar^.Max then
-        NewFirstVisibleIndex := AScrBar^.Max;
-      if NewFirstVisibleIndex < 0 then
-        NewFirstVisibleIndex := 0;
+      AScrBar^.Position := 0;
+      DynTFTDrawScrollBar(AScrBar, True);
+    end;
 
-      AListBox^.Items^.FirstVisibleIndex := NewFirstVisibleIndex;
+    NewFirstDisplayableIndex := AListBox^.Items^.FirstDisplayablePosition;
+    if NewFirstDisplayableIndex <> AScrBar^.Position then
+    begin
+      NewFirstDisplayableIndex := AScrBar^.Position;
+      if NewFirstDisplayableIndex > AScrBar^.Max then
+        NewFirstDisplayableIndex := AScrBar^.Max;
+      if NewFirstDisplayableIndex < 0 then
+        NewFirstDisplayableIndex := 0;
+
+      AListBox^.Items^.FirstDisplayablePosition := NewFirstDisplayableIndex;
       DynTFTDrawItems(AListBox^.Items, True);
     end;
   end;
@@ -186,25 +232,26 @@ procedure TDynTFTListBox_OnDynTFTChildScrollBarInternalMouseMove(ABase: PDynTFTB
 var
   AScrBar: PDynTFTScrollBar;
   AListBox: PDynTFTListBox;
-  MaxFirstVisibleItemIndex, NewFirstVisibleIndex: Integer;
+  MaxFirstDisplayableIndex, NewFirstDisplayableIndex: Longint;
 begin
   AScrBar := PDynTFTScrollBar(TPtrRec(ABase));
   if PDynTFTBaseComponent(TPtrRec(AScrBar^.BaseProps.Parent))^.BaseProps.ComponentType = ComponentType then //scroll bar belongs to a listbox
   begin
     AListBox := PDynTFTListBox(TPtrRec(AScrBar^.BaseProps.Parent));
-    MaxFirstVisibleItemIndex := AListBox^.Items^.Count - DynTFTGetNumberOfItemsToDraw(AListBox^.Items);
-    AScrBar^.Max := MaxFirstVisibleItemIndex;
+    SetScrollBarMaxBasedOnVisibility(AListBox);
 
-    NewFirstVisibleIndex := AListBox^.Items^.FirstVisibleIndex;
-    if NewFirstVisibleIndex <> AScrBar^.Position then
+    MaxFirstDisplayableIndex := AScrBar^.Max;
+
+    NewFirstDisplayableIndex := AListBox^.Items^.FirstDisplayablePosition;
+    if NewFirstDisplayableIndex <> AScrBar^.Position then
     begin
-      NewFirstVisibleIndex := AScrBar^.Position;
-      if NewFirstVisibleIndex > MaxFirstVisibleItemIndex then
-        NewFirstVisibleIndex := MaxFirstVisibleItemIndex;
-      if NewFirstVisibleIndex < 0 then
-        NewFirstVisibleIndex := 0;
+      NewFirstDisplayableIndex := AScrBar^.Position;
+      if NewFirstDisplayableIndex > MaxFirstDisplayableIndex then
+        NewFirstDisplayableIndex := MaxFirstDisplayableIndex;
+      if NewFirstDisplayableIndex < 0 then
+        NewFirstDisplayableIndex := 0;
 
-      AListBox^.Items^.FirstVisibleIndex := NewFirstVisibleIndex;
+      AListBox^.Items^.FirstDisplayablePosition := NewFirstDisplayableIndex;
 
       DynTFTDrawItems(AListBox^.Items, True);
     end;
@@ -218,22 +265,103 @@ begin
 end;
 
 
+function GetNewItemIndexBasedOnVisibility(AItems: PDynTFTItems; ClickedItemPositionOnScreen: LongInt; var ATempString: string {$IFDEF ItemsEnabling}; IsEnabled: PBoolean {$ENDIF}): LongInt;
+var
+  MaxDrawingPosition, IndexOfDrawingItem, i: LongInt;
+
+  {$IFDEF ItemsVisibility}
+    IsVisible: Boolean;
+  {$ENDIF}
+  VisibleCount: LongInt;
+begin
+  Result := -1;
+
+  VisibleCount := 0;
+
+  IndexOfDrawingItem := GetIndexOfFirstDrawingItem(AItems, VisibleCount, ATempString);
+  MaxDrawingPosition := GetMaxDrawingPosition(AItems);
+
+  {$IFDEF ItemsVisibility}
+    IsVisible := True;
+  {$ENDIF}  
+
+  for i := 0 to MaxDrawingPosition do
+  begin
+    if IndexOfDrawingItem >= AItems^.Count then
+      Break;
+
+    IndexOfDrawingItem := GoToNextVisibleItemFromIndex(AItems, IndexOfDrawingItem, ATempString {$IFDEF ItemsVisibility}, @IsVisible {$ENDIF} {$IFDEF ItemsEnabling}, IsEnabled {$ENDIF});
+
+    {$IFDEF ItemsVisibility}
+      if IsVisible then
+    {$ENDIF}  
+      if i = ClickedItemPositionOnScreen then
+      begin
+        Result := IndexOfDrawingItem - 1;
+        Break;
+      end;
+  end;
+end;
+
+
+{$IFDEF ItemsEnabling}
+  var
+    ClickedItem_IsEnabled: Boolean;  //yes, it's ugly, but it is better than having multiple instances of this variable for every listbox, used only one at a time
+{$ENDIF}
+
+
 procedure TDynTFTListBox_OnDynTFTChildItemsInternalMouseDown(ABase: PDynTFTBaseComponent);
 var
   AListBox: PDynTFTListBox;
-  NewItemIndex: Integer;
+  NewItemIndex, ClickedItemPositionOnScreen: LongInt;
+  {$IFDEF ItemsEnabling}
+    //ClickedItem_IsEnabled: Boolean;  //made global, to be available in TDynTFTListBox_OnDynTFTChildItemsInternalMouseUp
+  {$ENDIF}
+
+  {$IFDEF ItemsVisibility_Or_UseExternalItems}
+    ATempString: string {$IFDEF IsMCU}[CMaxItemsStringLength] {$ENDIF};
+  {$ENDIF}
 begin
   if PDynTFTBaseComponent(TPtrRec(ABase^.BaseProps.Parent))^.BaseProps.ComponentType = ComponentType then
   begin
     AListBox := PDynTFTListBox(TPtrRec(ABase^.BaseProps.Parent));
-    NewItemIndex := AListBox^.Items^.FirstVisibleIndex + (DynTFTMCU_YMouse - AListBox^.Items^.BaseProps.Top) div AListBox^.Items^.ItemHeight;
-    if NewItemIndex > AListBox^.Items^.Count - 1 then
-      NewItemIndex := -1;
+    ClickedItemPositionOnScreen := (DynTFTMCU_YMouse - AListBox^.Items^.BaseProps.Top) div AListBox^.Items^.ItemHeight;
 
+    {$IFDEF ItemsVisibility}  
+      NewItemIndex := GetNewItemIndexBasedOnVisibility(AListBox^.Items, ClickedItemPositionOnScreen, ATempString {$IFDEF ItemsEnabling}, @ClickedItem_IsEnabled {$ENDIF});
+    {$ELSE}
+      NewItemIndex := AListBox^.Items^.FirstDisplayablePosition + ClickedItemPositionOnScreen;
+
+      if NewItemIndex > AListBox^.Items^.Count - 1 then
+        NewItemIndex := -1;
+
+      {$IFDEF ItemsEnabling}
+        if NewItemIndex = -1 then
+          ClickedItem_IsEnabled := True
+        else
+        begin
+          {$IFDEF UseExternalItems}
+            ClickedItem_IsEnabled := DynTFTItemsGetItemEnabling(AListBox^.Items, NewItemIndex, ATempString);
+          {$ELSE}
+            ClickedItem_IsEnabled := AListBox^.Items^.ItemsEnabled[NewItemIndex];
+          {$ENDIF}
+        end;
+      {$ENDIF}
+    {$ENDIF}
+      
     if AListBox^.Items^.ItemIndex <> NewItemIndex then
     begin
-      AListBox^.Items^.ItemIndex := NewItemIndex;
-      DynTFTDrawItems(AListBox^.Items, True);
+      {$IFDEF ItemsEnabling}
+        if ClickedItem_IsEnabled then
+        begin
+      {$ENDIF}
+
+          AListBox^.Items^.ItemIndex := NewItemIndex;
+          DynTFTDrawItems(AListBox^.Items, True);
+          
+      {$IFDEF ItemsEnabling}
+        end;
+      {$ENDIF}  
     end
     else
       if AListBox^.Items^.BaseProps.Focused and CPAINTAFTERFOCUS <> CPAINTAFTERFOCUS then
@@ -241,25 +369,56 @@ begin
         AListBox^.Items^.BaseProps.Focused := AListBox^.Items^.BaseProps.Focused or CPAINTAFTERFOCUS;
         DynTFTDrawItems(AListBox^.Items, True);
       end;
+
+    {$IFDEF IsDesktop}
+      if Assigned(AListBox^.BaseProps.OnMouseDownUser) then
+        if Assigned(AListBox^.BaseProps.OnMouseDownUser^) then
+    {$ELSE}
+      if AListBox^.BaseProps.OnMouseDownUser <> nil then
+    {$ENDIF}
+        AListBox^.BaseProps.OnMouseDownUser^(PPtrRec(TPtrRec(AListBox)));
   end;
 end;
 
 
 procedure TDynTFTListBox_OnDynTFTChildItemsInternalMouseMove(ABase: PDynTFTBaseComponent);
 begin
-  //nothing here
+  {$IFDEF IsDesktop}
+    if Assigned(PDynTFTListBox(TPtrRec(ABase^.BaseProps.Parent))^.BaseProps.OnMouseMoveUser) then
+      if Assigned(PDynTFTListBox(TPtrRec(ABase^.BaseProps.Parent))^.BaseProps.OnMouseMoveUser^) then
+  {$ELSE}
+    if PDynTFTListBox(TPtrRec(ABase^.BaseProps.Parent))^.BaseProps.OnMouseMoveUser <> nil then
+  {$ENDIF}
+      PDynTFTListBox(TPtrRec(ABase^.BaseProps.Parent))^.BaseProps.OnMouseMoveUser^(PPtrRec(TPtrRec(ABase^.BaseProps.Parent)));
 end;
 
 
 procedure TDynTFTListBox_OnDynTFTChildItemsInternalMouseUp(ABase: PDynTFTBaseComponent);
 begin
-  {$IFDEF IsDesktop}
-    if Assigned(PDynTFTListBox(TPtrRec(ABase^.BaseProps.Parent))^.OnOwnerInternalMouseUp) then
-      if Assigned(PDynTFTListBox(TPtrRec(ABase^.BaseProps.Parent))^.OnOwnerInternalMouseUp^) then
-  {$ELSE}
-    if PDynTFTListBox(TPtrRec(ABase^.BaseProps.Parent))^.OnOwnerInternalMouseUp <> nil then
+  {$IFDEF ItemsEnabling}
+    if ClickedItem_IsEnabled then  //requires TDynTFTListBox_OnDynTFTChildItemsInternalMouseDown to be used
+    begin
   {$ENDIF}
-      PDynTFTListBox(TPtrRec(ABase^.BaseProps.Parent))^.OnOwnerInternalMouseUp^(PDynTFTBaseComponent(TPtrRec(ABase^.BaseProps.Parent)));
+
+      {$IFDEF IsDesktop}
+        if Assigned(PDynTFTListBox(TPtrRec(ABase^.BaseProps.Parent))^.OnOwnerInternalMouseUp) then
+          if Assigned(PDynTFTListBox(TPtrRec(ABase^.BaseProps.Parent))^.OnOwnerInternalMouseUp^) then
+      {$ELSE}
+        if PDynTFTListBox(TPtrRec(ABase^.BaseProps.Parent))^.OnOwnerInternalMouseUp <> nil then
+      {$ENDIF}
+          PDynTFTListBox(TPtrRec(ABase^.BaseProps.Parent))^.OnOwnerInternalMouseUp^(PDynTFTBaseComponent(TPtrRec(ABase^.BaseProps.Parent)));
+
+  {$IFDEF ItemsEnabling}
+    end;
+  {$ENDIF}
+
+  {$IFDEF IsDesktop}
+    if Assigned(PDynTFTListBox(TPtrRec(ABase^.BaseProps.Parent))^.BaseProps.OnMouseUpUser) then
+      if Assigned(PDynTFTListBox(TPtrRec(ABase^.BaseProps.Parent))^.BaseProps.OnMouseUpUser^) then
+  {$ELSE}
+    if PDynTFTListBox(TPtrRec(ABase^.BaseProps.Parent))^.BaseProps.OnMouseUpUser <> nil then
+  {$ENDIF}
+      PDynTFTListBox(TPtrRec(ABase^.BaseProps.Parent))^.BaseProps.OnMouseUpUser^(PPtrRec(TPtrRec(ABase^.BaseProps.Parent)));    
 end;
 
 
@@ -278,6 +437,7 @@ begin
   Result^.BaseProps.Top := Top;
   Result^.BaseProps.Width := Width;
   Result^.BaseProps.Height := Height;
+  //DynTFTInitComponentDimensions(PDynTFTBaseComponent(TPtrRec(Result)), ComponentType, False, Left, Top, Width, Height);
   DynTFTInitBasicStatePropertiesToDefault(PDynTFTBaseComponent(TPtrRec(Result)));
 
   Result^.Items := DynTFTItems_Create(ScreenIndex, Left + 1, Top + 1, Width - CScrollBarArrBtnWidthHeight - 1, Height - 2);
@@ -315,6 +475,11 @@ begin
   Result^.VertScrollBar^.BaseProps.Parent := PPtrRec(TPtrRec(Result));
   Result^.Items^.BaseProps.Parent := PPtrRec(TPtrRec(Result));
 
+  {$IFDEF ComponentsHaveName}
+    Result^.VertScrollBar^.BaseProps.Name := 'cmb.VertScrollBar';
+    Result^.Items^.BaseProps.Name := 'cmb.Items';
+  {$ENDIF}
+
   {$IFDEF IsDesktop}
     New(Result^.OnOwnerInternalMouseDown);
     New(Result^.OnOwnerInternalMouseMove);
@@ -329,9 +494,19 @@ begin
     Result^.OnOwnerInternalMouseUp := nil;
   {$ENDIF}
 
-  Result^.Items^.FirstVisibleIndex := 0;
+  Result^.Items^.FirstDisplayablePosition := 0;
   Result^.Items^.ItemIndex := -1;
   Result^.Items^.Count := 0;
+
+  {$IFDEF ComponentsHaveName}
+        {DynTFT_DebugConsole('--- Allocating user event handlers of list box $' + IntToHex(TPTr(Result), 8) +
+                            '  Addr(Down) = $' + IntToHex(TPTr(Result^.OnOwnerInternalMouseDown), 8) +
+                            '  Addr(Move) = $' + IntToHex(TPTr(Result^.OnOwnerInternalMouseMove), 8) +
+                            '  Addr(Up) = $' + IntToHex(TPTr(Result^.OnOwnerInternalMouseUp), 8)
+                            );}
+  {$ENDIF}
+
+  //DynTFTUpdateListBoxEventHandlers(Result);
 end;
 
 
@@ -347,27 +522,34 @@ procedure DynTFTListBox_Destroy(var AListBox: PDynTFTListBox);
     ATemp: PDynTFTBaseComponent;
 {$ENDIF}
 begin
+  {$IFDEF ComponentsHaveName}
+    AListBox^.VertScrollBar^.BaseProps.Name := AListBox^.BaseProps.Name + '.VertScrollBar';
+    AListBox^.Items^.BaseProps.Name := AListBox^.BaseProps.Name + '.Items';
+  {$ENDIF}
+
+  {$IFDEF ComponentsHaveName}
+    {DynTFT_DebugConsole('/// Disposing internal event handlers of list box: ' + AListBox^.BaseProps.Name +
+                        '  Addr(Down) = $' + IntToHex(TPTr(AListBox^.OnOwnerInternalMouseDown), 8) +
+                        '  Addr(Move) = $' + IntToHex(TPTr(AListBox^.OnOwnerInternalMouseMove), 8) +
+                        '  Addr(Up) = $' + IntToHex(TPTr(AListBox^.OnOwnerInternalMouseUp), 8)
+                        );}
+  {$ENDIF}
+  
+  DynTFTItems_Destroy(AListBox^.Items);
+  DynTFTScrollBar_Destroy(AListBox^.VertScrollBar);
+
   {$IFDEF IsDesktop}
     Dispose(AListBox^.OnOwnerInternalMouseDown);
     Dispose(AListBox^.OnOwnerInternalMouseMove);
     Dispose(AListBox^.OnOwnerInternalMouseUp);
-  {$ENDIF}
+    
+    AListBox^.OnOwnerInternalMouseDown := nil;
+    AListBox^.OnOwnerInternalMouseMove := nil;
+    AListBox^.OnOwnerInternalMouseUp := nil;
 
-  {$IFDEF IsDesktop}
-    DynTFTComponent_Destroy(PDynTFTBaseComponent(TPtrRec(AListBox^.Items)), SizeOf(AListBox^.Items^));
-    DynTFTComponent_Destroy(PDynTFTBaseComponent(TPtrRec(AListBox^.VertScrollBar)), SizeOf(AListBox^.VertScrollBar^));
-  
     DynTFTComponent_Destroy(PDynTFTBaseComponent(TPtrRec(AListBox)), SizeOf(AListBox^));
   {$ELSE}
     //without temp var, mikroPascal gives an error:  289 341 Operator "@" not applicable to these operands "?T222"
-    ATemp := PDynTFTBaseComponent(TPtrRec(AListBox^.Items));
-    DynTFTComponent_Destroy(ATemp, SizeOf(AListBox^.Items^));
-    AListBox^.Items := PDynTFTItems(TPtrRec(ATemp));
-
-    ATemp := PDynTFTBaseComponent(TPtrRec(AListBox^.VertScrollBar));
-    DynTFTComponent_Destroy(ATemp, SizeOf(AListBox^.VertScrollBar^));
-    AListBox^.VertScrollBar := PDynTFTScrollBar(TPtrRec(ATemp));
-
     ATemp := PDynTFTBaseComponent(TPtrRec(AListBox));
     DynTFTComponent_Destroy(ATemp, SizeOf(AListBox^));
     AListBox := PDynTFTListBox(TPtrRec(ATemp));

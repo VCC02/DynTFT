@@ -46,11 +46,28 @@ uses
   DynTFTTypes, DynTFTConsts, DynTFTUtils, DynTFTBaseDrawing, DynTFTControls,
   DynTFTGUIObjects,
   
-  DynTFTButton, DynTFTArrowButton, DynTFTPanel, DynTFTCheckBox, DynTFTScrollBar,
-  DynTFTItems, DynTFTListBox, DynTFTLabel, DynTFTRadioButton, DynTFTRadioGroup,
-  DynTFTTabButton, DynTFTPageControl, DynTFTEdit, DynTFTKeyButton,
-  DynTFTVirtualKeyboard, DynTFTComboBox, DynTFTTrackBar, DynTFTProgressBar,
+//<DynTFTComponents>
+  DynTFTButton,
+  DynTFTArrowButton,
+  DynTFTPanel,
+  DynTFTCheckBox,
+  DynTFTScrollBar,
+  DynTFTItems,
+  DynTFTListBox,
+  DynTFTLabel,
+  DynTFTRadioButton,
+  DynTFTRadioGroup,
+  DynTFTTabButton,
+  DynTFTPageControl,
+  DynTFTEdit,
+  DynTFTKeyButton,
+  DynTFTVirtualKeyboard,
+  DynTFTComboBox,
+  DynTFTTrackBar,
+  DynTFTProgressBar,
   DynTFTMessageBox
+//<EndOfDynTFTComponents> - Do not remove or modify this line!
+
 
   {$IFDEF IsDesktop}
     ,SysUtils, Forms
@@ -63,6 +80,9 @@ procedure Default_OnMouseMoveUser(Sender: PPtrRec);
 procedure Default_OnMouseUpUser(Sender: PPtrRec);
 
 procedure SetAllHandlersToDefault(ABase: PDynTFTBaseComponent);
+
+//CodegenSym:GroupsBegin
+//CodegenSym:GroupsEnd
 
 procedure CreateNewButton_OnMouseUpUser(Sender: PPtrRec); //CodegenSym:header
 procedure TestScrollBarChange(Sender: PPtrRec); //CodegenSym:header
@@ -98,9 +118,19 @@ procedure btnMsgBox_OnMouseUpUser(Sender: PPtrRec); //CodegenSym:header
 procedure ATestRadioGroup1_OnSelectionChanged(Sender: PPtrRec); //CodegenSym:header
 
 
-
+procedure arrbtnDecItemIndex_OnMouseUpUser(Sender: PPtrRec); //CodegenSym:header
+procedure arrbtnIncItemIndex_OnMouseUpUser(Sender: PPtrRec); //CodegenSym:header
+procedure ATestListBox_OnMouseDownUser(Sender: PPtrRec); //CodegenSym:header
+procedure ATestListBox_Items_OnGetItemVisibility(AItems: PPtrRec; Index: LongInt; var ItemText: string {$IFDEF ItemsVisibility}; IsVisible: PBoolean {$ENDIF} {$IFDEF ItemsEnabling}; IsEnabled: PBoolean {$ENDIF}); //CodegenSym:header
+procedure AComboBox1_ListBox_Items_OnGetItemVisibility(AItems: PPtrRec; Index: LongInt; var ItemText: string {$IFDEF ItemsVisibility}; IsVisible: PBoolean {$ENDIF} {$IFDEF ItemsEnabling}; IsEnabled: PBoolean {$ENDIF}); //CodegenSym:header
 
 implementation
+
+{$I DynTFTHandlersAdditionalCode.inc}
+
+//CodegenSym:CreationGroups
+
+//CodegenSym:HandlersImplementation
 
 
 procedure ATestRadioGroup1_OnSelectionChanged(Sender: PPtrRec); //CodegenSym:handler
@@ -122,7 +152,7 @@ begin
     if PDynTFTBaseComponent(Sender)^.BaseProps.ComponentType = DynTFTGetItemsComponentType then
     begin
       DynTFT_DebugConsole('ItemIndex = ' + IntToStr(PDynTFTItems(TPtrRec(Sender))^.ItemIndex));
-      DynTFT_DebugConsole('FirstVisibleIndex = ' + IntToStr(PDynTFTItems(TPtrRec(Sender))^.FirstVisibleIndex));
+      DynTFT_DebugConsole('FirstDisplayablePosition = ' + IntToStr(PDynTFTItems(TPtrRec(Sender))^.FirstDisplayablePosition));
     end
     else
       if PDynTFTBaseComponent(Sender)^.BaseProps.ComponentType = DynTFTGetButtonComponentType then
@@ -357,13 +387,19 @@ begin
 
   if ATestEdit2^.BaseProps.Focused and CFOCUSED <> CFOCUSED then
     Edit_OnMouseDownUser(PPtrRec(TPtrRec(ATestEdit2)));
+
+  TriggerListBoxItemSearch(ATestListBox);
 end;
 
 
 procedure VirtualKeyboard_OnSpecialKey(Sender: PPtrRec; SpecialKey: Integer; CurrentShiftState: TPtr);
 begin
   case SpecialKey of
-    VK_BACK : DynTFTEditBackspaceAtCaret(ATestEdit2);
+    VK_BACK :
+    begin
+      DynTFTEditBackspaceAtCaret(ATestEdit2);
+      TriggerListBoxItemSearch(ATestListBox);
+    end;
 
     VK_DELETE :
     begin
@@ -374,6 +410,7 @@ begin
           Application.MainForm.Close;
         {$ENDIF}
       DynTFTEditDeleteAtCaret(ATestEdit2);
+      TriggerListBoxItemSearch(ATestListBox);
     end;
 
     VK_LEFT: DynTFTMoveEditCaretToLeft(ATestEdit2, 1);
@@ -383,6 +420,14 @@ begin
     VK_HOME: DynTFTMoveEditCaretToHome(ATestEdit2);
 
     VK_END: DynTFTMoveEditCaretToEnd(ATestEdit2);
+
+    VK_APPS :
+    begin
+      ATestEdit2^.Text := '';
+      DynTFTMoveEditCaretToHome(ATestEdit2);
+      DynTFTDrawEdit(ATestEdit2, False);
+      TriggerListBoxItemSearch(ATestListBox);
+    end;
   end;
 end;
 
@@ -520,11 +565,7 @@ end; //CodegenSym:handler:end
 
 procedure ListBoxItemsGetItemText(AItems: PPtrRec; Index: LongInt; var ItemText: string); //CodegenSym:handler
 begin //CodegenSym:handler:begin
-  {$IFDEF IsDesktop}
-    ItemText := IntToStr(Index);
-  {$ELSE}
-    IntToStr(Index, ItemText);
-  {$ENDIF}
+  GetSearchedListBoxItemByIndex(ItemText, Index);
 end; //CodegenSym:handler:end
 
 
@@ -560,5 +601,58 @@ begin //CodegenSym:handler:begin
     DynTFT_DebugConsole('');
   {$ENDIF}
 end; //CodegenSym:handler:end
+
+
+procedure arrbtnDecItemIndex_OnMouseUpUser(Sender: PPtrRec); //CodegenSym:handler
+begin //CodegenSym:handler:begin
+  if ATestListBox^.Items^.ItemIndex > -1 then
+    Dec(ATestListBox^.Items^.ItemIndex);
+
+  DynTFTDrawItems(ATestListBox^.Items, True);
+  DisplayItemIndexForListBox(ATestListBox, lblItemIndex);
+end; //CodegenSym:handler:end
+
+
+procedure arrbtnIncItemIndex_OnMouseUpUser(Sender: PPtrRec); //CodegenSym:handler
+begin //CodegenSym:handler:begin
+  if ATestListBox^.Items^.ItemIndex < ATestListBox^.Items^.Count - 1 then
+    Inc(ATestListBox^.Items^.ItemIndex);
+
+  DynTFTDrawItems(ATestListBox^.Items, True);
+  DisplayItemIndexForListBox(ATestListBox, lblItemIndex);
+end; //CodegenSym:handler:end
+
+
+procedure ATestListBox_OnMouseDownUser(Sender: PPtrRec); //CodegenSym:handler
+begin //CodegenSym:handler:begin
+  DisplayItemIndexForListBox(ATestListBox, lblItemIndex);
+end; //CodegenSym:handler:end
+
+
+procedure ATestListBox_Items_OnGetItemVisibility(AItems: PPtrRec; Index: LongInt; var ItemText: string {$IFDEF ItemsVisibility}; IsVisible: PBoolean {$ENDIF} {$IFDEF ItemsEnabling}; IsEnabled: PBoolean {$ENDIF}); //CodegenSym:handler
+begin //CodegenSym:handler:begin
+  {$IFDEF ItemsVisibility}
+    IsVisible^ := ListBoxItemIsVisible(ItemText, ATestEdit2^.Text);
+  {$ENDIF}
+
+  {$IFDEF ItemsEnabling}
+    IsEnabled^ := Index > 2;
+  {$ENDIF}
+end; //CodegenSym:handler:end
+
+
+procedure AComboBox1_ListBox_Items_OnGetItemVisibility(AItems: PPtrRec; Index: LongInt; var ItemText: string {$IFDEF ItemsVisibility}; IsVisible: PBoolean {$ENDIF} {$IFDEF ItemsEnabling}; IsEnabled: PBoolean {$ENDIF}); //CodegenSym:handler
+begin //CodegenSym:handler:begin
+  {$IFDEF ItemsVisibility}
+    IsVisible^ := True; //all visible here
+  {$ENDIF}
+
+  {$IFDEF ItemsEnabling}
+    IsEnabled^ := (Index <> 0) and (Index <> 2);
+  {$ENDIF}
+end; //CodegenSym:handler:end
+
+
+
 
 end.

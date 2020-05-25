@@ -97,6 +97,12 @@ begin
 
   TotalDrawSpace := TotalDrawSpace - 4;
   TotalPositionSpace := PrbBar^.Max - PrbBar^.Min;
+  
+  if TotalPositionSpace = 0 then
+  begin
+    Result := 1;
+    Exit;
+  end;
 
   {$IFDEF IsDesktop}
     Result := Round(LongInt(TotalDrawSpace) * (PrbBar^.Position - PrbBar^.Min) / TotalPositionSpace);
@@ -187,6 +193,7 @@ begin
   Result^.BaseProps.Top := Top;
   Result^.BaseProps.Width := Width;
   Result^.BaseProps.Height := Height;
+  //DynTFTInitComponentDimensions(PDynTFTBaseComponent(TPtrRec(Result)), ComponentType, False, Left, Top, Width, Height);
   DynTFTInitBasicStatePropertiesToDefault(PDynTFTBaseComponent(TPtrRec(Result)));
 
   Result^.Color := CL_DynTFTProgressBar_Progress;
@@ -233,6 +240,18 @@ procedure DynTFTProgressBar_Destroy(var AProgressBar: PDynTFTProgressBar);
     ATemp: PDynTFTBaseComponent;
 {$ENDIF}
 begin
+  (*
+  {$IFDEF IsDesktop}
+    Dispose(AProgressBar^.OnOwnerInternalMouseDown);
+    Dispose(AProgressBar^.OnOwnerInternalMouseMove);
+    Dispose(AProgressBar^.OnOwnerInternalMouseUp);
+
+    AProgressBar^.OnOwnerInternalMouseDown := nil;
+    AProgressBar^.OnOwnerInternalMouseMove := nil;
+    AProgressBar^.OnOwnerInternalMouseUp := nil;
+  {$ENDIF}
+  *)
+
   {$IFDEF IsDesktop}
     DynTFTComponent_Destroy(PDynTFTBaseComponent(TPtrRec(AProgressBar)), SizeOf(AProgressBar^));
   {$ELSE}
