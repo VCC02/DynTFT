@@ -63,7 +63,8 @@ uses
   DynTFTFonts in '..\GUI\DynTFTFonts.pas',
   DynTFTListExporter in 'D:\DynTFT\DynTFTListExporter.pas',
   RTTIDataProvider in '..\Common\RTTIDataProvider.pas',
-  DynTFTFAT32 in 'D:\DynTFT\DynTFTFAT32.pas';
+  DynTFTFAT32 in 'D:\DynTFT\DynTFTFAT32.pas',
+  DynTFTFAT32D in 'D:\DynTFT\DynTFTFAT32D.pas';
 
 {$R *.res}
 

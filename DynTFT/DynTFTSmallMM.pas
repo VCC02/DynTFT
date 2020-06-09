@@ -34,8 +34,16 @@ unit DynTFTSmallMM;
 {$IFNDEF IsMCU}
   {$DEFINE IsDesktop}
 
-  {$IFNDEF AppArch32}
-    {$DEFINE AppArch32}
+  {$IFDEF CPU64} // works on FP
+    {$IFNDEF AppArch64}
+      {$DEFINE AppArch64}
+    {$ENDIF}
+  {$ENDIF}
+
+  {$IFNDEF AppArch64}
+    {$IFNDEF AppArch32}
+      {$DEFINE AppArch32}
+    {$ENDIF}
   {$ENDIF}
 
 {$ELSE}

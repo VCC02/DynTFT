@@ -80,7 +80,7 @@ var   MM_FreeMemTable: array[0..NR_FREE_BLOCKS - 1] of TFreeMemBlock;
       MM_PossiblyFragmented: boolean;
       MM_Error_: boolean;
 
-      HEAP_START  : dword;
+      HEAP_START  : {$IFDEF CPU64} QWord {$ELSE} DWord {$ENDIF};
       mm: array[0..HEAP_SIZE - 1] of Byte;
 
 procedure MM_Init();
@@ -275,10 +275,16 @@ procedure GetMem(var P: TPtrRec; Size: dword);
 var alignment: byte;
 begin
   alignment  := 1;
-  if size >= 4 then
-    alignment := 4
-  else if size = 2 then
-    alignment  := 2;
+
+  {$IFDEF CPU64}
+    if size >= 8 then
+      alignment := 8
+    else
+  {$ENDIF}
+    if size >= 4 then
+      alignment := 4
+    else if size = 2 then
+      alignment  := 2;
 
   GetMemAlign(P, Size, alignment);
   if (P = 0) and MM_PossiblyFragmented then // try again after defragmentation

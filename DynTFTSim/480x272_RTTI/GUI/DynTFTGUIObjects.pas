@@ -67,10 +67,11 @@ uses
   ;
 
 
-// Project name: GUI_Example_480x272.dyntftcg //Do not delete or modify this line!
+// Project name: GUI_Example_480x272_RTTI.dyntftcg //Do not delete or modify this line!
 
 var
   PageControl1: PDynTFTPageControl;
+  lblRTTIDataSrcInfo: PDynTFTLabel;
   btn1: PDynTFTButton;  //created by First
   btn2: PDynTFTButton;  //created by First
   Arrow1: PDynTFTArrowButton;  //created by First
@@ -142,13 +143,16 @@ const
 
 
 const
+  C_lblRTTIDataSrcInfo_Caption = 'DataSrc';
   C_rdgrpTest_Caption = 'Radio Group 1';
   C_rdgrpTest1_Caption = 'Radio Group 2';
 
 
 {$IFDEF RTTIREG}
   {$IFDEF IsDesktop} {$IFDEF DesktopApp_D2006} // Profile: "DesktopApp_D2006"   HandlersLocation: Lst file
-    C_RTTI_CreateInstructionData: array[0..479] of DWord = (
+    C_RTTI_CreateInstructionData: array[0..480] of DWord = (
+      $0400000E,   //Set build number to 14
+
       $01014001, $001D0009, $0028006E,   //create btn1(1, 9, 29, 110, 40)  manual creation group: 0.  HasVariableInGUIObjects: 1.  CreatedAtStartup: 0
       $03018008, $74747542, $31206E6F,   //set property:  "Caption" of "STRING" to "Button 1".   Property index: 0
       $03010104, $006FAD0B,   //set property:  "Font_Color" of "TCOLOR" to "006FAD0B".   Property index: 1
@@ -264,7 +268,7 @@ const
       $01014102, $003F00F9, $0026008C,   //create DynTFTButton0(2, 249, 63, 140, 38)  manual creation group: 1.  HasVariableInGUIObjects: 1.  CreatedAtStartup: 0
       $03018004, $306E7462,   //set property:  "Caption" of "STRING" to "btn0".   Property index: 0
       $03010404, $00477938,   //set property:  "ActiveFont" of "PBYTE" to "Verdana29x32_ItalicUnderLine".   Property index: 4
-      $03010504, $00471374,   //set property:  "BaseProps.OnMouseUpUser" of "PBYTE" to "DynTFTButton0_OnMouseUpUser".   Property index: 5
+      $03010504, $00471908,   //set property:  "BaseProps.OnMouseUpUser" of "PBYTE" to "DynTFTButton0_OnMouseUpUser".   Property index: 5
 
       $01084203, $001D0009, $001E0050,   //create lbl1(3, 9, 29, 80, 30)  manual creation group: 2.  HasVariableInGUIObjects: 1.  CreatedAtStartup: 0
       $03080004, $00000000,   //set property:  "BaseProps.CanHandleMessages" of "BOOLEAN" to "False".   Property index: 0
@@ -287,8 +291,8 @@ const
       $03080204, $00FA8282,   //set property:  "Color" of "TCOLOR" to "00FA8282".   Property index: 2
 
       $010F4304, $00370001, $00B8013E,   //create vkTest(4, 1, 55, 318, 184)  manual creation group: 3.  HasVariableInGUIObjects: 1.  CreatedAtStartup: 0
-      $030F0004, $00470DD0,   //set property:  "OnCharKey" of "PBYTE" to "VirtualKeyboard_OnCharKey".   Property index: 0
-      $030F0104, $00470E54,   //set property:  "OnSpecialKey" of "PBYTE" to "VirtualKeyboard_OnSpecialKey".   Property index: 1
+      $030F0004, $00471308,   //set property:  "OnCharKey" of "PBYTE" to "VirtualKeyboard_OnCharKey".   Property index: 0
+      $030F0104, $0047138C,   //set property:  "OnSpecialKey" of "PBYTE" to "VirtualKeyboard_OnSpecialKey".   Property index: 1
 
       $010D4304, $001B0009, $001800C8,   //create Edit1(4, 9, 27, 200, 24)  manual creation group: 3.  HasVariableInGUIObjects: 1.  CreatedAtStartup: 0
       $030D8005, $74696445, $00000031,   //set property:  "Text" of "STRING" to "Edit1".   Property index: 0
@@ -377,12 +381,12 @@ const
 
       $01114506, $00210009, $001800C8,   //create TrackBar1(6, 9, 33, 200, 24)  manual creation group: 5.  HasVariableInGUIObjects: 1.  CreatedAtStartup: 0
       $03110004, $00000003,   //set property:  "Position" of "INTEGER" to "3".   Property index: 0
-      $03110104, $0047132C,   //set property:  "OnTrackBarChange" of "PBYTE" to "TrackBar1_OnTrackBarChange".   Property index: 1
+      $03110104, $004718C0,   //set property:  "OnTrackBarChange" of "PBYTE" to "TrackBar1_OnTrackBarChange".   Property index: 1
 
       $01114506, $005D0019, $00A00018,   //create TrackBar2(6, 25, 93, 24, 160)  manual creation group: 5.  HasVariableInGUIObjects: 1.  CreatedAtStartup: 0
       $03110004, $00000007,   //set property:  "Position" of "INTEGER" to "7".   Property index: 0
       $03110201, $00000001,   //set property:  "Orientation" of "BYTE" to "CTrackBarVertDir".   Property index: 2
-      $03110104, $00471350,   //set property:  "OnTrackBarChange" of "PBYTE" to "TrackBar2_OnTrackBarChange".   Property index: 1
+      $03110104, $004718E4,   //set property:  "OnTrackBarChange" of "PBYTE" to "TrackBar2_OnTrackBarChange".   Property index: 1
 
       $01124506, $002D0101, $001400CC,   //create ProgressBar1(6, 257, 45, 204, 20)  manual creation group: 5.  HasVariableInGUIObjects: 1.  CreatedAtStartup: 0
       $03120004, $00000000,   //set property:  "BaseProps.CanHandleMessages" of "BOOLEAN" to "False".   Property index: 0
@@ -395,13 +399,15 @@ const
 
       $01014506, $00C80049, $00190068,   //create btnShowMessageBox(6, 73, 200, 104, 25)  manual creation group: 5.  HasVariableInGUIObjects: 1.  CreatedAtStartup: 0
       $0301800B, $7373654D, $20656761, $00786F42,   //set property:  "Caption" of "STRING" to "Message Box".   Property index: 0
-      $03010504, $00470EE8,   //set property:  "BaseProps.OnMouseUpUser" of "PBYTE" to "btnShowMessageBox_OnMouseUpUser".   Property index: 5
+      $03010504, $00471420,   //set property:  "BaseProps.OnMouseUpUser" of "PBYTE" to "btnShowMessageBox_OnMouseUpUser".   Property index: 5
       0  //stop execution
     );
   {$ENDIF} {$ENDIF} // IsDesktop DesktopApp_D2006
 
   {$IFDEF IsMCU} {$IFDEF PIC32App} // Profile: "PIC32App"   HandlersLocation: Lst file
-    C_RTTI_CreateInstructionData: array[0..479] of DWord = (
+    C_RTTI_CreateInstructionData: array[0..480] of DWord = (
+      $04000005,   //Set build number to 5
+
       $01014001, $001D0009, $0028006E,   //create btn1(1, 9, 29, 110, 40)  manual creation group: 0.  HasVariableInGUIObjects: 1.  CreatedAtStartup: 0
       $03018008, $74747542, $31206E6F,   //set property:  "Caption" of "STRING" to "Button 1".   Property index: 0
       $03010104, $00000D6D,   //set property:  "Font_Color" of "TCOLOR" to "00000D6D".   Property index: 1
@@ -516,8 +522,8 @@ const
 
       $01014102, $003F00F9, $0026008C,   //create DynTFTButton0(2, 249, 63, 140, 38)  manual creation group: 1.  HasVariableInGUIObjects: 1.  CreatedAtStartup: 0
       $03018004, $306E7462,   //set property:  "Caption" of "STRING" to "btn0".   Property index: 0
-      $03010404, $9D01A72C,   //set property:  "ActiveFont" of "PBYTE" to "Verdana29x32_ItalicUnderLine".   Property index: 4
-      $03010504, $9D018628,   //set property:  "BaseProps.OnMouseUpUser" of "PBYTE" to "DynTFTButton0_OnMouseUpUser".   Property index: 5
+      $03010404, $9D01AD70,   //set property:  "ActiveFont" of "PBYTE" to "Verdana29x32_ItalicUnderLine".   Property index: 4
+      $03010504, $9D018828,   //set property:  "BaseProps.OnMouseUpUser" of "PBYTE" to "DynTFTButton0_OnMouseUpUser".   Property index: 5
 
       $01084203, $001D0009, $001E0050,   //create lbl1(3, 9, 29, 80, 30)  manual creation group: 2.  HasVariableInGUIObjects: 1.  CreatedAtStartup: 0
       $03080004, $00000000,   //set property:  "BaseProps.CanHandleMessages" of "BOOLEAN" to "False".   Property index: 0
@@ -540,8 +546,8 @@ const
       $03080204, $0000841F,   //set property:  "Color" of "TCOLOR" to "0000841F".   Property index: 2
 
       $010F4304, $00370001, $00B8013E,   //create vkTest(4, 1, 55, 318, 184)  manual creation group: 3.  HasVariableInGUIObjects: 1.  CreatedAtStartup: 0
-      $030F0004, $9D017530,   //set property:  "OnCharKey" of "PBYTE" to "VirtualKeyboard_OnCharKey".   Property index: 0
-      $030F0104, $9D0170DC,   //set property:  "OnSpecialKey" of "PBYTE" to "VirtualKeyboard_OnSpecialKey".   Property index: 1
+      $030F0004, $9D01778C,   //set property:  "OnCharKey" of "PBYTE" to "VirtualKeyboard_OnCharKey".   Property index: 0
+      $030F0104, $9D017338,   //set property:  "OnSpecialKey" of "PBYTE" to "VirtualKeyboard_OnSpecialKey".   Property index: 1
 
       $010D4304, $001B0009, $001800C8,   //create Edit1(4, 9, 27, 200, 24)  manual creation group: 3.  HasVariableInGUIObjects: 1.  CreatedAtStartup: 0
       $030D8005, $74696445, $00000031,   //set property:  "Text" of "STRING" to "Edit1".   Property index: 0
@@ -630,12 +636,12 @@ const
 
       $01114506, $00210009, $001800C8,   //create TrackBar1(6, 9, 33, 200, 24)  manual creation group: 5.  HasVariableInGUIObjects: 1.  CreatedAtStartup: 0
       $03110002, $00000003,   //set property:  "Position" of "INTEGER" to "3".   Property index: 0
-      $03110104, $9D016604,   //set property:  "OnTrackBarChange" of "PBYTE" to "TrackBar1_OnTrackBarChange".   Property index: 1
+      $03110104, $9D0167FC,   //set property:  "OnTrackBarChange" of "PBYTE" to "TrackBar1_OnTrackBarChange".   Property index: 1
 
       $01114506, $005D0019, $00A00018,   //create TrackBar2(6, 25, 93, 24, 160)  manual creation group: 5.  HasVariableInGUIObjects: 1.  CreatedAtStartup: 0
       $03110002, $00000007,   //set property:  "Position" of "INTEGER" to "7".   Property index: 0
       $03110201, $00000001,   //set property:  "Orientation" of "BYTE" to "CTrackBarVertDir".   Property index: 2
-      $03110104, $9D0168E0,   //set property:  "OnTrackBarChange" of "PBYTE" to "TrackBar2_OnTrackBarChange".   Property index: 1
+      $03110104, $9D016AD8,   //set property:  "OnTrackBarChange" of "PBYTE" to "TrackBar2_OnTrackBarChange".   Property index: 1
 
       $01124506, $002D0101, $001400CC,   //create ProgressBar1(6, 257, 45, 204, 20)  manual creation group: 5.  HasVariableInGUIObjects: 1.  CreatedAtStartup: 0
       $03120004, $00000000,   //set property:  "BaseProps.CanHandleMessages" of "BOOLEAN" to "False".   Property index: 0
@@ -648,13 +654,15 @@ const
 
       $01014506, $00C80049, $00190068,   //create btnShowMessageBox(6, 73, 200, 104, 25)  manual creation group: 5.  HasVariableInGUIObjects: 1.  CreatedAtStartup: 0
       $0301800B, $7373654D, $20656761, $00786F42,   //set property:  "Caption" of "STRING" to "Message Box".   Property index: 0
-      $03010504, $9D016654,   //set property:  "BaseProps.OnMouseUpUser" of "PBYTE" to "btnShowMessageBox_OnMouseUpUser".   Property index: 5
+      $03010504, $9D01684C,   //set property:  "BaseProps.OnMouseUpUser" of "PBYTE" to "btnShowMessageBox_OnMouseUpUser".   Property index: 5
       0  //stop execution
     );
   {$ENDIF} {$ENDIF} // IsMCU PIC32App
 
   {$IFDEF IsDesktop} {$IFDEF DesktopApp_D10_2} // Profile: "DesktopApp_D10_2"   HandlersLocation: Lst file
-    C_RTTI_CreateInstructionData: array[0..479] of DWord = (
+    C_RTTI_CreateInstructionData: array[0..480] of DWord = (
+      $04000003,   //Set build number to 3
+
       $01014001, $001D0009, $0028006E,   //create btn1(1, 9, 29, 110, 40)  manual creation group: 0.  HasVariableInGUIObjects: 1.  CreatedAtStartup: 0
       $03018008, $74747542, $31206E6F,   //set property:  "Caption" of "STRING" to "Button 1".   Property index: 0
       $03010104, $006FAD0B,   //set property:  "Font_Color" of "TCOLOR" to "006FAD0B".   Property index: 1
@@ -907,7 +915,9 @@ const
   {$ENDIF} {$ENDIF} // IsDesktop DesktopApp_D10_2
 
   {$IFDEF IsDesktop} {$IFDEF DesktopApp_FP} // Profile: "DesktopApp_FP"   HandlersLocation: Lst file
-    C_RTTI_CreateInstructionData: array[0..479] of DWord = (
+    C_RTTI_CreateInstructionData: array[0..480] of DWord = (
+      $04000004,   //Set build number to 4
+
       $01014001, $001D0009, $0028006E,   //create btn1(1, 9, 29, 110, 40)  manual creation group: 0.  HasVariableInGUIObjects: 1.  CreatedAtStartup: 0
       $03018008, $74747542, $31206E6F,   //set property:  "Caption" of "STRING" to "Button 1".   Property index: 0
       $03010104, $006FAD0B,   //set property:  "Font_Color" of "TCOLOR" to "006FAD0B".   Property index: 1
@@ -1022,8 +1032,8 @@ const
 
       $01014102, $003F00F9, $0026008C,   //create DynTFTButton0(2, 249, 63, 140, 38)  manual creation group: 1.  HasVariableInGUIObjects: 1.  CreatedAtStartup: 0
       $03018004, $306E7462,   //set property:  "Caption" of "STRING" to "btn0".   Property index: 0
-      $03010404, $0058F2A8,   //set property:  "ActiveFont" of "PBYTE" to "Verdana29x32_ItalicUnderLine".   Property index: 4
-      $03010504, $00569550,   //set property:  "BaseProps.OnMouseUpUser" of "PBYTE" to "DynTFTButton0_OnMouseUpUser".   Property index: 5
+      $03010404, $0058F2B8,   //set property:  "ActiveFont" of "PBYTE" to "Verdana29x32_ItalicUnderLine".   Property index: 4
+      $03010504, $00569340,   //set property:  "BaseProps.OnMouseUpUser" of "PBYTE" to "DynTFTButton0_OnMouseUpUser".   Property index: 5
 
       $01084203, $001D0009, $001E0050,   //create lbl1(3, 9, 29, 80, 30)  manual creation group: 2.  HasVariableInGUIObjects: 1.  CreatedAtStartup: 0
       $03080004, $00000000,   //set property:  "BaseProps.CanHandleMessages" of "BOOLEAN" to "False".   Property index: 0
@@ -1046,8 +1056,8 @@ const
       $03080204, $00FA8282,   //set property:  "Color" of "TCOLOR" to "00FA8282".   Property index: 2
 
       $010F4304, $00370001, $00B8013E,   //create vkTest(4, 1, 55, 318, 184)  manual creation group: 3.  HasVariableInGUIObjects: 1.  CreatedAtStartup: 0
-      $030F0004, $00568EB0,   //set property:  "OnCharKey" of "PBYTE" to "VirtualKeyboard_OnCharKey".   Property index: 0
-      $030F0104, $00568F60,   //set property:  "OnSpecialKey" of "PBYTE" to "VirtualKeyboard_OnSpecialKey".   Property index: 1
+      $030F0004, $00568C30,   //set property:  "OnCharKey" of "PBYTE" to "VirtualKeyboard_OnCharKey".   Property index: 0
+      $030F0104, $00568CE0,   //set property:  "OnSpecialKey" of "PBYTE" to "VirtualKeyboard_OnSpecialKey".   Property index: 1
 
       $010D4304, $001B0009, $001800C8,   //create Edit1(4, 9, 27, 200, 24)  manual creation group: 3.  HasVariableInGUIObjects: 1.  CreatedAtStartup: 0
       $030D8005, $74696445, $00000031,   //set property:  "Text" of "STRING" to "Edit1".   Property index: 0
@@ -1136,12 +1146,12 @@ const
 
       $01114506, $00210009, $001800C8,   //create TrackBar1(6, 9, 33, 200, 24)  manual creation group: 5.  HasVariableInGUIObjects: 1.  CreatedAtStartup: 0
       $03110004, $00000003,   //set property:  "Position" of "INTEGER" to "3".   Property index: 0
-      $03110104, $005694F0,   //set property:  "OnTrackBarChange" of "PBYTE" to "TrackBar1_OnTrackBarChange".   Property index: 1
+      $03110104, $005692E0,   //set property:  "OnTrackBarChange" of "PBYTE" to "TrackBar1_OnTrackBarChange".   Property index: 1
 
       $01114506, $005D0019, $00A00018,   //create TrackBar2(6, 25, 93, 24, 160)  manual creation group: 5.  HasVariableInGUIObjects: 1.  CreatedAtStartup: 0
       $03110004, $00000007,   //set property:  "Position" of "INTEGER" to "7".   Property index: 0
       $03110201, $00000001,   //set property:  "Orientation" of "BYTE" to "CTrackBarVertDir".   Property index: 2
-      $03110104, $00569520,   //set property:  "OnTrackBarChange" of "PBYTE" to "TrackBar2_OnTrackBarChange".   Property index: 1
+      $03110104, $00569310,   //set property:  "OnTrackBarChange" of "PBYTE" to "TrackBar2_OnTrackBarChange".   Property index: 1
 
       $01124506, $002D0101, $001400CC,   //create ProgressBar1(6, 257, 45, 204, 20)  manual creation group: 5.  HasVariableInGUIObjects: 1.  CreatedAtStartup: 0
       $03120004, $00000000,   //set property:  "BaseProps.CanHandleMessages" of "BOOLEAN" to "False".   Property index: 0
@@ -1154,13 +1164,779 @@ const
 
       $01014506, $00C80049, $00190068,   //create btnShowMessageBox(6, 73, 200, 104, 25)  manual creation group: 5.  HasVariableInGUIObjects: 1.  CreatedAtStartup: 0
       $0301800B, $7373654D, $20656761, $00786F42,   //set property:  "Caption" of "STRING" to "Message Box".   Property index: 0
-      $03010504, $00569030,   //set property:  "BaseProps.OnMouseUpUser" of "PBYTE" to "btnShowMessageBox_OnMouseUpUser".   Property index: 5
+      $03010504, $00568DB0,   //set property:  "BaseProps.OnMouseUpUser" of "PBYTE" to "btnShowMessageBox_OnMouseUpUser".   Property index: 5
       0  //stop execution
     );
   {$ENDIF} {$ENDIF} // IsDesktop DesktopApp_FP
 
+  {$IFDEF IsMCU} {$IFDEF PIC32AppAddrArr} // Profile: "PIC32AppAddrArr"   HandlersLocation: Code (constant array of addresses)
+    C_RTTI_CreateInstructionData: array[0..480] of DWord = (
+      $04000020,   //Set build number to 32
+
+      $01014001, $001D0009, $0028006E,   //create btn1(1, 9, 29, 110, 40)  manual creation group: 0.  HasVariableInGUIObjects: 1.  CreatedAtStartup: 0
+      $03018008, $74747542, $31206E6F,   //set property:  "Caption" of "STRING" to "Button 1".   Property index: 0
+      $03010104, $00000D6D,   //set property:  "Font_Color" of "TCOLOR" to "00000D6D".   Property index: 1
+
+      $01014001, $001D0169, $0028006E,   //create btn2(1, 361, 29, 110, 40)  manual creation group: 0.  HasVariableInGUIObjects: 1.  CreatedAtStartup: 0
+      $03018008, $74747542, $32206E6F,   //set property:  "Caption" of "STRING" to "Button 2".   Property index: 0
+      $03010104, $00000D6D,   //set property:  "Font_Color" of "TCOLOR" to "00000D6D".   Property index: 1
+
+      $01024001, $00220089, $001E001E,   //create Arrow1(1, 137, 34, 30, 30)  manual creation group: 0.  HasVariableInGUIObjects: 1.  CreatedAtStartup: 0
+      $03020004, $00000D6D,   //set property:  "Color" of "TCOLOR" to "00000D6D".   Property index: 0
+      $03020101, $00000002,   //set property:  "ArrowDir" of "BYTE" to "CLeftArrow".   Property index: 1
+
+      $01024001, $002200B1, $001E001E,   //create Arrow2(1, 177, 34, 30, 30)  manual creation group: 0.  HasVariableInGUIObjects: 1.  CreatedAtStartup: 0
+      $03020004, $00000D6D,   //set property:  "Color" of "TCOLOR" to "00000D6D".   Property index: 0
+      $03020101, $00000003,   //set property:  "ArrowDir" of "BYTE" to "CRightArrow".   Property index: 1
+
+      $01024001, $0022010F, $001E001E,   //create Arrow3(1, 271, 34, 30, 30)  manual creation group: 0.  HasVariableInGUIObjects: 1.  CreatedAtStartup: 0
+      $03020004, $00000D6D,   //set property:  "Color" of "TCOLOR" to "00000D6D".   Property index: 0
+
+      $01024001, $00220139, $001E001E,   //create Arrow4(1, 313, 34, 30, 30)  manual creation group: 0.  HasVariableInGUIObjects: 1.  CreatedAtStartup: 0
+      $03020004, $00000D6D,   //set property:  "Color" of "TCOLOR" to "00000D6D".   Property index: 0
+      $03020101, $00000001,   //set property:  "ArrowDir" of "BYTE" to "CDownArrow".   Property index: 1
+
+      $01034001, $00550069, $00620112,   //create Panel1(1, 105, 85, 274, 98)  manual creation group: 0.  HasVariableInGUIObjects: 1.  CreatedAtStartup: 0
+      $03030004, $00000000,   //set property:  "BaseProps.CanHandleMessages" of "BOOLEAN" to "False".   Property index: 0
+      $03038107, $656E6150, $0031206C,   //set property:  "Caption" of "STRING" to "Panel 1".   Property index: 1
+      $03030204, $00006D6D,   //set property:  "Color" of "TCOLOR" to "00006D6D".   Property index: 2
+      $03030304, $00000000,   //set property:  "Font_Color" of "TCOLOR" to "00000000".   Property index: 3
+
+      $01024001, $00A50011, $002D002D,   //create Arrow5(1, 17, 165, 45, 45)  manual creation group: 0.  HasVariableInGUIObjects: 1.  CreatedAtStartup: 0
+      $03020004, $00003734,   //set property:  "Color" of "TCOLOR" to "00003734".   Property index: 0
+
+      $01024001, $00DD0011, $002D002D,   //create Arrow6(1, 17, 221, 45, 45)  manual creation group: 0.  HasVariableInGUIObjects: 1.  CreatedAtStartup: 0
+      $03020004, $00003734,   //set property:  "Color" of "TCOLOR" to "00003734".   Property index: 0
+      $03020101, $00000001,   //set property:  "ArrowDir" of "BYTE" to "CDownArrow".   Property index: 1
+
+      $01024001, $00A501A1, $002D002D,   //create Arrow7(1, 417, 165, 45, 45)  manual creation group: 0.  HasVariableInGUIObjects: 1.  CreatedAtStartup: 0
+      $03020004, $00003734,   //set property:  "Color" of "TCOLOR" to "00003734".   Property index: 0
+      $03020101, $00000002,   //set property:  "ArrowDir" of "BYTE" to "CLeftArrow".   Property index: 1
+
+      $01024001, $00DD01A1, $002D002D,   //create Arrow8(1, 417, 221, 45, 45)  manual creation group: 0.  HasVariableInGUIObjects: 1.  CreatedAtStartup: 0
+      $03020004, $00003734,   //set property:  "Color" of "TCOLOR" to "00003734".   Property index: 0
+      $03020101, $00000003,   //set property:  "ArrowDir" of "BYTE" to "CRightArrow".   Property index: 1
+
+      $01014001, $00BD00A9, $00230094,   //create btn3(1, 169, 189, 148, 35)  manual creation group: 0.  HasVariableInGUIObjects: 1.  CreatedAtStartup: 0
+      $03010201, $00000000,   //set property:  "BaseProps.Enabled" of "BYTE" to "0".   Property index: 2
+      $03010304, $00000000,   //set property:  "BaseProps.CanHandleMessages" of "BOOLEAN" to "False".   Property index: 3
+      $03018011, $61736944, $64656C62, $74754220, $206E6F74, $00000033,   //set property:  "Caption" of "STRING" to "Disabled Button 3".   Property index: 0
+
+      $01014001, $00E500A9, $00230094,   //create btn4(1, 169, 229, 148, 35)  manual creation group: 0.  HasVariableInGUIObjects: 1.  CreatedAtStartup: 0
+      $03010201, $00000000,   //set property:  "BaseProps.Enabled" of "BYTE" to "0".   Property index: 2
+      $03010304, $00000000,   //set property:  "BaseProps.CanHandleMessages" of "BOOLEAN" to "False".   Property index: 3
+      $03018011, $61736944, $64656C62, $74754220, $206E6F74, $00000034,   //set property:  "Caption" of "STRING" to "Disabled Button 4".   Property index: 0
+
+      $01024001, $001D00D8, $002D002D,   //create Arrow9(1, 216, 29, 45, 45)  manual creation group: 0.  HasVariableInGUIObjects: 1.  CreatedAtStartup: 0
+      $03020004, $0000EF7F,   //set property:  "Color" of "TCOLOR" to "0000EF7F".   Property index: 0
+      $03020101, $00000004,   //set property:  "ArrowDir" of "BYTE" to "CUndefinedArrow".   Property index: 1
+
+      $01044102, $001D0019, $0019008C,   //create CheckBox1(2, 25, 29, 140, 25)  manual creation group: 1.  HasVariableInGUIObjects: 1.  CreatedAtStartup: 0
+      $0304800A, $63656843, $786F426B, $00003120,   //set property:  "Caption" of "STRING" to "CheckBox 1".   Property index: 0
+      $03040104, $00009417,   //set property:  "Color" of "TCOLOR" to "00009417".   Property index: 1
+      $03040204, $00000000,   //set property:  "Font_Color" of "TCOLOR" to "00000000".   Property index: 2
+
+      $01044102, $00450019, $0019008C,   //create CheckBox2(2, 25, 69, 140, 25)  manual creation group: 1.  HasVariableInGUIObjects: 1.  CreatedAtStartup: 0
+      $0304800A, $63656843, $786F426B, $00003220,   //set property:  "Caption" of "STRING" to "CheckBox 2".   Property index: 0
+      $03040104, $00009417,   //set property:  "Color" of "TCOLOR" to "00009417".   Property index: 1
+      $03040204, $00000000,   //set property:  "Font_Color" of "TCOLOR" to "00000000".   Property index: 2
+
+      $01044102, $001D00F9, $0019008C,   //create CheckBox3(2, 249, 29, 140, 25)  manual creation group: 1.  HasVariableInGUIObjects: 1.  CreatedAtStartup: 0
+      $03040301, $00000000,   //set property:  "BaseProps.Enabled" of "BYTE" to "0".   Property index: 3
+      $0304800A, $63656843, $786F426B, $00003320,   //set property:  "Caption" of "STRING" to "CheckBox 3".   Property index: 0
+      $03040104, $00009417,   //set property:  "Color" of "TCOLOR" to "00009417".   Property index: 1
+      $03040204, $00000000,   //set property:  "Font_Color" of "TCOLOR" to "00000000".   Property index: 2
+
+      $01054102, $00ED0019, $00140199,   //create ScrollBar1(2, 25, 237, 409, 20)  manual creation group: 1.  HasVariableInGUIObjects: 1.  CreatedAtStartup: 0
+
+      $01054102, $001D01B9, $00D00014,   //create ScrollBar2(2, 441, 29, 20, 208)  manual creation group: 1.  HasVariableInGUIObjects: 1.  CreatedAtStartup: 0
+      $03050001, $00000001,   //set property:  "Direction" of "BYTE" to "CScrollBarVertDir".   Property index: 0
+
+      $01074102, $006D0019, $006F008C,   //create ListBox1(2, 25, 109, 140, 111)  manual creation group: 1.  HasVariableInGUIObjects: 1.  CreatedAtStartup: 0
+      $03070004, $0000BD7F,   //set property:  "Items^.BackgroundColor" of "TCOLOR" to "0000BD7F".   Property index: 0
+      $03078103, $00656E6F,   //set property:  "Items^.Strings[0]" of "STRING" to "one".   Property index: 1
+      $03078203, $006F7774,   //set property:  "Items^.Strings[1]" of "STRING" to "two".   Property index: 2
+      $03078305, $65726874, $00000065,   //set property:  "Items^.Strings[2]" of "STRING" to "three".   Property index: 3
+      $03078404, $72756F66,   //set property:  "Items^.Strings[3]" of "STRING" to "four".   Property index: 4
+      $03078504, $65766966,   //set property:  "Items^.Strings[4]" of "STRING" to "five".   Property index: 5
+      $03078603, $00786973,   //set property:  "Items^.Strings[5]" of "STRING" to "six".   Property index: 6
+      $03078705, $65766573, $0000006E,   //set property:  "Items^.Strings[6]" of "STRING" to "seven".   Property index: 7
+      $03078805, $68676965, $00000074,   //set property:  "Items^.Strings[7]" of "STRING" to "eight".   Property index: 8
+      $03078904, $656E696E,   //set property:  "Items^.Strings[8]" of "STRING" to "nine".   Property index: 9
+      $03078A03, $006E6574,   //set property:  "Items^.Strings[9]" of "STRING" to "ten".   Property index: 10
+      $03070B02, $0000000F,   //set property:  "Items^.ItemHeight" of "WORD" to "15".   Property index: 11
+      $03070C02, $0000000A,   //set property:  "Items^.Count" of "INTEGER" to "10".   Property index: 12
+      // Property Items^.TotalVisibleCount skipped because of compiler directives.
+      // Property Items^.OnGetItem skipped because of compiler directives.
+
+      $01074102, $006D00F9, $006F008C,   //create ListBox3(2, 249, 109, 140, 111)  manual creation group: 1.  HasVariableInGUIObjects: 1.  CreatedAtStartup: 0
+      $03078103, $00656E6F,   //set property:  "Items^.Strings[0]" of "STRING" to "one".   Property index: 1
+      $03078203, $006F7774,   //set property:  "Items^.Strings[1]" of "STRING" to "two".   Property index: 2
+      $03078305, $65726874, $00000065,   //set property:  "Items^.Strings[2]" of "STRING" to "three".   Property index: 3
+      $03078404, $72756F66,   //set property:  "Items^.Strings[3]" of "STRING" to "four".   Property index: 4
+      $03078504, $65766966,   //set property:  "Items^.Strings[4]" of "STRING" to "five".   Property index: 5
+      $03078603, $00786973,   //set property:  "Items^.Strings[5]" of "STRING" to "six".   Property index: 6
+      $03078705, $65766573, $0000006E,   //set property:  "Items^.Strings[6]" of "STRING" to "seven".   Property index: 7
+      $03078805, $68676965, $00000074,   //set property:  "Items^.Strings[7]" of "STRING" to "eight".   Property index: 8
+      $03078904, $656E696E,   //set property:  "Items^.Strings[8]" of "STRING" to "nine".   Property index: 9
+      $03078A03, $006E6574,   //set property:  "Items^.Strings[9]" of "STRING" to "ten".   Property index: 10
+      $03070B02, $0000000F,   //set property:  "Items^.ItemHeight" of "WORD" to "15".   Property index: 11
+      $03070C02, $0000000A,   //set property:  "Items^.Count" of "INTEGER" to "10".   Property index: 12
+      // Property Items^.TotalVisibleCount skipped because of compiler directives.
+      // Property Items^.OnGetItem skipped because of compiler directives.
+
+      $01014102, $003F00F9, $0026008C,   //create DynTFTButton0(2, 249, 63, 140, 38)  manual creation group: 1.  HasVariableInGUIObjects: 1.  CreatedAtStartup: 0
+      $03018004, $306E7462,   //set property:  "Caption" of "STRING" to "btn0".   Property index: 0
+      $03810404, $00000000,   //set property:  "ActiveFont" of "PBYTE" to "Verdana29x32_ItalicUnderLine".  Set to index of "Verdana29x32_ItalicUnderLine".   Property index: 4
+      $03810504, $00000001,   //set property:  "BaseProps.OnMouseUpUser" of "PBYTE" to "DynTFTButton0_OnMouseUpUser".  Set to index of "DynTFTButton0_OnMouseUpUser".   Property index: 5
+
+      $01084203, $001D0009, $001E0050,   //create lbl1(3, 9, 29, 80, 30)  manual creation group: 2.  HasVariableInGUIObjects: 1.  CreatedAtStartup: 0
+      $03080004, $00000000,   //set property:  "BaseProps.CanHandleMessages" of "BOOLEAN" to "False".   Property index: 0
+      $03088107, $6562614C, $0031206C,   //set property:  "Caption" of "STRING" to "Label 1".   Property index: 1
+      $03080204, $0000841F,   //set property:  "Color" of "TCOLOR" to "0000841F".   Property index: 2
+
+      $01084203, $001D0081, $001E0050,   //create lbl2(3, 129, 29, 80, 30)  manual creation group: 2.  HasVariableInGUIObjects: 1.  CreatedAtStartup: 0
+      $03080004, $00000000,   //set property:  "BaseProps.CanHandleMessages" of "BOOLEAN" to "False".   Property index: 0
+      $03088107, $6562614C, $0032206C,   //set property:  "Caption" of "STRING" to "Label 2".   Property index: 1
+      $03080204, $0000841F,   //set property:  "Color" of "TCOLOR" to "0000841F".   Property index: 2
+
+      $01084203, $001D0109, $001E0050,   //create lbl3(3, 265, 29, 80, 30)  manual creation group: 2.  HasVariableInGUIObjects: 1.  CreatedAtStartup: 0
+      $03080004, $00000000,   //set property:  "BaseProps.CanHandleMessages" of "BOOLEAN" to "False".   Property index: 0
+      $03088107, $6562614C, $0033206C,   //set property:  "Caption" of "STRING" to "Label 3".   Property index: 1
+      $03080204, $0000841F,   //set property:  "Color" of "TCOLOR" to "0000841F".   Property index: 2
+
+      $01084203, $001D0181, $001E0050,   //create lbl4(3, 385, 29, 80, 30)  manual creation group: 2.  HasVariableInGUIObjects: 1.  CreatedAtStartup: 0
+      $03080004, $00000000,   //set property:  "BaseProps.CanHandleMessages" of "BOOLEAN" to "False".   Property index: 0
+      $03088107, $6562614C, $0034206C,   //set property:  "Caption" of "STRING" to "Label 4".   Property index: 1
+      $03080204, $0000841F,   //set property:  "Color" of "TCOLOR" to "0000841F".   Property index: 2
+
+      $010F4304, $00370001, $00B8013E,   //create vkTest(4, 1, 55, 318, 184)  manual creation group: 3.  HasVariableInGUIObjects: 1.  CreatedAtStartup: 0
+      $038F0004, $00000002,   //set property:  "OnCharKey" of "PBYTE" to "VirtualKeyboard_OnCharKey".  Set to index of "VirtualKeyboard_OnCharKey".   Property index: 0
+      $038F0104, $00000003,   //set property:  "OnSpecialKey" of "PBYTE" to "VirtualKeyboard_OnSpecialKey".  Set to index of "VirtualKeyboard_OnSpecialKey".   Property index: 1
+
+      $010D4304, $001B0009, $001800C8,   //create Edit1(4, 9, 27, 200, 24)  manual creation group: 3.  HasVariableInGUIObjects: 1.  CreatedAtStartup: 0
+      $030D8005, $74696445, $00000031,   //set property:  "Text" of "STRING" to "Edit1".   Property index: 0
+
+      $01104405, $001D0009, $001600A0,   //create ComboBox1(5, 9, 29, 160, 22)  manual creation group: 4.  HasVariableInGUIObjects: 1.  CreatedAtStartup: 0
+      $03100004, $00006FDF,   //set property:  "ListBox^.Items^.BackgroundColor" of "TCOLOR" to "00006FDF".   Property index: 0
+      $03108103, $00656E6F,   //set property:  "ListBox^.Items^.Strings[0]" of "STRING" to "one".   Property index: 1
+      $03108203, $006F7774,   //set property:  "ListBox^.Items^.Strings[1]" of "STRING" to "two".   Property index: 2
+      $03108305, $65726874, $00000065,   //set property:  "ListBox^.Items^.Strings[2]" of "STRING" to "three".   Property index: 3
+      $03108404, $72756F66,   //set property:  "ListBox^.Items^.Strings[3]" of "STRING" to "four".   Property index: 4
+      $03108504, $65766966,   //set property:  "ListBox^.Items^.Strings[4]" of "STRING" to "five".   Property index: 5
+      $03108603, $00786973,   //set property:  "ListBox^.Items^.Strings[5]" of "STRING" to "six".   Property index: 6
+      $03108705, $65766573, $0000006E,   //set property:  "ListBox^.Items^.Strings[6]" of "STRING" to "seven".   Property index: 7
+      $03108805, $68676965, $00000074,   //set property:  "ListBox^.Items^.Strings[7]" of "STRING" to "eight".   Property index: 8
+      $03108904, $656E696E,   //set property:  "ListBox^.Items^.Strings[8]" of "STRING" to "nine".   Property index: 9
+      $03108A03, $006E6574,   //set property:  "ListBox^.Items^.Strings[9]" of "STRING" to "ten".   Property index: 10
+      $03100B02, $0000000F,   //set property:  "ListBox^.Items^.ItemHeight" of "WORD" to "15".   Property index: 11
+      $03100C04, $00006FDF,   //set property:  "Edit^.Color" of "TCOLOR" to "00006FDF".   Property index: 12
+      $03100D04, $00000000,   //set property:  "Editable" of "BOOLEAN" to "False".   Property index: 13
+      $03100E02, $0000000A,   //set property:  "ListBox^.Items^.Count" of "INTEGER" to "10".   Property index: 14
+      // Property ListBox^.Items^.TotalVisibleCount skipped because of compiler directives.
+      // Property ListBox^.Items^.OnGetItem skipped because of compiler directives.
+
+      $01104405, $004D0009, $001800A0,   //create ComboBox2(5, 9, 77, 160, 24)  manual creation group: 4.  HasVariableInGUIObjects: 1.  CreatedAtStartup: 0
+      $03100004, $00006FDF,   //set property:  "ListBox^.Items^.BackgroundColor" of "TCOLOR" to "00006FDF".   Property index: 0
+      $03108103, $00656E6F,   //set property:  "ListBox^.Items^.Strings[0]" of "STRING" to "one".   Property index: 1
+      $03108203, $006F7774,   //set property:  "ListBox^.Items^.Strings[1]" of "STRING" to "two".   Property index: 2
+      $03108305, $65726874, $00000065,   //set property:  "ListBox^.Items^.Strings[2]" of "STRING" to "three".   Property index: 3
+      $03108404, $72756F66,   //set property:  "ListBox^.Items^.Strings[3]" of "STRING" to "four".   Property index: 4
+      $03108504, $65766966,   //set property:  "ListBox^.Items^.Strings[4]" of "STRING" to "five".   Property index: 5
+      $03108603, $00786973,   //set property:  "ListBox^.Items^.Strings[5]" of "STRING" to "six".   Property index: 6
+      $03108705, $65766573, $0000006E,   //set property:  "ListBox^.Items^.Strings[6]" of "STRING" to "seven".   Property index: 7
+      $03108805, $68676965, $00000074,   //set property:  "ListBox^.Items^.Strings[7]" of "STRING" to "eight".   Property index: 8
+      $03108904, $656E696E,   //set property:  "ListBox^.Items^.Strings[8]" of "STRING" to "nine".   Property index: 9
+      $03108A03, $006E6574,   //set property:  "ListBox^.Items^.Strings[9]" of "STRING" to "ten".   Property index: 10
+      $03100B02, $0000000F,   //set property:  "ListBox^.Items^.ItemHeight" of "WORD" to "15".   Property index: 11
+      $03100E02, $0000000A,   //set property:  "ListBox^.Items^.Count" of "INTEGER" to "10".   Property index: 14
+      // Property ListBox^.Items^.TotalVisibleCount skipped because of compiler directives.
+      // Property ListBox^.Items^.OnGetItem skipped because of compiler directives.
+
+      $01084405, $004D00C1, $00180050,   //create Label4(5, 193, 77, 80, 24)  manual creation group: 4.  HasVariableInGUIObjects: 1.  CreatedAtStartup: 0
+      $03080004, $00000000,   //set property:  "BaseProps.CanHandleMessages" of "BOOLEAN" to "False".   Property index: 0
+      $03088108, $74696445, $656C6261,   //set property:  "Caption" of "STRING" to "Editable".   Property index: 1
+      $03080204, $00000659,   //set property:  "Color" of "TCOLOR" to "00000659".   Property index: 2
+      $03080304, $0000FFFF,   //set property:  "Font_Color" of "TCOLOR" to "0000FFFF".   Property index: 3
+
+      $01084405, $001D00C1, $00180082,   //create Label5(5, 193, 29, 130, 24)  manual creation group: 4.  HasVariableInGUIObjects: 1.  CreatedAtStartup: 0
+      $03080004, $00000000,   //set property:  "BaseProps.CanHandleMessages" of "BOOLEAN" to "False".   Property index: 0
+      $0308810F, $656C6553, $62617463, $6F20656C, $00796C6E,   //set property:  "Caption" of "STRING" to "Selectable only".   Property index: 1
+      $03080204, $00000659,   //set property:  "Color" of "TCOLOR" to "00000659".   Property index: 2
+      $03080304, $0000FFFF,   //set property:  "Font_Color" of "TCOLOR" to "0000FFFF".   Property index: 3
+
+      $01074405, $00850009, $007800A0,   //create ListBox2(5, 9, 133, 160, 120)  manual creation group: 4.  HasVariableInGUIObjects: 1.  CreatedAtStartup: 0
+      $03070004, $0000079E,   //set property:  "Items^.BackgroundColor" of "TCOLOR" to "0000079E".   Property index: 0
+      $03078103, $00656E6F,   //set property:  "Items^.Strings[0]" of "STRING" to "one".   Property index: 1
+      $03078203, $006F7774,   //set property:  "Items^.Strings[1]" of "STRING" to "two".   Property index: 2
+      $03078305, $65726874, $00000065,   //set property:  "Items^.Strings[2]" of "STRING" to "three".   Property index: 3
+      $03078404, $72756F66,   //set property:  "Items^.Strings[3]" of "STRING" to "four".   Property index: 4
+      $03078504, $65766966,   //set property:  "Items^.Strings[4]" of "STRING" to "five".   Property index: 5
+      $03078603, $00786973,   //set property:  "Items^.Strings[5]" of "STRING" to "six".   Property index: 6
+      $03078705, $65766573, $0000006E,   //set property:  "Items^.Strings[6]" of "STRING" to "seven".   Property index: 7
+      $03078805, $68676965, $00000074,   //set property:  "Items^.Strings[7]" of "STRING" to "eight".   Property index: 8
+      $03078904, $656E696E,   //set property:  "Items^.Strings[8]" of "STRING" to "nine".   Property index: 9
+      $03078A03, $006E6574,   //set property:  "Items^.Strings[9]" of "STRING" to "ten".   Property index: 10
+      $03070B02, $0000000F,   //set property:  "Items^.ItemHeight" of "WORD" to "15".   Property index: 11
+      $03070C02, $0000000A,   //set property:  "Items^.Count" of "INTEGER" to "10".   Property index: 12
+      // Property Items^.TotalVisibleCount skipped because of compiler directives.
+      // Property Items^.OnGetItem skipped because of compiler directives.
+
+      $01074405, $008500F9, $007800A0,   //create ListBox4(5, 249, 133, 160, 120)  manual creation group: 4.  HasVariableInGUIObjects: 1.  CreatedAtStartup: 0
+      $03070004, $0000079E,   //set property:  "Items^.BackgroundColor" of "TCOLOR" to "0000079E".   Property index: 0
+      $03078103, $00656E6F,   //set property:  "Items^.Strings[0]" of "STRING" to "one".   Property index: 1
+      $03078203, $006F7774,   //set property:  "Items^.Strings[1]" of "STRING" to "two".   Property index: 2
+      $03078305, $65726874, $00000065,   //set property:  "Items^.Strings[2]" of "STRING" to "three".   Property index: 3
+      $03078404, $72756F66,   //set property:  "Items^.Strings[3]" of "STRING" to "four".   Property index: 4
+      $03078504, $65766966,   //set property:  "Items^.Strings[4]" of "STRING" to "five".   Property index: 5
+      $03078603, $00786973,   //set property:  "Items^.Strings[5]" of "STRING" to "six".   Property index: 6
+      $03078705, $65766573, $0000006E,   //set property:  "Items^.Strings[6]" of "STRING" to "seven".   Property index: 7
+      $03078805, $68676965, $00000074,   //set property:  "Items^.Strings[7]" of "STRING" to "eight".   Property index: 8
+      $03078904, $656E696E,   //set property:  "Items^.Strings[8]" of "STRING" to "nine".   Property index: 9
+      $03078A03, $006E6574,   //set property:  "Items^.Strings[9]" of "STRING" to "ten".   Property index: 10
+      $03070B02, $0000000F,   //set property:  "Items^.ItemHeight" of "WORD" to "15".   Property index: 11
+      $03070C02, $0000000A,   //set property:  "Items^.Count" of "INTEGER" to "10".   Property index: 12
+      // Property Items^.TotalVisibleCount skipped because of compiler directives.
+      // Property Items^.OnGetItem skipped because of compiler directives.
+
+      $01114506, $00210009, $001800C8,   //create TrackBar1(6, 9, 33, 200, 24)  manual creation group: 5.  HasVariableInGUIObjects: 1.  CreatedAtStartup: 0
+      $03110002, $00000003,   //set property:  "Position" of "INTEGER" to "3".   Property index: 0
+      $03910104, $00000004,   //set property:  "OnTrackBarChange" of "PBYTE" to "TrackBar1_OnTrackBarChange".  Set to index of "TrackBar1_OnTrackBarChange".   Property index: 1
+
+      $01114506, $005D0019, $00A00018,   //create TrackBar2(6, 25, 93, 24, 160)  manual creation group: 5.  HasVariableInGUIObjects: 1.  CreatedAtStartup: 0
+      $03110002, $00000007,   //set property:  "Position" of "INTEGER" to "7".   Property index: 0
+      $03110201, $00000001,   //set property:  "Orientation" of "BYTE" to "CTrackBarVertDir".   Property index: 2
+      $03910104, $00000005,   //set property:  "OnTrackBarChange" of "PBYTE" to "TrackBar2_OnTrackBarChange".  Set to index of "TrackBar2_OnTrackBarChange".   Property index: 1
+
+      $01124506, $002D0101, $001400CC,   //create ProgressBar1(6, 257, 45, 204, 20)  manual creation group: 5.  HasVariableInGUIObjects: 1.  CreatedAtStartup: 0
+      $03120004, $00000000,   //set property:  "BaseProps.CanHandleMessages" of "BOOLEAN" to "False".   Property index: 0
+      $03120102, $00000003,   //set property:  "Position" of "INTEGER" to "3".   Property index: 1
+
+      $01124506, $005D0101, $00A00018,   //create ProgressBar2(6, 257, 93, 24, 160)  manual creation group: 5.  HasVariableInGUIObjects: 1.  CreatedAtStartup: 0
+      $03120004, $00000000,   //set property:  "BaseProps.CanHandleMessages" of "BOOLEAN" to "False".   Property index: 0
+      $03120102, $00000007,   //set property:  "Position" of "INTEGER" to "7".   Property index: 1
+      $03120201, $00000001,   //set property:  "Orientation" of "BYTE" to "CProgressBarVertDir".   Property index: 2
+
+      $01014506, $00C80049, $00190068,   //create btnShowMessageBox(6, 73, 200, 104, 25)  manual creation group: 5.  HasVariableInGUIObjects: 1.  CreatedAtStartup: 0
+      $0301800B, $7373654D, $20656761, $00786F42,   //set property:  "Caption" of "STRING" to "Message Box".   Property index: 0
+      $03810504, $00000006,   //set property:  "BaseProps.OnMouseUpUser" of "PBYTE" to "btnShowMessageBox_OnMouseUpUser".  Set to index of "btnShowMessageBox_OnMouseUpUser".   Property index: 5
+      0  //stop execution
+    );
+  {$ENDIF} {$ENDIF} // IsMCU PIC32AppAddrArr
+
+  {$IFDEF IsMCU} {$IFDEF PIC32AppWithSDCard} // Profile: "PIC32AppWithSDCard"   HandlersLocation: Lst file
+    C_RTTI_CreateInstructionData: array[0..480] of DWord = (
+      $04000005,   //Set build number to 5
+
+      $01014001, $001D0009, $0028006E,   //create btn1(1, 9, 29, 110, 40)  manual creation group: 0.  HasVariableInGUIObjects: 1.  CreatedAtStartup: 0
+      $03018008, $74747542, $31206E6F,   //set property:  "Caption" of "STRING" to "Button 1".   Property index: 0
+      $03010104, $00000D6D,   //set property:  "Font_Color" of "TCOLOR" to "00000D6D".   Property index: 1
+
+      $01014001, $001D0169, $0028006E,   //create btn2(1, 361, 29, 110, 40)  manual creation group: 0.  HasVariableInGUIObjects: 1.  CreatedAtStartup: 0
+      $03018008, $74747542, $32206E6F,   //set property:  "Caption" of "STRING" to "Button 2".   Property index: 0
+      $03010104, $00000D6D,   //set property:  "Font_Color" of "TCOLOR" to "00000D6D".   Property index: 1
+
+      $01024001, $00220089, $001E001E,   //create Arrow1(1, 137, 34, 30, 30)  manual creation group: 0.  HasVariableInGUIObjects: 1.  CreatedAtStartup: 0
+      $03020004, $00000D6D,   //set property:  "Color" of "TCOLOR" to "00000D6D".   Property index: 0
+      $03020101, $00000002,   //set property:  "ArrowDir" of "BYTE" to "CLeftArrow".   Property index: 1
+
+      $01024001, $002200B1, $001E001E,   //create Arrow2(1, 177, 34, 30, 30)  manual creation group: 0.  HasVariableInGUIObjects: 1.  CreatedAtStartup: 0
+      $03020004, $00000D6D,   //set property:  "Color" of "TCOLOR" to "00000D6D".   Property index: 0
+      $03020101, $00000003,   //set property:  "ArrowDir" of "BYTE" to "CRightArrow".   Property index: 1
+
+      $01024001, $0022010F, $001E001E,   //create Arrow3(1, 271, 34, 30, 30)  manual creation group: 0.  HasVariableInGUIObjects: 1.  CreatedAtStartup: 0
+      $03020004, $00000D6D,   //set property:  "Color" of "TCOLOR" to "00000D6D".   Property index: 0
+
+      $01024001, $00220139, $001E001E,   //create Arrow4(1, 313, 34, 30, 30)  manual creation group: 0.  HasVariableInGUIObjects: 1.  CreatedAtStartup: 0
+      $03020004, $00000D6D,   //set property:  "Color" of "TCOLOR" to "00000D6D".   Property index: 0
+      $03020101, $00000001,   //set property:  "ArrowDir" of "BYTE" to "CDownArrow".   Property index: 1
+
+      $01034001, $00550069, $00620112,   //create Panel1(1, 105, 85, 274, 98)  manual creation group: 0.  HasVariableInGUIObjects: 1.  CreatedAtStartup: 0
+      $03030004, $00000000,   //set property:  "BaseProps.CanHandleMessages" of "BOOLEAN" to "False".   Property index: 0
+      $03038107, $656E6150, $0031206C,   //set property:  "Caption" of "STRING" to "Panel 1".   Property index: 1
+      $03030204, $00006D6D,   //set property:  "Color" of "TCOLOR" to "00006D6D".   Property index: 2
+      $03030304, $00000000,   //set property:  "Font_Color" of "TCOLOR" to "00000000".   Property index: 3
+
+      $01024001, $00A50011, $002D002D,   //create Arrow5(1, 17, 165, 45, 45)  manual creation group: 0.  HasVariableInGUIObjects: 1.  CreatedAtStartup: 0
+      $03020004, $00003734,   //set property:  "Color" of "TCOLOR" to "00003734".   Property index: 0
+
+      $01024001, $00DD0011, $002D002D,   //create Arrow6(1, 17, 221, 45, 45)  manual creation group: 0.  HasVariableInGUIObjects: 1.  CreatedAtStartup: 0
+      $03020004, $00003734,   //set property:  "Color" of "TCOLOR" to "00003734".   Property index: 0
+      $03020101, $00000001,   //set property:  "ArrowDir" of "BYTE" to "CDownArrow".   Property index: 1
+
+      $01024001, $00A501A1, $002D002D,   //create Arrow7(1, 417, 165, 45, 45)  manual creation group: 0.  HasVariableInGUIObjects: 1.  CreatedAtStartup: 0
+      $03020004, $00003734,   //set property:  "Color" of "TCOLOR" to "00003734".   Property index: 0
+      $03020101, $00000002,   //set property:  "ArrowDir" of "BYTE" to "CLeftArrow".   Property index: 1
+
+      $01024001, $00DD01A1, $002D002D,   //create Arrow8(1, 417, 221, 45, 45)  manual creation group: 0.  HasVariableInGUIObjects: 1.  CreatedAtStartup: 0
+      $03020004, $00003734,   //set property:  "Color" of "TCOLOR" to "00003734".   Property index: 0
+      $03020101, $00000003,   //set property:  "ArrowDir" of "BYTE" to "CRightArrow".   Property index: 1
+
+      $01014001, $00BD00A9, $00230094,   //create btn3(1, 169, 189, 148, 35)  manual creation group: 0.  HasVariableInGUIObjects: 1.  CreatedAtStartup: 0
+      $03010201, $00000000,   //set property:  "BaseProps.Enabled" of "BYTE" to "0".   Property index: 2
+      $03010304, $00000000,   //set property:  "BaseProps.CanHandleMessages" of "BOOLEAN" to "False".   Property index: 3
+      $03018011, $61736944, $64656C62, $74754220, $206E6F74, $00000033,   //set property:  "Caption" of "STRING" to "Disabled Button 3".   Property index: 0
+
+      $01014001, $00E500A9, $00230094,   //create btn4(1, 169, 229, 148, 35)  manual creation group: 0.  HasVariableInGUIObjects: 1.  CreatedAtStartup: 0
+      $03010201, $00000000,   //set property:  "BaseProps.Enabled" of "BYTE" to "0".   Property index: 2
+      $03010304, $00000000,   //set property:  "BaseProps.CanHandleMessages" of "BOOLEAN" to "False".   Property index: 3
+      $03018011, $61736944, $64656C62, $74754220, $206E6F74, $00000034,   //set property:  "Caption" of "STRING" to "Disabled Button 4".   Property index: 0
+
+      $01024001, $001D00D8, $002D002D,   //create Arrow9(1, 216, 29, 45, 45)  manual creation group: 0.  HasVariableInGUIObjects: 1.  CreatedAtStartup: 0
+      $03020004, $0000EF7F,   //set property:  "Color" of "TCOLOR" to "0000EF7F".   Property index: 0
+      $03020101, $00000004,   //set property:  "ArrowDir" of "BYTE" to "CUndefinedArrow".   Property index: 1
+
+      $01044102, $001D0019, $0019008C,   //create CheckBox1(2, 25, 29, 140, 25)  manual creation group: 1.  HasVariableInGUIObjects: 1.  CreatedAtStartup: 0
+      $0304800A, $63656843, $786F426B, $00003120,   //set property:  "Caption" of "STRING" to "CheckBox 1".   Property index: 0
+      $03040104, $00009417,   //set property:  "Color" of "TCOLOR" to "00009417".   Property index: 1
+      $03040204, $00000000,   //set property:  "Font_Color" of "TCOLOR" to "00000000".   Property index: 2
+
+      $01044102, $00450019, $0019008C,   //create CheckBox2(2, 25, 69, 140, 25)  manual creation group: 1.  HasVariableInGUIObjects: 1.  CreatedAtStartup: 0
+      $0304800A, $63656843, $786F426B, $00003220,   //set property:  "Caption" of "STRING" to "CheckBox 2".   Property index: 0
+      $03040104, $00009417,   //set property:  "Color" of "TCOLOR" to "00009417".   Property index: 1
+      $03040204, $00000000,   //set property:  "Font_Color" of "TCOLOR" to "00000000".   Property index: 2
+
+      $01044102, $001D00F9, $0019008C,   //create CheckBox3(2, 249, 29, 140, 25)  manual creation group: 1.  HasVariableInGUIObjects: 1.  CreatedAtStartup: 0
+      $03040301, $00000000,   //set property:  "BaseProps.Enabled" of "BYTE" to "0".   Property index: 3
+      $0304800A, $63656843, $786F426B, $00003320,   //set property:  "Caption" of "STRING" to "CheckBox 3".   Property index: 0
+      $03040104, $00009417,   //set property:  "Color" of "TCOLOR" to "00009417".   Property index: 1
+      $03040204, $00000000,   //set property:  "Font_Color" of "TCOLOR" to "00000000".   Property index: 2
+
+      $01054102, $00ED0019, $00140199,   //create ScrollBar1(2, 25, 237, 409, 20)  manual creation group: 1.  HasVariableInGUIObjects: 1.  CreatedAtStartup: 0
+
+      $01054102, $001D01B9, $00D00014,   //create ScrollBar2(2, 441, 29, 20, 208)  manual creation group: 1.  HasVariableInGUIObjects: 1.  CreatedAtStartup: 0
+      $03050001, $00000001,   //set property:  "Direction" of "BYTE" to "CScrollBarVertDir".   Property index: 0
+
+      $01074102, $006D0019, $006F008C,   //create ListBox1(2, 25, 109, 140, 111)  manual creation group: 1.  HasVariableInGUIObjects: 1.  CreatedAtStartup: 0
+      $03070004, $0000BD7F,   //set property:  "Items^.BackgroundColor" of "TCOLOR" to "0000BD7F".   Property index: 0
+      $03078103, $00656E6F,   //set property:  "Items^.Strings[0]" of "STRING" to "one".   Property index: 1
+      $03078203, $006F7774,   //set property:  "Items^.Strings[1]" of "STRING" to "two".   Property index: 2
+      $03078305, $65726874, $00000065,   //set property:  "Items^.Strings[2]" of "STRING" to "three".   Property index: 3
+      $03078404, $72756F66,   //set property:  "Items^.Strings[3]" of "STRING" to "four".   Property index: 4
+      $03078504, $65766966,   //set property:  "Items^.Strings[4]" of "STRING" to "five".   Property index: 5
+      $03078603, $00786973,   //set property:  "Items^.Strings[5]" of "STRING" to "six".   Property index: 6
+      $03078705, $65766573, $0000006E,   //set property:  "Items^.Strings[6]" of "STRING" to "seven".   Property index: 7
+      $03078805, $68676965, $00000074,   //set property:  "Items^.Strings[7]" of "STRING" to "eight".   Property index: 8
+      $03078904, $656E696E,   //set property:  "Items^.Strings[8]" of "STRING" to "nine".   Property index: 9
+      $03078A03, $006E6574,   //set property:  "Items^.Strings[9]" of "STRING" to "ten".   Property index: 10
+      $03070B02, $0000000F,   //set property:  "Items^.ItemHeight" of "WORD" to "15".   Property index: 11
+      $03070C02, $0000000A,   //set property:  "Items^.Count" of "INTEGER" to "10".   Property index: 12
+      // Property Items^.TotalVisibleCount skipped because of compiler directives.
+      // Property Items^.OnGetItem skipped because of compiler directives.
+
+      $01074102, $006D00F9, $006F008C,   //create ListBox3(2, 249, 109, 140, 111)  manual creation group: 1.  HasVariableInGUIObjects: 1.  CreatedAtStartup: 0
+      $03078103, $00656E6F,   //set property:  "Items^.Strings[0]" of "STRING" to "one".   Property index: 1
+      $03078203, $006F7774,   //set property:  "Items^.Strings[1]" of "STRING" to "two".   Property index: 2
+      $03078305, $65726874, $00000065,   //set property:  "Items^.Strings[2]" of "STRING" to "three".   Property index: 3
+      $03078404, $72756F66,   //set property:  "Items^.Strings[3]" of "STRING" to "four".   Property index: 4
+      $03078504, $65766966,   //set property:  "Items^.Strings[4]" of "STRING" to "five".   Property index: 5
+      $03078603, $00786973,   //set property:  "Items^.Strings[5]" of "STRING" to "six".   Property index: 6
+      $03078705, $65766573, $0000006E,   //set property:  "Items^.Strings[6]" of "STRING" to "seven".   Property index: 7
+      $03078805, $68676965, $00000074,   //set property:  "Items^.Strings[7]" of "STRING" to "eight".   Property index: 8
+      $03078904, $656E696E,   //set property:  "Items^.Strings[8]" of "STRING" to "nine".   Property index: 9
+      $03078A03, $006E6574,   //set property:  "Items^.Strings[9]" of "STRING" to "ten".   Property index: 10
+      $03070B02, $0000000F,   //set property:  "Items^.ItemHeight" of "WORD" to "15".   Property index: 11
+      $03070C02, $0000000A,   //set property:  "Items^.Count" of "INTEGER" to "10".   Property index: 12
+      // Property Items^.TotalVisibleCount skipped because of compiler directives.
+      // Property Items^.OnGetItem skipped because of compiler directives.
+
+      $01014102, $003F00F9, $0026008C,   //create DynTFTButton0(2, 249, 63, 140, 38)  manual creation group: 1.  HasVariableInGUIObjects: 1.  CreatedAtStartup: 0
+      $03018004, $306E7462,   //set property:  "Caption" of "STRING" to "btn0".   Property index: 0
+      $03010404, $9D021688,   //set property:  "ActiveFont" of "PBYTE" to "Verdana29x32_ItalicUnderLine".   Property index: 4
+      $03010504, $9D01B90C,   //set property:  "BaseProps.OnMouseUpUser" of "PBYTE" to "DynTFTButton0_OnMouseUpUser".   Property index: 5
+
+      $01084203, $001D0009, $001E0050,   //create lbl1(3, 9, 29, 80, 30)  manual creation group: 2.  HasVariableInGUIObjects: 1.  CreatedAtStartup: 0
+      $03080004, $00000000,   //set property:  "BaseProps.CanHandleMessages" of "BOOLEAN" to "False".   Property index: 0
+      $03088107, $6562614C, $0031206C,   //set property:  "Caption" of "STRING" to "Label 1".   Property index: 1
+      $03080204, $0000841F,   //set property:  "Color" of "TCOLOR" to "0000841F".   Property index: 2
+
+      $01084203, $001D0081, $001E0050,   //create lbl2(3, 129, 29, 80, 30)  manual creation group: 2.  HasVariableInGUIObjects: 1.  CreatedAtStartup: 0
+      $03080004, $00000000,   //set property:  "BaseProps.CanHandleMessages" of "BOOLEAN" to "False".   Property index: 0
+      $03088107, $6562614C, $0032206C,   //set property:  "Caption" of "STRING" to "Label 2".   Property index: 1
+      $03080204, $0000841F,   //set property:  "Color" of "TCOLOR" to "0000841F".   Property index: 2
+
+      $01084203, $001D0109, $001E0050,   //create lbl3(3, 265, 29, 80, 30)  manual creation group: 2.  HasVariableInGUIObjects: 1.  CreatedAtStartup: 0
+      $03080004, $00000000,   //set property:  "BaseProps.CanHandleMessages" of "BOOLEAN" to "False".   Property index: 0
+      $03088107, $6562614C, $0033206C,   //set property:  "Caption" of "STRING" to "Label 3".   Property index: 1
+      $03080204, $0000841F,   //set property:  "Color" of "TCOLOR" to "0000841F".   Property index: 2
+
+      $01084203, $001D0181, $001E0050,   //create lbl4(3, 385, 29, 80, 30)  manual creation group: 2.  HasVariableInGUIObjects: 1.  CreatedAtStartup: 0
+      $03080004, $00000000,   //set property:  "BaseProps.CanHandleMessages" of "BOOLEAN" to "False".   Property index: 0
+      $03088107, $6562614C, $0034206C,   //set property:  "Caption" of "STRING" to "Label 4".   Property index: 1
+      $03080204, $0000841F,   //set property:  "Color" of "TCOLOR" to "0000841F".   Property index: 2
+
+      $010F4304, $00370001, $00B8013E,   //create vkTest(4, 1, 55, 318, 184)  manual creation group: 3.  HasVariableInGUIObjects: 1.  CreatedAtStartup: 0
+      $030F0004, $9D01BC60,   //set property:  "OnCharKey" of "PBYTE" to "VirtualKeyboard_OnCharKey".   Property index: 0
+      $030F0104, $9D01E4D4,   //set property:  "OnSpecialKey" of "PBYTE" to "VirtualKeyboard_OnSpecialKey".   Property index: 1
+
+      $010D4304, $001B0009, $001800C8,   //create Edit1(4, 9, 27, 200, 24)  manual creation group: 3.  HasVariableInGUIObjects: 1.  CreatedAtStartup: 0
+      $030D8005, $74696445, $00000031,   //set property:  "Text" of "STRING" to "Edit1".   Property index: 0
+
+      $01104405, $001D0009, $001600A0,   //create ComboBox1(5, 9, 29, 160, 22)  manual creation group: 4.  HasVariableInGUIObjects: 1.  CreatedAtStartup: 0
+      $03100004, $00006FDF,   //set property:  "ListBox^.Items^.BackgroundColor" of "TCOLOR" to "00006FDF".   Property index: 0
+      $03108103, $00656E6F,   //set property:  "ListBox^.Items^.Strings[0]" of "STRING" to "one".   Property index: 1
+      $03108203, $006F7774,   //set property:  "ListBox^.Items^.Strings[1]" of "STRING" to "two".   Property index: 2
+      $03108305, $65726874, $00000065,   //set property:  "ListBox^.Items^.Strings[2]" of "STRING" to "three".   Property index: 3
+      $03108404, $72756F66,   //set property:  "ListBox^.Items^.Strings[3]" of "STRING" to "four".   Property index: 4
+      $03108504, $65766966,   //set property:  "ListBox^.Items^.Strings[4]" of "STRING" to "five".   Property index: 5
+      $03108603, $00786973,   //set property:  "ListBox^.Items^.Strings[5]" of "STRING" to "six".   Property index: 6
+      $03108705, $65766573, $0000006E,   //set property:  "ListBox^.Items^.Strings[6]" of "STRING" to "seven".   Property index: 7
+      $03108805, $68676965, $00000074,   //set property:  "ListBox^.Items^.Strings[7]" of "STRING" to "eight".   Property index: 8
+      $03108904, $656E696E,   //set property:  "ListBox^.Items^.Strings[8]" of "STRING" to "nine".   Property index: 9
+      $03108A03, $006E6574,   //set property:  "ListBox^.Items^.Strings[9]" of "STRING" to "ten".   Property index: 10
+      $03100B02, $0000000F,   //set property:  "ListBox^.Items^.ItemHeight" of "WORD" to "15".   Property index: 11
+      $03100C04, $00006FDF,   //set property:  "Edit^.Color" of "TCOLOR" to "00006FDF".   Property index: 12
+      $03100D04, $00000000,   //set property:  "Editable" of "BOOLEAN" to "False".   Property index: 13
+      $03100E02, $0000000A,   //set property:  "ListBox^.Items^.Count" of "INTEGER" to "10".   Property index: 14
+      // Property ListBox^.Items^.TotalVisibleCount skipped because of compiler directives.
+      // Property ListBox^.Items^.OnGetItem skipped because of compiler directives.
+
+      $01104405, $004D0009, $001800A0,   //create ComboBox2(5, 9, 77, 160, 24)  manual creation group: 4.  HasVariableInGUIObjects: 1.  CreatedAtStartup: 0
+      $03100004, $00006FDF,   //set property:  "ListBox^.Items^.BackgroundColor" of "TCOLOR" to "00006FDF".   Property index: 0
+      $03108103, $00656E6F,   //set property:  "ListBox^.Items^.Strings[0]" of "STRING" to "one".   Property index: 1
+      $03108203, $006F7774,   //set property:  "ListBox^.Items^.Strings[1]" of "STRING" to "two".   Property index: 2
+      $03108305, $65726874, $00000065,   //set property:  "ListBox^.Items^.Strings[2]" of "STRING" to "three".   Property index: 3
+      $03108404, $72756F66,   //set property:  "ListBox^.Items^.Strings[3]" of "STRING" to "four".   Property index: 4
+      $03108504, $65766966,   //set property:  "ListBox^.Items^.Strings[4]" of "STRING" to "five".   Property index: 5
+      $03108603, $00786973,   //set property:  "ListBox^.Items^.Strings[5]" of "STRING" to "six".   Property index: 6
+      $03108705, $65766573, $0000006E,   //set property:  "ListBox^.Items^.Strings[6]" of "STRING" to "seven".   Property index: 7
+      $03108805, $68676965, $00000074,   //set property:  "ListBox^.Items^.Strings[7]" of "STRING" to "eight".   Property index: 8
+      $03108904, $656E696E,   //set property:  "ListBox^.Items^.Strings[8]" of "STRING" to "nine".   Property index: 9
+      $03108A03, $006E6574,   //set property:  "ListBox^.Items^.Strings[9]" of "STRING" to "ten".   Property index: 10
+      $03100B02, $0000000F,   //set property:  "ListBox^.Items^.ItemHeight" of "WORD" to "15".   Property index: 11
+      $03100E02, $0000000A,   //set property:  "ListBox^.Items^.Count" of "INTEGER" to "10".   Property index: 14
+      // Property ListBox^.Items^.TotalVisibleCount skipped because of compiler directives.
+      // Property ListBox^.Items^.OnGetItem skipped because of compiler directives.
+
+      $01084405, $004D00C1, $00180050,   //create Label4(5, 193, 77, 80, 24)  manual creation group: 4.  HasVariableInGUIObjects: 1.  CreatedAtStartup: 0
+      $03080004, $00000000,   //set property:  "BaseProps.CanHandleMessages" of "BOOLEAN" to "False".   Property index: 0
+      $03088108, $74696445, $656C6261,   //set property:  "Caption" of "STRING" to "Editable".   Property index: 1
+      $03080204, $00000659,   //set property:  "Color" of "TCOLOR" to "00000659".   Property index: 2
+      $03080304, $0000FFFF,   //set property:  "Font_Color" of "TCOLOR" to "0000FFFF".   Property index: 3
+
+      $01084405, $001D00C1, $00180082,   //create Label5(5, 193, 29, 130, 24)  manual creation group: 4.  HasVariableInGUIObjects: 1.  CreatedAtStartup: 0
+      $03080004, $00000000,   //set property:  "BaseProps.CanHandleMessages" of "BOOLEAN" to "False".   Property index: 0
+      $0308810F, $656C6553, $62617463, $6F20656C, $00796C6E,   //set property:  "Caption" of "STRING" to "Selectable only".   Property index: 1
+      $03080204, $00000659,   //set property:  "Color" of "TCOLOR" to "00000659".   Property index: 2
+      $03080304, $0000FFFF,   //set property:  "Font_Color" of "TCOLOR" to "0000FFFF".   Property index: 3
+
+      $01074405, $00850009, $007800A0,   //create ListBox2(5, 9, 133, 160, 120)  manual creation group: 4.  HasVariableInGUIObjects: 1.  CreatedAtStartup: 0
+      $03070004, $0000079E,   //set property:  "Items^.BackgroundColor" of "TCOLOR" to "0000079E".   Property index: 0
+      $03078103, $00656E6F,   //set property:  "Items^.Strings[0]" of "STRING" to "one".   Property index: 1
+      $03078203, $006F7774,   //set property:  "Items^.Strings[1]" of "STRING" to "two".   Property index: 2
+      $03078305, $65726874, $00000065,   //set property:  "Items^.Strings[2]" of "STRING" to "three".   Property index: 3
+      $03078404, $72756F66,   //set property:  "Items^.Strings[3]" of "STRING" to "four".   Property index: 4
+      $03078504, $65766966,   //set property:  "Items^.Strings[4]" of "STRING" to "five".   Property index: 5
+      $03078603, $00786973,   //set property:  "Items^.Strings[5]" of "STRING" to "six".   Property index: 6
+      $03078705, $65766573, $0000006E,   //set property:  "Items^.Strings[6]" of "STRING" to "seven".   Property index: 7
+      $03078805, $68676965, $00000074,   //set property:  "Items^.Strings[7]" of "STRING" to "eight".   Property index: 8
+      $03078904, $656E696E,   //set property:  "Items^.Strings[8]" of "STRING" to "nine".   Property index: 9
+      $03078A03, $006E6574,   //set property:  "Items^.Strings[9]" of "STRING" to "ten".   Property index: 10
+      $03070B02, $0000000F,   //set property:  "Items^.ItemHeight" of "WORD" to "15".   Property index: 11
+      $03070C02, $0000000A,   //set property:  "Items^.Count" of "INTEGER" to "10".   Property index: 12
+      // Property Items^.TotalVisibleCount skipped because of compiler directives.
+      // Property Items^.OnGetItem skipped because of compiler directives.
+
+      $01074405, $008500F9, $007800A0,   //create ListBox4(5, 249, 133, 160, 120)  manual creation group: 4.  HasVariableInGUIObjects: 1.  CreatedAtStartup: 0
+      $03070004, $0000079E,   //set property:  "Items^.BackgroundColor" of "TCOLOR" to "0000079E".   Property index: 0
+      $03078103, $00656E6F,   //set property:  "Items^.Strings[0]" of "STRING" to "one".   Property index: 1
+      $03078203, $006F7774,   //set property:  "Items^.Strings[1]" of "STRING" to "two".   Property index: 2
+      $03078305, $65726874, $00000065,   //set property:  "Items^.Strings[2]" of "STRING" to "three".   Property index: 3
+      $03078404, $72756F66,   //set property:  "Items^.Strings[3]" of "STRING" to "four".   Property index: 4
+      $03078504, $65766966,   //set property:  "Items^.Strings[4]" of "STRING" to "five".   Property index: 5
+      $03078603, $00786973,   //set property:  "Items^.Strings[5]" of "STRING" to "six".   Property index: 6
+      $03078705, $65766573, $0000006E,   //set property:  "Items^.Strings[6]" of "STRING" to "seven".   Property index: 7
+      $03078805, $68676965, $00000074,   //set property:  "Items^.Strings[7]" of "STRING" to "eight".   Property index: 8
+      $03078904, $656E696E,   //set property:  "Items^.Strings[8]" of "STRING" to "nine".   Property index: 9
+      $03078A03, $006E6574,   //set property:  "Items^.Strings[9]" of "STRING" to "ten".   Property index: 10
+      $03070B02, $0000000F,   //set property:  "Items^.ItemHeight" of "WORD" to "15".   Property index: 11
+      $03070C02, $0000000A,   //set property:  "Items^.Count" of "INTEGER" to "10".   Property index: 12
+      // Property Items^.TotalVisibleCount skipped because of compiler directives.
+      // Property Items^.OnGetItem skipped because of compiler directives.
+
+      $01114506, $00210009, $001800C8,   //create TrackBar1(6, 9, 33, 200, 24)  manual creation group: 5.  HasVariableInGUIObjects: 1.  CreatedAtStartup: 0
+      $03110002, $00000003,   //set property:  "Position" of "INTEGER" to "3".   Property index: 0
+      $03110104, $9D01E454,   //set property:  "OnTrackBarChange" of "PBYTE" to "TrackBar1_OnTrackBarChange".   Property index: 1
+
+      $01114506, $005D0019, $00A00018,   //create TrackBar2(6, 25, 93, 24, 160)  manual creation group: 5.  HasVariableInGUIObjects: 1.  CreatedAtStartup: 0
+      $03110002, $00000007,   //set property:  "Position" of "INTEGER" to "7".   Property index: 0
+      $03110201, $00000001,   //set property:  "Orientation" of "BYTE" to "CTrackBarVertDir".   Property index: 2
+      $03110104, $9D01BFA4,   //set property:  "OnTrackBarChange" of "PBYTE" to "TrackBar2_OnTrackBarChange".   Property index: 1
+
+      $01124506, $002D0101, $001400CC,   //create ProgressBar1(6, 257, 45, 204, 20)  manual creation group: 5.  HasVariableInGUIObjects: 1.  CreatedAtStartup: 0
+      $03120004, $00000000,   //set property:  "BaseProps.CanHandleMessages" of "BOOLEAN" to "False".   Property index: 0
+      $03120102, $00000003,   //set property:  "Position" of "INTEGER" to "3".   Property index: 1
+
+      $01124506, $005D0101, $00A00018,   //create ProgressBar2(6, 257, 93, 24, 160)  manual creation group: 5.  HasVariableInGUIObjects: 1.  CreatedAtStartup: 0
+      $03120004, $00000000,   //set property:  "BaseProps.CanHandleMessages" of "BOOLEAN" to "False".   Property index: 0
+      $03120102, $00000007,   //set property:  "Position" of "INTEGER" to "7".   Property index: 1
+      $03120201, $00000001,   //set property:  "Orientation" of "BYTE" to "CProgressBarVertDir".   Property index: 2
+
+      $01014506, $00C80049, $00190068,   //create btnShowMessageBox(6, 73, 200, 104, 25)  manual creation group: 5.  HasVariableInGUIObjects: 1.  CreatedAtStartup: 0
+      $0301800B, $7373654D, $20656761, $00786F42,   //set property:  "Caption" of "STRING" to "Message Box".   Property index: 0
+      $03010504, $9D01B9E4,   //set property:  "BaseProps.OnMouseUpUser" of "PBYTE" to "btnShowMessageBox_OnMouseUpUser".   Property index: 5
+      0  //stop execution
+    );
+  {$ENDIF} {$ENDIF} // IsMCU PIC32AppWithSDCard
+
+  {$IFDEF IsMCU} {$IFDEF PIC32AppDWithSDCard} // Profile: "PIC32AppDWithSDCard"   HandlersLocation: Lst file
+    C_RTTI_CreateInstructionData: array[0..480] of DWord = (
+      $04000005,   //Set build number to 5
+
+      $01014001, $001D0009, $0028006E,   //create btn1(1, 9, 29, 110, 40)  manual creation group: 0.  HasVariableInGUIObjects: 1.  CreatedAtStartup: 0
+      $03018008, $74747542, $31206E6F,   //set property:  "Caption" of "STRING" to "Button 1".   Property index: 0
+      $03010104, $00000D6D,   //set property:  "Font_Color" of "TCOLOR" to "00000D6D".   Property index: 1
+
+      $01014001, $001D0169, $0028006E,   //create btn2(1, 361, 29, 110, 40)  manual creation group: 0.  HasVariableInGUIObjects: 1.  CreatedAtStartup: 0
+      $03018008, $74747542, $32206E6F,   //set property:  "Caption" of "STRING" to "Button 2".   Property index: 0
+      $03010104, $00000D6D,   //set property:  "Font_Color" of "TCOLOR" to "00000D6D".   Property index: 1
+
+      $01024001, $00220089, $001E001E,   //create Arrow1(1, 137, 34, 30, 30)  manual creation group: 0.  HasVariableInGUIObjects: 1.  CreatedAtStartup: 0
+      $03020004, $00000D6D,   //set property:  "Color" of "TCOLOR" to "00000D6D".   Property index: 0
+      $03020101, $00000002,   //set property:  "ArrowDir" of "BYTE" to "CLeftArrow".   Property index: 1
+
+      $01024001, $002200B1, $001E001E,   //create Arrow2(1, 177, 34, 30, 30)  manual creation group: 0.  HasVariableInGUIObjects: 1.  CreatedAtStartup: 0
+      $03020004, $00000D6D,   //set property:  "Color" of "TCOLOR" to "00000D6D".   Property index: 0
+      $03020101, $00000003,   //set property:  "ArrowDir" of "BYTE" to "CRightArrow".   Property index: 1
+
+      $01024001, $0022010F, $001E001E,   //create Arrow3(1, 271, 34, 30, 30)  manual creation group: 0.  HasVariableInGUIObjects: 1.  CreatedAtStartup: 0
+      $03020004, $00000D6D,   //set property:  "Color" of "TCOLOR" to "00000D6D".   Property index: 0
+
+      $01024001, $00220139, $001E001E,   //create Arrow4(1, 313, 34, 30, 30)  manual creation group: 0.  HasVariableInGUIObjects: 1.  CreatedAtStartup: 0
+      $03020004, $00000D6D,   //set property:  "Color" of "TCOLOR" to "00000D6D".   Property index: 0
+      $03020101, $00000001,   //set property:  "ArrowDir" of "BYTE" to "CDownArrow".   Property index: 1
+
+      $01034001, $00550069, $00620112,   //create Panel1(1, 105, 85, 274, 98)  manual creation group: 0.  HasVariableInGUIObjects: 1.  CreatedAtStartup: 0
+      $03030004, $00000000,   //set property:  "BaseProps.CanHandleMessages" of "BOOLEAN" to "False".   Property index: 0
+      $03038107, $656E6150, $0031206C,   //set property:  "Caption" of "STRING" to "Panel 1".   Property index: 1
+      $03030204, $00006D6D,   //set property:  "Color" of "TCOLOR" to "00006D6D".   Property index: 2
+      $03030304, $00000000,   //set property:  "Font_Color" of "TCOLOR" to "00000000".   Property index: 3
+
+      $01024001, $00A50011, $002D002D,   //create Arrow5(1, 17, 165, 45, 45)  manual creation group: 0.  HasVariableInGUIObjects: 1.  CreatedAtStartup: 0
+      $03020004, $00003734,   //set property:  "Color" of "TCOLOR" to "00003734".   Property index: 0
+
+      $01024001, $00DD0011, $002D002D,   //create Arrow6(1, 17, 221, 45, 45)  manual creation group: 0.  HasVariableInGUIObjects: 1.  CreatedAtStartup: 0
+      $03020004, $00003734,   //set property:  "Color" of "TCOLOR" to "00003734".   Property index: 0
+      $03020101, $00000001,   //set property:  "ArrowDir" of "BYTE" to "CDownArrow".   Property index: 1
+
+      $01024001, $00A501A1, $002D002D,   //create Arrow7(1, 417, 165, 45, 45)  manual creation group: 0.  HasVariableInGUIObjects: 1.  CreatedAtStartup: 0
+      $03020004, $00003734,   //set property:  "Color" of "TCOLOR" to "00003734".   Property index: 0
+      $03020101, $00000002,   //set property:  "ArrowDir" of "BYTE" to "CLeftArrow".   Property index: 1
+
+      $01024001, $00DD01A1, $002D002D,   //create Arrow8(1, 417, 221, 45, 45)  manual creation group: 0.  HasVariableInGUIObjects: 1.  CreatedAtStartup: 0
+      $03020004, $00003734,   //set property:  "Color" of "TCOLOR" to "00003734".   Property index: 0
+      $03020101, $00000003,   //set property:  "ArrowDir" of "BYTE" to "CRightArrow".   Property index: 1
+
+      $01014001, $00BD00A9, $00230094,   //create btn3(1, 169, 189, 148, 35)  manual creation group: 0.  HasVariableInGUIObjects: 1.  CreatedAtStartup: 0
+      $03010201, $00000000,   //set property:  "BaseProps.Enabled" of "BYTE" to "0".   Property index: 2
+      $03010304, $00000000,   //set property:  "BaseProps.CanHandleMessages" of "BOOLEAN" to "False".   Property index: 3
+      $03018011, $61736944, $64656C62, $74754220, $206E6F74, $00000033,   //set property:  "Caption" of "STRING" to "Disabled Button 3".   Property index: 0
+
+      $01014001, $00E500A9, $00230094,   //create btn4(1, 169, 229, 148, 35)  manual creation group: 0.  HasVariableInGUIObjects: 1.  CreatedAtStartup: 0
+      $03010201, $00000000,   //set property:  "BaseProps.Enabled" of "BYTE" to "0".   Property index: 2
+      $03010304, $00000000,   //set property:  "BaseProps.CanHandleMessages" of "BOOLEAN" to "False".   Property index: 3
+      $03018011, $61736944, $64656C62, $74754220, $206E6F74, $00000034,   //set property:  "Caption" of "STRING" to "Disabled Button 4".   Property index: 0
+
+      $01024001, $001D00D8, $002D002D,   //create Arrow9(1, 216, 29, 45, 45)  manual creation group: 0.  HasVariableInGUIObjects: 1.  CreatedAtStartup: 0
+      $03020004, $0000EF7F,   //set property:  "Color" of "TCOLOR" to "0000EF7F".   Property index: 0
+      $03020101, $00000004,   //set property:  "ArrowDir" of "BYTE" to "CUndefinedArrow".   Property index: 1
+
+      $01044102, $001D0019, $0019008C,   //create CheckBox1(2, 25, 29, 140, 25)  manual creation group: 1.  HasVariableInGUIObjects: 1.  CreatedAtStartup: 0
+      $0304800A, $63656843, $786F426B, $00003120,   //set property:  "Caption" of "STRING" to "CheckBox 1".   Property index: 0
+      $03040104, $00009417,   //set property:  "Color" of "TCOLOR" to "00009417".   Property index: 1
+      $03040204, $00000000,   //set property:  "Font_Color" of "TCOLOR" to "00000000".   Property index: 2
+
+      $01044102, $00450019, $0019008C,   //create CheckBox2(2, 25, 69, 140, 25)  manual creation group: 1.  HasVariableInGUIObjects: 1.  CreatedAtStartup: 0
+      $0304800A, $63656843, $786F426B, $00003220,   //set property:  "Caption" of "STRING" to "CheckBox 2".   Property index: 0
+      $03040104, $00009417,   //set property:  "Color" of "TCOLOR" to "00009417".   Property index: 1
+      $03040204, $00000000,   //set property:  "Font_Color" of "TCOLOR" to "00000000".   Property index: 2
+
+      $01044102, $001D00F9, $0019008C,   //create CheckBox3(2, 249, 29, 140, 25)  manual creation group: 1.  HasVariableInGUIObjects: 1.  CreatedAtStartup: 0
+      $03040301, $00000000,   //set property:  "BaseProps.Enabled" of "BYTE" to "0".   Property index: 3
+      $0304800A, $63656843, $786F426B, $00003320,   //set property:  "Caption" of "STRING" to "CheckBox 3".   Property index: 0
+      $03040104, $00009417,   //set property:  "Color" of "TCOLOR" to "00009417".   Property index: 1
+      $03040204, $00000000,   //set property:  "Font_Color" of "TCOLOR" to "00000000".   Property index: 2
+
+      $01054102, $00ED0019, $00140199,   //create ScrollBar1(2, 25, 237, 409, 20)  manual creation group: 1.  HasVariableInGUIObjects: 1.  CreatedAtStartup: 0
+
+      $01054102, $001D01B9, $00D00014,   //create ScrollBar2(2, 441, 29, 20, 208)  manual creation group: 1.  HasVariableInGUIObjects: 1.  CreatedAtStartup: 0
+      $03050001, $00000001,   //set property:  "Direction" of "BYTE" to "CScrollBarVertDir".   Property index: 0
+
+      $01074102, $006D0019, $006F008C,   //create ListBox1(2, 25, 109, 140, 111)  manual creation group: 1.  HasVariableInGUIObjects: 1.  CreatedAtStartup: 0
+      $03070004, $0000BD7F,   //set property:  "Items^.BackgroundColor" of "TCOLOR" to "0000BD7F".   Property index: 0
+      $03078103, $00656E6F,   //set property:  "Items^.Strings[0]" of "STRING" to "one".   Property index: 1
+      $03078203, $006F7774,   //set property:  "Items^.Strings[1]" of "STRING" to "two".   Property index: 2
+      $03078305, $65726874, $00000065,   //set property:  "Items^.Strings[2]" of "STRING" to "three".   Property index: 3
+      $03078404, $72756F66,   //set property:  "Items^.Strings[3]" of "STRING" to "four".   Property index: 4
+      $03078504, $65766966,   //set property:  "Items^.Strings[4]" of "STRING" to "five".   Property index: 5
+      $03078603, $00786973,   //set property:  "Items^.Strings[5]" of "STRING" to "six".   Property index: 6
+      $03078705, $65766573, $0000006E,   //set property:  "Items^.Strings[6]" of "STRING" to "seven".   Property index: 7
+      $03078805, $68676965, $00000074,   //set property:  "Items^.Strings[7]" of "STRING" to "eight".   Property index: 8
+      $03078904, $656E696E,   //set property:  "Items^.Strings[8]" of "STRING" to "nine".   Property index: 9
+      $03078A03, $006E6574,   //set property:  "Items^.Strings[9]" of "STRING" to "ten".   Property index: 10
+      $03070B02, $0000000F,   //set property:  "Items^.ItemHeight" of "WORD" to "15".   Property index: 11
+      $03070C02, $0000000A,   //set property:  "Items^.Count" of "INTEGER" to "10".   Property index: 12
+      // Property Items^.TotalVisibleCount skipped because of compiler directives.
+      // Property Items^.OnGetItem skipped because of compiler directives.
+
+      $01074102, $006D00F9, $006F008C,   //create ListBox3(2, 249, 109, 140, 111)  manual creation group: 1.  HasVariableInGUIObjects: 1.  CreatedAtStartup: 0
+      $03078103, $00656E6F,   //set property:  "Items^.Strings[0]" of "STRING" to "one".   Property index: 1
+      $03078203, $006F7774,   //set property:  "Items^.Strings[1]" of "STRING" to "two".   Property index: 2
+      $03078305, $65726874, $00000065,   //set property:  "Items^.Strings[2]" of "STRING" to "three".   Property index: 3
+      $03078404, $72756F66,   //set property:  "Items^.Strings[3]" of "STRING" to "four".   Property index: 4
+      $03078504, $65766966,   //set property:  "Items^.Strings[4]" of "STRING" to "five".   Property index: 5
+      $03078603, $00786973,   //set property:  "Items^.Strings[5]" of "STRING" to "six".   Property index: 6
+      $03078705, $65766573, $0000006E,   //set property:  "Items^.Strings[6]" of "STRING" to "seven".   Property index: 7
+      $03078805, $68676965, $00000074,   //set property:  "Items^.Strings[7]" of "STRING" to "eight".   Property index: 8
+      $03078904, $656E696E,   //set property:  "Items^.Strings[8]" of "STRING" to "nine".   Property index: 9
+      $03078A03, $006E6574,   //set property:  "Items^.Strings[9]" of "STRING" to "ten".   Property index: 10
+      $03070B02, $0000000F,   //set property:  "Items^.ItemHeight" of "WORD" to "15".   Property index: 11
+      $03070C02, $0000000A,   //set property:  "Items^.Count" of "INTEGER" to "10".   Property index: 12
+      // Property Items^.TotalVisibleCount skipped because of compiler directives.
+      // Property Items^.OnGetItem skipped because of compiler directives.
+
+      $01014102, $003F00F9, $0026008C,   //create DynTFTButton0(2, 249, 63, 140, 38)  manual creation group: 1.  HasVariableInGUIObjects: 1.  CreatedAtStartup: 0
+      $03018004, $306E7462,   //set property:  "Caption" of "STRING" to "btn0".   Property index: 0
+      $03010404, $9D01F8D0,   //set property:  "ActiveFont" of "PBYTE" to "Verdana29x32_ItalicUnderLine".   Property index: 4
+      $03010504, $9D01A6E8,   //set property:  "BaseProps.OnMouseUpUser" of "PBYTE" to "DynTFTButton0_OnMouseUpUser".   Property index: 5
+
+      $01084203, $001D0009, $001E0050,   //create lbl1(3, 9, 29, 80, 30)  manual creation group: 2.  HasVariableInGUIObjects: 1.  CreatedAtStartup: 0
+      $03080004, $00000000,   //set property:  "BaseProps.CanHandleMessages" of "BOOLEAN" to "False".   Property index: 0
+      $03088107, $6562614C, $0031206C,   //set property:  "Caption" of "STRING" to "Label 1".   Property index: 1
+      $03080204, $0000841F,   //set property:  "Color" of "TCOLOR" to "0000841F".   Property index: 2
+
+      $01084203, $001D0081, $001E0050,   //create lbl2(3, 129, 29, 80, 30)  manual creation group: 2.  HasVariableInGUIObjects: 1.  CreatedAtStartup: 0
+      $03080004, $00000000,   //set property:  "BaseProps.CanHandleMessages" of "BOOLEAN" to "False".   Property index: 0
+      $03088107, $6562614C, $0032206C,   //set property:  "Caption" of "STRING" to "Label 2".   Property index: 1
+      $03080204, $0000841F,   //set property:  "Color" of "TCOLOR" to "0000841F".   Property index: 2
+
+      $01084203, $001D0109, $001E0050,   //create lbl3(3, 265, 29, 80, 30)  manual creation group: 2.  HasVariableInGUIObjects: 1.  CreatedAtStartup: 0
+      $03080004, $00000000,   //set property:  "BaseProps.CanHandleMessages" of "BOOLEAN" to "False".   Property index: 0
+      $03088107, $6562614C, $0033206C,   //set property:  "Caption" of "STRING" to "Label 3".   Property index: 1
+      $03080204, $0000841F,   //set property:  "Color" of "TCOLOR" to "0000841F".   Property index: 2
+
+      $01084203, $001D0181, $001E0050,   //create lbl4(3, 385, 29, 80, 30)  manual creation group: 2.  HasVariableInGUIObjects: 1.  CreatedAtStartup: 0
+      $03080004, $00000000,   //set property:  "BaseProps.CanHandleMessages" of "BOOLEAN" to "False".   Property index: 0
+      $03088107, $6562614C, $0034206C,   //set property:  "Caption" of "STRING" to "Label 4".   Property index: 1
+      $03080204, $0000841F,   //set property:  "Color" of "TCOLOR" to "0000841F".   Property index: 2
+
+      $010F4304, $00370001, $00B8013E,   //create vkTest(4, 1, 55, 318, 184)  manual creation group: 3.  HasVariableInGUIObjects: 1.  CreatedAtStartup: 0
+      $030F0004, $9D01AF80,   //set property:  "OnCharKey" of "PBYTE" to "VirtualKeyboard_OnCharKey".   Property index: 0
+      $030F0104, $9D01AE7C,   //set property:  "OnSpecialKey" of "PBYTE" to "VirtualKeyboard_OnSpecialKey".   Property index: 1
+
+      $010D4304, $001B0009, $001800C8,   //create Edit1(4, 9, 27, 200, 24)  manual creation group: 3.  HasVariableInGUIObjects: 1.  CreatedAtStartup: 0
+      $030D8005, $74696445, $00000031,   //set property:  "Text" of "STRING" to "Edit1".   Property index: 0
+
+      $01104405, $001D0009, $001600A0,   //create ComboBox1(5, 9, 29, 160, 22)  manual creation group: 4.  HasVariableInGUIObjects: 1.  CreatedAtStartup: 0
+      $03100004, $00006FDF,   //set property:  "ListBox^.Items^.BackgroundColor" of "TCOLOR" to "00006FDF".   Property index: 0
+      $03108103, $00656E6F,   //set property:  "ListBox^.Items^.Strings[0]" of "STRING" to "one".   Property index: 1
+      $03108203, $006F7774,   //set property:  "ListBox^.Items^.Strings[1]" of "STRING" to "two".   Property index: 2
+      $03108305, $65726874, $00000065,   //set property:  "ListBox^.Items^.Strings[2]" of "STRING" to "three".   Property index: 3
+      $03108404, $72756F66,   //set property:  "ListBox^.Items^.Strings[3]" of "STRING" to "four".   Property index: 4
+      $03108504, $65766966,   //set property:  "ListBox^.Items^.Strings[4]" of "STRING" to "five".   Property index: 5
+      $03108603, $00786973,   //set property:  "ListBox^.Items^.Strings[5]" of "STRING" to "six".   Property index: 6
+      $03108705, $65766573, $0000006E,   //set property:  "ListBox^.Items^.Strings[6]" of "STRING" to "seven".   Property index: 7
+      $03108805, $68676965, $00000074,   //set property:  "ListBox^.Items^.Strings[7]" of "STRING" to "eight".   Property index: 8
+      $03108904, $656E696E,   //set property:  "ListBox^.Items^.Strings[8]" of "STRING" to "nine".   Property index: 9
+      $03108A03, $006E6574,   //set property:  "ListBox^.Items^.Strings[9]" of "STRING" to "ten".   Property index: 10
+      $03100B02, $0000000F,   //set property:  "ListBox^.Items^.ItemHeight" of "WORD" to "15".   Property index: 11
+      $03100C04, $00006FDF,   //set property:  "Edit^.Color" of "TCOLOR" to "00006FDF".   Property index: 12
+      $03100D04, $00000000,   //set property:  "Editable" of "BOOLEAN" to "False".   Property index: 13
+      $03100E02, $0000000A,   //set property:  "ListBox^.Items^.Count" of "INTEGER" to "10".   Property index: 14
+      // Property ListBox^.Items^.TotalVisibleCount skipped because of compiler directives.
+      // Property ListBox^.Items^.OnGetItem skipped because of compiler directives.
+
+      $01104405, $004D0009, $001800A0,   //create ComboBox2(5, 9, 77, 160, 24)  manual creation group: 4.  HasVariableInGUIObjects: 1.  CreatedAtStartup: 0
+      $03100004, $00006FDF,   //set property:  "ListBox^.Items^.BackgroundColor" of "TCOLOR" to "00006FDF".   Property index: 0
+      $03108103, $00656E6F,   //set property:  "ListBox^.Items^.Strings[0]" of "STRING" to "one".   Property index: 1
+      $03108203, $006F7774,   //set property:  "ListBox^.Items^.Strings[1]" of "STRING" to "two".   Property index: 2
+      $03108305, $65726874, $00000065,   //set property:  "ListBox^.Items^.Strings[2]" of "STRING" to "three".   Property index: 3
+      $03108404, $72756F66,   //set property:  "ListBox^.Items^.Strings[3]" of "STRING" to "four".   Property index: 4
+      $03108504, $65766966,   //set property:  "ListBox^.Items^.Strings[4]" of "STRING" to "five".   Property index: 5
+      $03108603, $00786973,   //set property:  "ListBox^.Items^.Strings[5]" of "STRING" to "six".   Property index: 6
+      $03108705, $65766573, $0000006E,   //set property:  "ListBox^.Items^.Strings[6]" of "STRING" to "seven".   Property index: 7
+      $03108805, $68676965, $00000074,   //set property:  "ListBox^.Items^.Strings[7]" of "STRING" to "eight".   Property index: 8
+      $03108904, $656E696E,   //set property:  "ListBox^.Items^.Strings[8]" of "STRING" to "nine".   Property index: 9
+      $03108A03, $006E6574,   //set property:  "ListBox^.Items^.Strings[9]" of "STRING" to "ten".   Property index: 10
+      $03100B02, $0000000F,   //set property:  "ListBox^.Items^.ItemHeight" of "WORD" to "15".   Property index: 11
+      $03100E02, $0000000A,   //set property:  "ListBox^.Items^.Count" of "INTEGER" to "10".   Property index: 14
+      // Property ListBox^.Items^.TotalVisibleCount skipped because of compiler directives.
+      // Property ListBox^.Items^.OnGetItem skipped because of compiler directives.
+
+      $01084405, $004D00C1, $00180050,   //create Label4(5, 193, 77, 80, 24)  manual creation group: 4.  HasVariableInGUIObjects: 1.  CreatedAtStartup: 0
+      $03080004, $00000000,   //set property:  "BaseProps.CanHandleMessages" of "BOOLEAN" to "False".   Property index: 0
+      $03088108, $74696445, $656C6261,   //set property:  "Caption" of "STRING" to "Editable".   Property index: 1
+      $03080204, $00000659,   //set property:  "Color" of "TCOLOR" to "00000659".   Property index: 2
+      $03080304, $0000FFFF,   //set property:  "Font_Color" of "TCOLOR" to "0000FFFF".   Property index: 3
+
+      $01084405, $001D00C1, $00180082,   //create Label5(5, 193, 29, 130, 24)  manual creation group: 4.  HasVariableInGUIObjects: 1.  CreatedAtStartup: 0
+      $03080004, $00000000,   //set property:  "BaseProps.CanHandleMessages" of "BOOLEAN" to "False".   Property index: 0
+      $0308810F, $656C6553, $62617463, $6F20656C, $00796C6E,   //set property:  "Caption" of "STRING" to "Selectable only".   Property index: 1
+      $03080204, $00000659,   //set property:  "Color" of "TCOLOR" to "00000659".   Property index: 2
+      $03080304, $0000FFFF,   //set property:  "Font_Color" of "TCOLOR" to "0000FFFF".   Property index: 3
+
+      $01074405, $00850009, $007800A0,   //create ListBox2(5, 9, 133, 160, 120)  manual creation group: 4.  HasVariableInGUIObjects: 1.  CreatedAtStartup: 0
+      $03070004, $0000079E,   //set property:  "Items^.BackgroundColor" of "TCOLOR" to "0000079E".   Property index: 0
+      $03078103, $00656E6F,   //set property:  "Items^.Strings[0]" of "STRING" to "one".   Property index: 1
+      $03078203, $006F7774,   //set property:  "Items^.Strings[1]" of "STRING" to "two".   Property index: 2
+      $03078305, $65726874, $00000065,   //set property:  "Items^.Strings[2]" of "STRING" to "three".   Property index: 3
+      $03078404, $72756F66,   //set property:  "Items^.Strings[3]" of "STRING" to "four".   Property index: 4
+      $03078504, $65766966,   //set property:  "Items^.Strings[4]" of "STRING" to "five".   Property index: 5
+      $03078603, $00786973,   //set property:  "Items^.Strings[5]" of "STRING" to "six".   Property index: 6
+      $03078705, $65766573, $0000006E,   //set property:  "Items^.Strings[6]" of "STRING" to "seven".   Property index: 7
+      $03078805, $68676965, $00000074,   //set property:  "Items^.Strings[7]" of "STRING" to "eight".   Property index: 8
+      $03078904, $656E696E,   //set property:  "Items^.Strings[8]" of "STRING" to "nine".   Property index: 9
+      $03078A03, $006E6574,   //set property:  "Items^.Strings[9]" of "STRING" to "ten".   Property index: 10
+      $03070B02, $0000000F,   //set property:  "Items^.ItemHeight" of "WORD" to "15".   Property index: 11
+      $03070C02, $0000000A,   //set property:  "Items^.Count" of "INTEGER" to "10".   Property index: 12
+      // Property Items^.TotalVisibleCount skipped because of compiler directives.
+      // Property Items^.OnGetItem skipped because of compiler directives.
+
+      $01074405, $008500F9, $007800A0,   //create ListBox4(5, 249, 133, 160, 120)  manual creation group: 4.  HasVariableInGUIObjects: 1.  CreatedAtStartup: 0
+      $03070004, $0000079E,   //set property:  "Items^.BackgroundColor" of "TCOLOR" to "0000079E".   Property index: 0
+      $03078103, $00656E6F,   //set property:  "Items^.Strings[0]" of "STRING" to "one".   Property index: 1
+      $03078203, $006F7774,   //set property:  "Items^.Strings[1]" of "STRING" to "two".   Property index: 2
+      $03078305, $65726874, $00000065,   //set property:  "Items^.Strings[2]" of "STRING" to "three".   Property index: 3
+      $03078404, $72756F66,   //set property:  "Items^.Strings[3]" of "STRING" to "four".   Property index: 4
+      $03078504, $65766966,   //set property:  "Items^.Strings[4]" of "STRING" to "five".   Property index: 5
+      $03078603, $00786973,   //set property:  "Items^.Strings[5]" of "STRING" to "six".   Property index: 6
+      $03078705, $65766573, $0000006E,   //set property:  "Items^.Strings[6]" of "STRING" to "seven".   Property index: 7
+      $03078805, $68676965, $00000074,   //set property:  "Items^.Strings[7]" of "STRING" to "eight".   Property index: 8
+      $03078904, $656E696E,   //set property:  "Items^.Strings[8]" of "STRING" to "nine".   Property index: 9
+      $03078A03, $006E6574,   //set property:  "Items^.Strings[9]" of "STRING" to "ten".   Property index: 10
+      $03070B02, $0000000F,   //set property:  "Items^.ItemHeight" of "WORD" to "15".   Property index: 11
+      $03070C02, $0000000A,   //set property:  "Items^.Count" of "INTEGER" to "10".   Property index: 12
+      // Property Items^.TotalVisibleCount skipped because of compiler directives.
+      // Property Items^.OnGetItem skipped because of compiler directives.
+
+      $01114506, $00210009, $001800C8,   //create TrackBar1(6, 9, 33, 200, 24)  manual creation group: 5.  HasVariableInGUIObjects: 1.  CreatedAtStartup: 0
+      $03110002, $00000003,   //set property:  "Position" of "INTEGER" to "3".   Property index: 0
+      $03110104, $9D01B030,   //set property:  "OnTrackBarChange" of "PBYTE" to "TrackBar1_OnTrackBarChange".   Property index: 1
+
+      $01114506, $005D0019, $00A00018,   //create TrackBar2(6, 25, 93, 24, 160)  manual creation group: 5.  HasVariableInGUIObjects: 1.  CreatedAtStartup: 0
+      $03110002, $00000007,   //set property:  "Position" of "INTEGER" to "7".   Property index: 0
+      $03110201, $00000001,   //set property:  "Orientation" of "BYTE" to "CTrackBarVertDir".   Property index: 2
+      $03110104, $9D01B2F4,   //set property:  "OnTrackBarChange" of "PBYTE" to "TrackBar2_OnTrackBarChange".   Property index: 1
+
+      $01124506, $002D0101, $001400CC,   //create ProgressBar1(6, 257, 45, 204, 20)  manual creation group: 5.  HasVariableInGUIObjects: 1.  CreatedAtStartup: 0
+      $03120004, $00000000,   //set property:  "BaseProps.CanHandleMessages" of "BOOLEAN" to "False".   Property index: 0
+      $03120102, $00000003,   //set property:  "Position" of "INTEGER" to "3".   Property index: 1
+
+      $01124506, $005D0101, $00A00018,   //create ProgressBar2(6, 257, 93, 24, 160)  manual creation group: 5.  HasVariableInGUIObjects: 1.  CreatedAtStartup: 0
+      $03120004, $00000000,   //set property:  "BaseProps.CanHandleMessages" of "BOOLEAN" to "False".   Property index: 0
+      $03120102, $00000007,   //set property:  "Position" of "INTEGER" to "7".   Property index: 1
+      $03120201, $00000001,   //set property:  "Orientation" of "BYTE" to "CProgressBarVertDir".   Property index: 2
+
+      $01014506, $00C80049, $00190068,   //create btnShowMessageBox(6, 73, 200, 104, 25)  manual creation group: 5.  HasVariableInGUIObjects: 1.  CreatedAtStartup: 0
+      $0301800B, $7373654D, $20656761, $00786F42,   //set property:  "Caption" of "STRING" to "Message Box".   Property index: 0
+      $03010504, $9D01B078,   //set property:  "BaseProps.OnMouseUpUser" of "PBYTE" to "btnShowMessageBox_OnMouseUpUser".   Property index: 5
+      0  //stop execution
+    );
+  {$ENDIF} {$ENDIF} // IsMCU PIC32AppDWithSDCard
+
   {$IFDEF IsDesktop} {$IFDEF DesktopApp_D2006} // Profile: "DesktopApp_D2006"
-    C_RTTI_DestroyInstructionData: array[0..39] of DWord = (
+    C_RTTI_DestroyInstructionData: array[0..40] of DWord = (
+      $0400000E,   //Set build number to 14
       $02014000,   //destroy btn1 at index 0  manual creation group: 0.  HasVariableInGUIObjects: 1.  CreatedAtStartup: 0
       $02014001,   //destroy btn2 at index 1  manual creation group: 0.  HasVariableInGUIObjects: 1.  CreatedAtStartup: 0
       $02024002,   //destroy Arrow1 at index 2  manual creation group: 0.  HasVariableInGUIObjects: 1.  CreatedAtStartup: 0
@@ -1205,7 +1981,8 @@ const
   {$ENDIF} {$ENDIF} // IsDesktop DesktopApp_D2006
 
   {$IFDEF IsMCU} {$IFDEF PIC32App} // Profile: "PIC32App"
-    C_RTTI_DestroyInstructionData: array[0..39] of DWord = (
+    C_RTTI_DestroyInstructionData: array[0..40] of DWord = (
+      $04000005,   //Set build number to 5
       $02014000,   //destroy btn1 at index 0  manual creation group: 0.  HasVariableInGUIObjects: 1.  CreatedAtStartup: 0
       $02014001,   //destroy btn2 at index 1  manual creation group: 0.  HasVariableInGUIObjects: 1.  CreatedAtStartup: 0
       $02024002,   //destroy Arrow1 at index 2  manual creation group: 0.  HasVariableInGUIObjects: 1.  CreatedAtStartup: 0
@@ -1250,7 +2027,8 @@ const
   {$ENDIF} {$ENDIF} // IsMCU PIC32App
 
   {$IFDEF IsDesktop} {$IFDEF DesktopApp_D10_2} // Profile: "DesktopApp_D10_2"
-    C_RTTI_DestroyInstructionData: array[0..39] of DWord = (
+    C_RTTI_DestroyInstructionData: array[0..40] of DWord = (
+      $04000003,   //Set build number to 3
       $02014000,   //destroy btn1 at index 0  manual creation group: 0.  HasVariableInGUIObjects: 1.  CreatedAtStartup: 0
       $02014001,   //destroy btn2 at index 1  manual creation group: 0.  HasVariableInGUIObjects: 1.  CreatedAtStartup: 0
       $02024002,   //destroy Arrow1 at index 2  manual creation group: 0.  HasVariableInGUIObjects: 1.  CreatedAtStartup: 0
@@ -1295,7 +2073,8 @@ const
   {$ENDIF} {$ENDIF} // IsDesktop DesktopApp_D10_2
 
   {$IFDEF IsDesktop} {$IFDEF DesktopApp_FP} // Profile: "DesktopApp_FP"
-    C_RTTI_DestroyInstructionData: array[0..39] of DWord = (
+    C_RTTI_DestroyInstructionData: array[0..40] of DWord = (
+      $04000004,   //Set build number to 4
       $02014000,   //destroy btn1 at index 0  manual creation group: 0.  HasVariableInGUIObjects: 1.  CreatedAtStartup: 0
       $02014001,   //destroy btn2 at index 1  manual creation group: 0.  HasVariableInGUIObjects: 1.  CreatedAtStartup: 0
       $02024002,   //destroy Arrow1 at index 2  manual creation group: 0.  HasVariableInGUIObjects: 1.  CreatedAtStartup: 0
@@ -1339,25 +2118,222 @@ const
     );
   {$ENDIF} {$ENDIF} // IsDesktop DesktopApp_FP
 
+  {$IFDEF IsMCU} {$IFDEF PIC32AppAddrArr} // Profile: "PIC32AppAddrArr"
+    C_RTTI_DestroyInstructionData: array[0..40] of DWord = (
+      $04000020,   //Set build number to 32
+      $02014000,   //destroy btn1 at index 0  manual creation group: 0.  HasVariableInGUIObjects: 1.  CreatedAtStartup: 0
+      $02014001,   //destroy btn2 at index 1  manual creation group: 0.  HasVariableInGUIObjects: 1.  CreatedAtStartup: 0
+      $02024002,   //destroy Arrow1 at index 2  manual creation group: 0.  HasVariableInGUIObjects: 1.  CreatedAtStartup: 0
+      $02024003,   //destroy Arrow2 at index 3  manual creation group: 0.  HasVariableInGUIObjects: 1.  CreatedAtStartup: 0
+      $02024004,   //destroy Arrow3 at index 4  manual creation group: 0.  HasVariableInGUIObjects: 1.  CreatedAtStartup: 0
+      $02024005,   //destroy Arrow4 at index 5  manual creation group: 0.  HasVariableInGUIObjects: 1.  CreatedAtStartup: 0
+      $02034006,   //destroy Panel1 at index 6  manual creation group: 0.  HasVariableInGUIObjects: 1.  CreatedAtStartup: 0
+      $02024007,   //destroy Arrow5 at index 7  manual creation group: 0.  HasVariableInGUIObjects: 1.  CreatedAtStartup: 0
+      $02024008,   //destroy Arrow6 at index 8  manual creation group: 0.  HasVariableInGUIObjects: 1.  CreatedAtStartup: 0
+      $02024009,   //destroy Arrow7 at index 9  manual creation group: 0.  HasVariableInGUIObjects: 1.  CreatedAtStartup: 0
+      $0202400A,   //destroy Arrow8 at index 10  manual creation group: 0.  HasVariableInGUIObjects: 1.  CreatedAtStartup: 0
+      $0201400B,   //destroy btn3 at index 11  manual creation group: 0.  HasVariableInGUIObjects: 1.  CreatedAtStartup: 0
+      $0201400C,   //destroy btn4 at index 12  manual creation group: 0.  HasVariableInGUIObjects: 1.  CreatedAtStartup: 0
+      $0202400D,   //destroy Arrow9 at index 13  manual creation group: 0.  HasVariableInGUIObjects: 1.  CreatedAtStartup: 0
+      $0204410E,   //destroy CheckBox1 at index 14  manual creation group: 1.  HasVariableInGUIObjects: 1.  CreatedAtStartup: 0
+      $0204410F,   //destroy CheckBox2 at index 15  manual creation group: 1.  HasVariableInGUIObjects: 1.  CreatedAtStartup: 0
+      $02044110,   //destroy CheckBox3 at index 16  manual creation group: 1.  HasVariableInGUIObjects: 1.  CreatedAtStartup: 0
+      $02054111,   //destroy ScrollBar1 at index 17  manual creation group: 1.  HasVariableInGUIObjects: 1.  CreatedAtStartup: 0
+      $02054112,   //destroy ScrollBar2 at index 18  manual creation group: 1.  HasVariableInGUIObjects: 1.  CreatedAtStartup: 0
+      $02074113,   //destroy ListBox1 at index 19  manual creation group: 1.  HasVariableInGUIObjects: 1.  CreatedAtStartup: 0
+      $02074114,   //destroy ListBox3 at index 20  manual creation group: 1.  HasVariableInGUIObjects: 1.  CreatedAtStartup: 0
+      $02014115,   //destroy DynTFTButton0 at index 21  manual creation group: 1.  HasVariableInGUIObjects: 1.  CreatedAtStartup: 0
+      $02084216,   //destroy lbl1 at index 22  manual creation group: 2.  HasVariableInGUIObjects: 1.  CreatedAtStartup: 0
+      $02084217,   //destroy lbl2 at index 23  manual creation group: 2.  HasVariableInGUIObjects: 1.  CreatedAtStartup: 0
+      $02084218,   //destroy lbl3 at index 24  manual creation group: 2.  HasVariableInGUIObjects: 1.  CreatedAtStartup: 0
+      $02084219,   //destroy lbl4 at index 25  manual creation group: 2.  HasVariableInGUIObjects: 1.  CreatedAtStartup: 0
+      $020F431A,   //destroy vkTest at index 26  manual creation group: 3.  HasVariableInGUIObjects: 1.  CreatedAtStartup: 0
+      $020D431B,   //destroy Edit1 at index 27  manual creation group: 3.  HasVariableInGUIObjects: 1.  CreatedAtStartup: 0
+      $0210441C,   //destroy ComboBox1 at index 28  manual creation group: 4.  HasVariableInGUIObjects: 1.  CreatedAtStartup: 0
+      $0210441D,   //destroy ComboBox2 at index 29  manual creation group: 4.  HasVariableInGUIObjects: 1.  CreatedAtStartup: 0
+      $0208441E,   //destroy Label4 at index 30  manual creation group: 4.  HasVariableInGUIObjects: 1.  CreatedAtStartup: 0
+      $0208441F,   //destroy Label5 at index 31  manual creation group: 4.  HasVariableInGUIObjects: 1.  CreatedAtStartup: 0
+      $02074420,   //destroy ListBox2 at index 32  manual creation group: 4.  HasVariableInGUIObjects: 1.  CreatedAtStartup: 0
+      $02074421,   //destroy ListBox4 at index 33  manual creation group: 4.  HasVariableInGUIObjects: 1.  CreatedAtStartup: 0
+      $02114522,   //destroy TrackBar1 at index 34  manual creation group: 5.  HasVariableInGUIObjects: 1.  CreatedAtStartup: 0
+      $02114523,   //destroy TrackBar2 at index 35  manual creation group: 5.  HasVariableInGUIObjects: 1.  CreatedAtStartup: 0
+      $02124524,   //destroy ProgressBar1 at index 36  manual creation group: 5.  HasVariableInGUIObjects: 1.  CreatedAtStartup: 0
+      $02124525,   //destroy ProgressBar2 at index 37  manual creation group: 5.  HasVariableInGUIObjects: 1.  CreatedAtStartup: 0
+      $02014526,   //destroy btnShowMessageBox at index 38  manual creation group: 5.  HasVariableInGUIObjects: 1.  CreatedAtStartup: 0
+      0  //stop execution
+    );
+  {$ENDIF} {$ENDIF} // IsMCU PIC32AppAddrArr
+
+  {$IFDEF IsMCU} {$IFDEF PIC32AppWithSDCard} // Profile: "PIC32AppWithSDCard"
+    C_RTTI_DestroyInstructionData: array[0..40] of DWord = (
+      $04000005,   //Set build number to 5
+      $02014000,   //destroy btn1 at index 0  manual creation group: 0.  HasVariableInGUIObjects: 1.  CreatedAtStartup: 0
+      $02014001,   //destroy btn2 at index 1  manual creation group: 0.  HasVariableInGUIObjects: 1.  CreatedAtStartup: 0
+      $02024002,   //destroy Arrow1 at index 2  manual creation group: 0.  HasVariableInGUIObjects: 1.  CreatedAtStartup: 0
+      $02024003,   //destroy Arrow2 at index 3  manual creation group: 0.  HasVariableInGUIObjects: 1.  CreatedAtStartup: 0
+      $02024004,   //destroy Arrow3 at index 4  manual creation group: 0.  HasVariableInGUIObjects: 1.  CreatedAtStartup: 0
+      $02024005,   //destroy Arrow4 at index 5  manual creation group: 0.  HasVariableInGUIObjects: 1.  CreatedAtStartup: 0
+      $02034006,   //destroy Panel1 at index 6  manual creation group: 0.  HasVariableInGUIObjects: 1.  CreatedAtStartup: 0
+      $02024007,   //destroy Arrow5 at index 7  manual creation group: 0.  HasVariableInGUIObjects: 1.  CreatedAtStartup: 0
+      $02024008,   //destroy Arrow6 at index 8  manual creation group: 0.  HasVariableInGUIObjects: 1.  CreatedAtStartup: 0
+      $02024009,   //destroy Arrow7 at index 9  manual creation group: 0.  HasVariableInGUIObjects: 1.  CreatedAtStartup: 0
+      $0202400A,   //destroy Arrow8 at index 10  manual creation group: 0.  HasVariableInGUIObjects: 1.  CreatedAtStartup: 0
+      $0201400B,   //destroy btn3 at index 11  manual creation group: 0.  HasVariableInGUIObjects: 1.  CreatedAtStartup: 0
+      $0201400C,   //destroy btn4 at index 12  manual creation group: 0.  HasVariableInGUIObjects: 1.  CreatedAtStartup: 0
+      $0202400D,   //destroy Arrow9 at index 13  manual creation group: 0.  HasVariableInGUIObjects: 1.  CreatedAtStartup: 0
+      $0204410E,   //destroy CheckBox1 at index 14  manual creation group: 1.  HasVariableInGUIObjects: 1.  CreatedAtStartup: 0
+      $0204410F,   //destroy CheckBox2 at index 15  manual creation group: 1.  HasVariableInGUIObjects: 1.  CreatedAtStartup: 0
+      $02044110,   //destroy CheckBox3 at index 16  manual creation group: 1.  HasVariableInGUIObjects: 1.  CreatedAtStartup: 0
+      $02054111,   //destroy ScrollBar1 at index 17  manual creation group: 1.  HasVariableInGUIObjects: 1.  CreatedAtStartup: 0
+      $02054112,   //destroy ScrollBar2 at index 18  manual creation group: 1.  HasVariableInGUIObjects: 1.  CreatedAtStartup: 0
+      $02074113,   //destroy ListBox1 at index 19  manual creation group: 1.  HasVariableInGUIObjects: 1.  CreatedAtStartup: 0
+      $02074114,   //destroy ListBox3 at index 20  manual creation group: 1.  HasVariableInGUIObjects: 1.  CreatedAtStartup: 0
+      $02014115,   //destroy DynTFTButton0 at index 21  manual creation group: 1.  HasVariableInGUIObjects: 1.  CreatedAtStartup: 0
+      $02084216,   //destroy lbl1 at index 22  manual creation group: 2.  HasVariableInGUIObjects: 1.  CreatedAtStartup: 0
+      $02084217,   //destroy lbl2 at index 23  manual creation group: 2.  HasVariableInGUIObjects: 1.  CreatedAtStartup: 0
+      $02084218,   //destroy lbl3 at index 24  manual creation group: 2.  HasVariableInGUIObjects: 1.  CreatedAtStartup: 0
+      $02084219,   //destroy lbl4 at index 25  manual creation group: 2.  HasVariableInGUIObjects: 1.  CreatedAtStartup: 0
+      $020F431A,   //destroy vkTest at index 26  manual creation group: 3.  HasVariableInGUIObjects: 1.  CreatedAtStartup: 0
+      $020D431B,   //destroy Edit1 at index 27  manual creation group: 3.  HasVariableInGUIObjects: 1.  CreatedAtStartup: 0
+      $0210441C,   //destroy ComboBox1 at index 28  manual creation group: 4.  HasVariableInGUIObjects: 1.  CreatedAtStartup: 0
+      $0210441D,   //destroy ComboBox2 at index 29  manual creation group: 4.  HasVariableInGUIObjects: 1.  CreatedAtStartup: 0
+      $0208441E,   //destroy Label4 at index 30  manual creation group: 4.  HasVariableInGUIObjects: 1.  CreatedAtStartup: 0
+      $0208441F,   //destroy Label5 at index 31  manual creation group: 4.  HasVariableInGUIObjects: 1.  CreatedAtStartup: 0
+      $02074420,   //destroy ListBox2 at index 32  manual creation group: 4.  HasVariableInGUIObjects: 1.  CreatedAtStartup: 0
+      $02074421,   //destroy ListBox4 at index 33  manual creation group: 4.  HasVariableInGUIObjects: 1.  CreatedAtStartup: 0
+      $02114522,   //destroy TrackBar1 at index 34  manual creation group: 5.  HasVariableInGUIObjects: 1.  CreatedAtStartup: 0
+      $02114523,   //destroy TrackBar2 at index 35  manual creation group: 5.  HasVariableInGUIObjects: 1.  CreatedAtStartup: 0
+      $02124524,   //destroy ProgressBar1 at index 36  manual creation group: 5.  HasVariableInGUIObjects: 1.  CreatedAtStartup: 0
+      $02124525,   //destroy ProgressBar2 at index 37  manual creation group: 5.  HasVariableInGUIObjects: 1.  CreatedAtStartup: 0
+      $02014526,   //destroy btnShowMessageBox at index 38  manual creation group: 5.  HasVariableInGUIObjects: 1.  CreatedAtStartup: 0
+      0  //stop execution
+    );
+  {$ENDIF} {$ENDIF} // IsMCU PIC32AppWithSDCard
+
+  {$IFDEF IsMCU} {$IFDEF PIC32AppDWithSDCard} // Profile: "PIC32AppDWithSDCard"
+    C_RTTI_DestroyInstructionData: array[0..40] of DWord = (
+      $04000005,   //Set build number to 5
+      $02014000,   //destroy btn1 at index 0  manual creation group: 0.  HasVariableInGUIObjects: 1.  CreatedAtStartup: 0
+      $02014001,   //destroy btn2 at index 1  manual creation group: 0.  HasVariableInGUIObjects: 1.  CreatedAtStartup: 0
+      $02024002,   //destroy Arrow1 at index 2  manual creation group: 0.  HasVariableInGUIObjects: 1.  CreatedAtStartup: 0
+      $02024003,   //destroy Arrow2 at index 3  manual creation group: 0.  HasVariableInGUIObjects: 1.  CreatedAtStartup: 0
+      $02024004,   //destroy Arrow3 at index 4  manual creation group: 0.  HasVariableInGUIObjects: 1.  CreatedAtStartup: 0
+      $02024005,   //destroy Arrow4 at index 5  manual creation group: 0.  HasVariableInGUIObjects: 1.  CreatedAtStartup: 0
+      $02034006,   //destroy Panel1 at index 6  manual creation group: 0.  HasVariableInGUIObjects: 1.  CreatedAtStartup: 0
+      $02024007,   //destroy Arrow5 at index 7  manual creation group: 0.  HasVariableInGUIObjects: 1.  CreatedAtStartup: 0
+      $02024008,   //destroy Arrow6 at index 8  manual creation group: 0.  HasVariableInGUIObjects: 1.  CreatedAtStartup: 0
+      $02024009,   //destroy Arrow7 at index 9  manual creation group: 0.  HasVariableInGUIObjects: 1.  CreatedAtStartup: 0
+      $0202400A,   //destroy Arrow8 at index 10  manual creation group: 0.  HasVariableInGUIObjects: 1.  CreatedAtStartup: 0
+      $0201400B,   //destroy btn3 at index 11  manual creation group: 0.  HasVariableInGUIObjects: 1.  CreatedAtStartup: 0
+      $0201400C,   //destroy btn4 at index 12  manual creation group: 0.  HasVariableInGUIObjects: 1.  CreatedAtStartup: 0
+      $0202400D,   //destroy Arrow9 at index 13  manual creation group: 0.  HasVariableInGUIObjects: 1.  CreatedAtStartup: 0
+      $0204410E,   //destroy CheckBox1 at index 14  manual creation group: 1.  HasVariableInGUIObjects: 1.  CreatedAtStartup: 0
+      $0204410F,   //destroy CheckBox2 at index 15  manual creation group: 1.  HasVariableInGUIObjects: 1.  CreatedAtStartup: 0
+      $02044110,   //destroy CheckBox3 at index 16  manual creation group: 1.  HasVariableInGUIObjects: 1.  CreatedAtStartup: 0
+      $02054111,   //destroy ScrollBar1 at index 17  manual creation group: 1.  HasVariableInGUIObjects: 1.  CreatedAtStartup: 0
+      $02054112,   //destroy ScrollBar2 at index 18  manual creation group: 1.  HasVariableInGUIObjects: 1.  CreatedAtStartup: 0
+      $02074113,   //destroy ListBox1 at index 19  manual creation group: 1.  HasVariableInGUIObjects: 1.  CreatedAtStartup: 0
+      $02074114,   //destroy ListBox3 at index 20  manual creation group: 1.  HasVariableInGUIObjects: 1.  CreatedAtStartup: 0
+      $02014115,   //destroy DynTFTButton0 at index 21  manual creation group: 1.  HasVariableInGUIObjects: 1.  CreatedAtStartup: 0
+      $02084216,   //destroy lbl1 at index 22  manual creation group: 2.  HasVariableInGUIObjects: 1.  CreatedAtStartup: 0
+      $02084217,   //destroy lbl2 at index 23  manual creation group: 2.  HasVariableInGUIObjects: 1.  CreatedAtStartup: 0
+      $02084218,   //destroy lbl3 at index 24  manual creation group: 2.  HasVariableInGUIObjects: 1.  CreatedAtStartup: 0
+      $02084219,   //destroy lbl4 at index 25  manual creation group: 2.  HasVariableInGUIObjects: 1.  CreatedAtStartup: 0
+      $020F431A,   //destroy vkTest at index 26  manual creation group: 3.  HasVariableInGUIObjects: 1.  CreatedAtStartup: 0
+      $020D431B,   //destroy Edit1 at index 27  manual creation group: 3.  HasVariableInGUIObjects: 1.  CreatedAtStartup: 0
+      $0210441C,   //destroy ComboBox1 at index 28  manual creation group: 4.  HasVariableInGUIObjects: 1.  CreatedAtStartup: 0
+      $0210441D,   //destroy ComboBox2 at index 29  manual creation group: 4.  HasVariableInGUIObjects: 1.  CreatedAtStartup: 0
+      $0208441E,   //destroy Label4 at index 30  manual creation group: 4.  HasVariableInGUIObjects: 1.  CreatedAtStartup: 0
+      $0208441F,   //destroy Label5 at index 31  manual creation group: 4.  HasVariableInGUIObjects: 1.  CreatedAtStartup: 0
+      $02074420,   //destroy ListBox2 at index 32  manual creation group: 4.  HasVariableInGUIObjects: 1.  CreatedAtStartup: 0
+      $02074421,   //destroy ListBox4 at index 33  manual creation group: 4.  HasVariableInGUIObjects: 1.  CreatedAtStartup: 0
+      $02114522,   //destroy TrackBar1 at index 34  manual creation group: 5.  HasVariableInGUIObjects: 1.  CreatedAtStartup: 0
+      $02114523,   //destroy TrackBar2 at index 35  manual creation group: 5.  HasVariableInGUIObjects: 1.  CreatedAtStartup: 0
+      $02124524,   //destroy ProgressBar1 at index 36  manual creation group: 5.  HasVariableInGUIObjects: 1.  CreatedAtStartup: 0
+      $02124525,   //destroy ProgressBar2 at index 37  manual creation group: 5.  HasVariableInGUIObjects: 1.  CreatedAtStartup: 0
+      $02014526,   //destroy btnShowMessageBox at index 38  manual creation group: 5.  HasVariableInGUIObjects: 1.  CreatedAtStartup: 0
+      0  //stop execution
+    );
+  {$ENDIF} {$ENDIF} // IsMCU PIC32AppDWithSDCard
+
   {$IFDEF IsDesktop} {$IFDEF DesktopApp_D2006} // Profile: "DesktopApp_D2006"
     C_CreateDynTFTUI_FileName = 'Create_D2006.dyntftui';
     C_DestroyDynTFTUI_FileName = 'Destroy_D2006.dyntftui';
+    C_DynTFTUI_BuildNumber = 14;
+    C_ProfileIntegerSize = 4;
+    C_ProfilePointerSize = 4;
+    C_CreateDynTFTUI_DataSourceOption = 1; // 0 = Data from code const,  1 = .dyntftui file.
+    C_DestroyDynTFTUI_DataSourceOption = 1; // 0 = Data from code const,  1 = .dyntftui file.
+    C_PropertyAddresses_SourceOption = 0; // 0 = lst file,  1 = array of addresses (code const).
   {$ENDIF} {$ENDIF} // IsDesktop DesktopApp_D2006
 
   {$IFDEF IsMCU} {$IFDEF PIC32App} // Profile: "PIC32App"
-    C_CreateDynTFTUI_FileName = 'C.dyntftui';
-    C_DestroyDynTFTUI_FileName = 'D.dyntftui';
+    C_CreateDynTFTUI_FileName = 'none'; //a constant, different than '' 
+    C_DestroyDynTFTUI_FileName = 'none'; //a constant, different than '' 
+    C_DynTFTUI_BuildNumber = 5;
+    C_ProfileIntegerSize = 2;
+    C_ProfilePointerSize = 4;
+    C_CreateDynTFTUI_DataSourceOption = 0; // 0 = Data from code const,  1 = .dyntftui file.
+    C_DestroyDynTFTUI_DataSourceOption = 0; // 0 = Data from code const,  1 = .dyntftui file.
+    C_PropertyAddresses_SourceOption = 0; // 0 = lst file,  1 = array of addresses (code const).
+    // No *.dyntftui files used in this profile.
   {$ENDIF} {$ENDIF} // IsMCU PIC32App
 
   {$IFDEF IsDesktop} {$IFDEF DesktopApp_D10_2} // Profile: "DesktopApp_D10_2"
     C_CreateDynTFTUI_FileName = 'Create_D10_2.dyntftui';
     C_DestroyDynTFTUI_FileName = 'Destroy_D10_2.dyntftui';
+    C_DynTFTUI_BuildNumber = 3;
+    C_ProfileIntegerSize = 4;
+    C_ProfilePointerSize = 4;
+    C_CreateDynTFTUI_DataSourceOption = 0; // 0 = Data from code const,  1 = .dyntftui file.
+    C_DestroyDynTFTUI_DataSourceOption = 0; // 0 = Data from code const,  1 = .dyntftui file.
+    C_PropertyAddresses_SourceOption = 0; // 0 = lst file,  1 = array of addresses (code const).
   {$ENDIF} {$ENDIF} // IsDesktop DesktopApp_D10_2
 
   {$IFDEF IsDesktop} {$IFDEF DesktopApp_FP} // Profile: "DesktopApp_FP"
     C_CreateDynTFTUI_FileName = 'Create_FP.dyntftui';
     C_DestroyDynTFTUI_FileName = 'Destroy_FP.dyntftui';
+    C_DynTFTUI_BuildNumber = 4;
+    C_ProfileIntegerSize = 4;
+    C_ProfilePointerSize = 4;
+    C_CreateDynTFTUI_DataSourceOption = 1; // 0 = Data from code const,  1 = .dyntftui file.
+    C_DestroyDynTFTUI_DataSourceOption = 1; // 0 = Data from code const,  1 = .dyntftui file.
+    C_PropertyAddresses_SourceOption = 0; // 0 = lst file,  1 = array of addresses (code const).
   {$ENDIF} {$ENDIF} // IsDesktop DesktopApp_FP
+
+  {$IFDEF IsMCU} {$IFDEF PIC32AppAddrArr} // Profile: "PIC32AppAddrArr"
+    C_CreateDynTFTUI_FileName = 'none'; //a constant, different than '' 
+    C_DestroyDynTFTUI_FileName = 'none'; //a constant, different than '' 
+    C_DynTFTUI_BuildNumber = 32;
+    C_ProfileIntegerSize = 2;
+    C_ProfilePointerSize = 4;
+    C_CreateDynTFTUI_DataSourceOption = 0; // 0 = Data from code const,  1 = .dyntftui file.
+    C_DestroyDynTFTUI_DataSourceOption = 0; // 0 = Data from code const,  1 = .dyntftui file.
+    C_PropertyAddresses_SourceOption = 1; // 0 = lst file,  1 = array of addresses (code const).
+    // No *.dyntftui files used in this profile.
+  {$ENDIF} {$ENDIF} // IsMCU PIC32AppAddrArr
+
+  {$IFDEF IsMCU} {$IFDEF PIC32AppWithSDCard} // Profile: "PIC32AppWithSDCard"
+    C_CreateDynTFTUI_FileName = 'C.dyntftui';
+    C_DestroyDynTFTUI_FileName = 'D.dyntftui';
+    C_DynTFTUI_BuildNumber = 5;
+    C_ProfileIntegerSize = 2;
+    C_ProfilePointerSize = 4;
+    C_CreateDynTFTUI_DataSourceOption = 1; // 0 = Data from code const,  1 = .dyntftui file.
+    C_DestroyDynTFTUI_DataSourceOption = 1; // 0 = Data from code const,  1 = .dyntftui file.
+    C_PropertyAddresses_SourceOption = 0; // 0 = lst file,  1 = array of addresses (code const).
+  {$ENDIF} {$ENDIF} // IsMCU PIC32AppWithSDCard
+
+  {$IFDEF IsMCU} {$IFDEF PIC32AppDWithSDCard} // Profile: "PIC32AppDWithSDCard"
+    C_CreateDynTFTUI_FileName = 'C_D.dyntftui';
+    C_DestroyDynTFTUI_FileName = 'D_D.dyntftui';
+    C_DynTFTUI_BuildNumber = 5;
+    C_ProfileIntegerSize = 2;
+    C_ProfilePointerSize = 4;
+    C_CreateDynTFTUI_DataSourceOption = 1; // 0 = Data from code const,  1 = .dyntftui file.
+    C_DestroyDynTFTUI_DataSourceOption = 1; // 0 = Data from code const,  1 = .dyntftui file.
+    C_PropertyAddresses_SourceOption = 0; // 0 = lst file,  1 = array of addresses (code const).
+  {$ENDIF} {$ENDIF} // IsMCU PIC32AppDWithSDCard
 
 
   {$IFDEF IsDesktop}

@@ -32,8 +32,16 @@ unit DynTFTTypes;
 {$IFNDEF IsMCU}
   {$DEFINE IsDesktop}
 
-  {$IFNDEF AppArch32}
-    {$DEFINE AppArch32}
+  {$IFDEF CPU64} // works on FP
+    {$IFNDEF AppArch64}
+      {$DEFINE AppArch64}
+    {$ENDIF}
+  {$ENDIF}
+
+  {$IFNDEF AppArch64}
+    {$IFNDEF AppArch32}
+      {$DEFINE AppArch32}
+    {$ENDIF}
   {$ENDIF}
 
 {$ELSE}
@@ -61,13 +69,13 @@ unit DynTFTTypes;
     {$DEFINE AppArch32}  //then it must be 32-bit !
   {$ENDIF}
 
-type
-  //PByte = ^Byte;
-  {$IFDEF AppArch16}
-    PByte = ^far const code Byte;
-  {$ELSE}
-    PByte = ^const code Byte;
-  {$ENDIF}  
+  type
+    //PByte = ^Byte;
+    {$IFDEF AppArch16}
+      PByte = ^far const code Byte;
+    {$ELSE}
+      PByte = ^const code Byte;
+    {$ENDIF}  
 {$ENDIF}
 
 {$IFDEF IsDesktop}
@@ -106,7 +114,7 @@ type
 
   TDynTFTCompDebugStr = string[50];
 
-  {$IFDEF CPU64}
+  {$IFDEF AppArch64}
     TSInt = Longint;
   {$ELSE}
     {$IFDEF IsDesktop}
@@ -117,7 +125,7 @@ type
   {$ENDIF}
 
   {$IFDEF IsDesktop}
-    {$IFDEF CPU64}
+    {$IFDEF AppArch64}
       TPtr = QWord;
       TIntPtr = Int64;
     {$ELSE}
@@ -250,7 +258,7 @@ type
   TDynTFTGetPropertyAddressProc = function(AComp: PDynTFTBaseComponent; PropertyIndex: Byte): PPtrRec;
   PDynTFTGetPropertyAddressProc = ^TDynTFTGetPropertyAddressProc;
 
-  TDynTFTExecRTTIInstructionCallback = procedure(ABinaryComponentsData: PDWordArray; ByteCount: TPtr);  //using TPtr for optimization only. It is not expected that datalength would be longer than 64KB.
+  TDynTFTExecRTTIInstructionCallback = procedure(ABinaryComponentsData: PDWordArray; ByteCount: TSInt);  //using TSInt for optimization only. It is not expected that datalength would be longer than 64KB.
   PDynTFTExecRTTIInstructionCallback = ^TDynTFTExecRTTIInstructionCallback;
 
   //These events allow internal handlers to call dedicated registered handlers. 

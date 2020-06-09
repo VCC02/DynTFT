@@ -125,7 +125,7 @@
 			<Directories Name="PackageDCPOutputDir"></Directories>
 			<Directories Name="SearchPath"></Directories>
 			<Directories Name="Packages"></Directories>
-			<Directories Name="Conditionals">DynTFTFontSupport;RTTIREG;DesktopApp_D2006</Directories>
+			<Directories Name="Conditionals">DynTFTFontSupport;RTTIREG;DesktopApp_D2006;UseFAT32D;UseSDCard</Directories>
 			<Directories Name="DebugSourceDirs"></Directories>
 			<Directories Name="UsePackages">False</Directories>
 		</Directories>

@@ -1,0 +1,7 @@
+ExtraColorCommands
+DynTFTFontSupport
+.UseExternalFont
+RTTIREG
+PIC32AppDWithSDCard
+UseFAT32D
+UseSDCard

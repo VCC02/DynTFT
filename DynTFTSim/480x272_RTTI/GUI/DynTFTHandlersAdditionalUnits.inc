@@ -3,4 +3,6 @@
   , ExternalResources
 {$ENDIF}
 
+{$IFDEF UseSDCard}
   , RTTIDataProvider
+{$ENDIF}  

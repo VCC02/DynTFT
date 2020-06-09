@@ -87,7 +87,7 @@ uses
 
   TFT, DynTFTGUI, DynTFTControls, DynTFTBaseDrawing, DynTFTUtils, DynTFTMessageBox,
   IniFiles, DynTFTSimScreenForm, ClipBrd, DynTFTListExporter, RTTIDataProvider,
-  DynTFTFAT32;
+  {$IFDEF UseFAT32D} DynTFTFAT32D {$ELSE} DynTFTFAT32 {$ENDIF};
 
 
 {TfrmTestDynTFTMain}
@@ -180,6 +180,8 @@ begin
   DynTFT_AssignDebugConsole(lstLog);
 
   {$IFDEF RTTIREG}
+    FAT32_SetBaseDirectory(ExtractFilePath(ParamStr(0)) + '..\SD_Card');
+    //FAT32_SetBaseDirectory(ExpandFileName('..\SD_Card'));
     FAT32_Init;
     GenerateListFile(ExtractFilePath(ParamStr(0)) + 'DynTFTSim.lst');
   {$ENDIF}  
@@ -222,11 +224,10 @@ begin
   GCanvas.Rectangle(0, 0, frmDynTFTSimScreen.imgScreen.Width, frmDynTFTSimScreen.imgScreen.Height);
 
   {$IFDEF RTTIREG}
-    FAT32_SetBaseDirectory(ExtractFilePath(ParamStr(0)) + '..\SD_Card');
-    //FAT32_SetBaseDirectory(ExpandFileName('..\SD_Card'));
-
-    RTTI_Create_Handle := -1;
-    RTTI_Destroy_Handle := -1;
+    {$IFNDEF UseFAT32D}
+      RTTI_Create_Handle := -1;
+      RTTI_Destroy_Handle := -1;
+    {$ENDIF}
     OpenRTTIFiles;
   {$ENDIF}
 

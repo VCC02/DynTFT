@@ -111,7 +111,9 @@
     <Other>
       <CustomOptions Value="-dDynTFTFontSupport
 -dRTTIREG
--dDesktopApp_FP"/>
+-dDesktopApp_FP
+-dUseFAT32D
+-dUseSDCard"/>
     </Other>
   </CompilerOptions>
   <Debugging>

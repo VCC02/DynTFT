@@ -6,7 +6,7 @@ Value=0
 [BUILD_TYPE]
 Value=0
 [ACTIVE_TAB]
-Value=ExtraColorCommands.pld
+Value=..\GUI\DynTFTGUI.pas
 [USE_EEPROM]
 Value=0
 [USE_HEAP]
@@ -23,8 +23,7 @@ File3=..\GUI\DynTFTGUI.mpas
 File4=..\GUI\DynTFTGUIObjects.mpas
 File5=..\GUI\DynTFTHandlers.mpas
 File6=..\GUI\ExternalResources.mpas
-File7=..\Common\RTTIDataProvider.mpas
-Count=8
+Count=7
 [BINARIES]
 Count=0
 [IMAGES]
@@ -35,9 +34,8 @@ File0=DynTFTExample.mpas
 File1=ExtraColorCommands.pld
 File2=DynTFTExample.lst
 File3=..\GUI\ExternalResources.mpas
-File4=..\GUI\DynTFTHandlers.pas
-File5=..\Common\RTTIDataProvider.pas
-Count=6
+File4=..\GUI\DynTFTGUI.pas
+Count=5
 [EEPROM]
 Count=0
 [ACTIVE_COMMENTS_FILES]
@@ -65,13 +63,9 @@ File6=STMPE610
 File7=I2C
 File8=Conversions
 File9=SPI
-File10=FAT32_MX
-File11=FAT32_Defs_MX
-File12=FAT32_Driver_MX
-File13=UART
-File14=Mmc
-File15=FAT32_Types_MX
-Count=16
+File10=UART
+File11=Mmc
+Count=12
 [INTERRUPT_DEFS]
 EBASE=9FC01000
 VECTOR_SPACEING=32

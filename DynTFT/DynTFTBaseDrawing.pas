@@ -196,9 +196,13 @@ const
   COUTOFMEMORYMESSAGE_MCU = 'Out of dynamic memory.';
 
   {$IFDEF RTTIREG}
-    CHANDLERSARRAYNOTSET = 'Handlers array not set';
-    CRTTIFILEPOINTERNOTSETTOINSTRUCTION = 'RTTI file pointer not set';  //in case of this error, you have to use FAT32_Seek or a similar function to set the file pointer to the first instruction
-  {$ENDIF}  
+    CHANDLERSARRAYNOTSET = 'Handlers array not set';                    //Display an error even on MCU, to detect a bad setting (or bug). This happens when the instruction is set to use handler indexes instead of addresses (bit "IsIndex" is 1), but there is no array of addresses to be indexed.  The "IsIndex" bit is usually set if no .lst file is provided when generating the instructions (either code or .dyntftui file).
+    CRTTIFILEPOINTERNOTSETTOINSTRUCTION = 'RTTI file pointer not set';  //in case of this error, you have to use FAT32_Seek or a similar function to set the file pointer to the first instruction (usually in data provider callbacks)
+    CRTTIDATAOUTOFDATE = 'Binary data out of date';                     //requires regeneration or dyntftui files from SDCard/USBDrive were not updated
+    CRTTIBADINTEGERSIZE = 'Bad Int Size';                               //the profile setting for integer size does not match compiler / architecture integer size
+    CRTTIBADIPOINTERSIZE = 'Bad Pointer Size';                          //the profile setting for pointer size does not match compiler / architecture pointer size
+    CRTTIDATAPROVIDERREADERR = 'DataProv Read Err';                     //maybe FAT32 is not initialized, or file not found, or SDCard/USBDrive not found, or other read error  (used in data provider callbacks)
+  {$ENDIF}
 
   CDynTFTUnrecognizedInstructionError = $FFFFFFFF;
   CDynTFTHasVarInGUIObjects_BitMask = $40;
@@ -216,9 +220,12 @@ const
   CRTTIInstruction_CreateComponent = 1;
   CRTTIInstruction_DestroyComponent = 2;
   CRTTIInstruction_SetProperty = 3;
-  //4 reserved for now
+  CRTTIInstruction_BuildVersion = 4; //Used to check if the build number of instructions array, match a constant in code. It stops execution on mismatch. Used for instructions generated based on lst files.
   CRTTIInstruction_Header = 5; //This should be present in dyntftui files only. Headers start with this (reserved) value, to signal that the file pointer was not set to the first instruction. See CRTTIFILEPOINTERNOTSETTOINSTRUCTION constant.
 
+  //DataCallBack args are 0 or negative:
+  CRTTI_DataCallBackArg_ResetFilePointer = 0;
+  CRTTI_DataCallBackArg_GetDataBuildNumber = 32767; //-1;
 
 var
   DynTFTReceivedMouseDown: Boolean;
@@ -351,11 +358,27 @@ procedure DynTFTDisplayErrorMessage({$IFDEF IsMCU}var{$ENDIF} AMessage: string; 
 begin
   DynTFT_Set_Pen(CL_RED, 1);
   DynTFT_Set_Brush(1, $FFFFFF, 0, 0, 0, 0);
-  DynTFT_Rectangle(10, 10, 300, 30);
+  DynTFT_Rectangle(10, 2, 300, 30);
 
   DynTFT_Set_Font(@TFT_defaultFont, TextColor, 0);
 
-  DynTFT_Write_Text(AMessage, 12, 12);
+  DynTFT_Write_Text(AMessage, 12, 4);
+end;
+
+
+procedure DynTFTDisplayErrorMessageAtPos({$IFDEF IsMCU}var{$ENDIF} AMessage: string; TextColor: DWord; X, Y: Integer);
+var
+  TextWidth, TextHeight: Word;
+begin
+  GetTextWidthAndHeight(AMessage, TextWidth, TextHeight);
+  
+  DynTFT_Set_Pen(CL_MAROON, 1);
+  DynTFT_Set_Brush(1, $FFFFFF, 0, 0, 0, 0);
+  DynTFT_Rectangle(X, Y, X + TextWidth + 4, Y + TextHeight + 4);
+
+  DynTFT_Set_Font(@TFT_defaultFont, TextColor, 0);
+
+  DynTFT_Write_Text(AMessage, X + 2, Y + 2);
 end;
 
 
@@ -559,22 +582,24 @@ end;
 
 
     RTTI Instruction format (architecture independent):
-                    ____________________________________________________________________________________________________________________________________
-  Array DWords:    |                                  DWord 0                                       |        DWord 1         |         DWord 2          |
-  Array Bytes:     |    Byte 0             Byte 1           Byte 2              Byte 3              |Byte4 Byte5 Byte6 Byte7 |Byte8 Byte9 Byte10 Byte11 |
-                   |________________________________________________________________________________|________________________|__________________________|
-                   |Instruction number  | | Component type |      Options 1    |    Options 2       |         Data           |          Data            |
-                   |____________________|_|________________|___________________|____________________|                        |                          |
-Stop execution:    |          0         |        ////      |        ////       |       ////         |                        |                          |
-                   |____________________|__________________|___________________|____________________|____________ ___________|__________________________|____________
-Create component:  |          1         | | Component type | CreateCompOptions | Screen index       |    Top     |   Left    |   Height   |    Width    |         maybe comp index (lower word)
-                   |____________________|_|________________|___________________|____________________|_____|______|_____|_____|_____|______|______|______|_________in AllComponents array
-Destroy component: |          2         | | Component type |      Options 1    |    Options 2       | CompIndex (optional)   |
-                   |____________________|_|________________|___________________|____________________|________________________|___________________________________
-Set property:      |          3         | | Component type |  Property options | Data length[bytes] |  <Property data> ...   |  <Property data> ...     |  <Property data> ...
-                   |____________________|_|________________|___________________|____________________|________________________|__________________________|________
-SetDataFromIndex   |          4         |
-                   |____________________|
+                     ____________________________________________________________________________________________________________________________________
+  Array DWords:     |                                  DWord 0                                       |        DWord 1         |         DWord 2          |
+  Array Bytes:      |    Byte 0             Byte 1           Byte 2              Byte 3              |Byte4 Byte5 Byte6 Byte7 |Byte8 Byte9 Byte10 Byte11 |
+                    |________________________________________________________________________________|________________________|__________________________|
+                    |Instruction number  | | Component type |      Options 1    |    Options 2       |         Data           |          Data            |
+                    |____________________|_|________________|___________________|____________________|                        |                          |
+Stop execution:     |          0         |        ////      |        ////       |       ////         |                        |                          |
+                    |____________________|__________________|___________________|____________________|____________ ___________|__________________________|____________
+Create component:   |          1         | | Component type | CreateCompOptions | Screen index       |    Top     |   Left    |   Height   |    Width    |         maybe comp index (lower word)
+                    |____________________|_|________________|___________________|____________________|_____|______|_____|_____|_____|______|______|______|_________in AllComponents array
+Destroy component:  |          2         | | Component type |      Options 1    |    Options 2       | CompIndex (optional)   |
+                    |____________________|_|________________|___________________|____________________|________________________|___________________________________
+Set property:       |          3         | | Component type |  Property options | Data length[bytes] |  <Property data> ...   |  <Property data> ...     |  <Property data> ...
+                    |____________________|_|________________|___________________|____________________|________________________|__________________________|________
+Check build version |          4         |         0        |              Build number              |
+                    |____________________|__________________|___________________|____________________|
+Header              |          5         |                           0                               |
+                    |____________________|___________________________________________________________|
 
 
      Create component "CreateCompOptions" (one byte):
@@ -612,6 +637,11 @@ SetDataFromIndex   |          4         |
                   It is used when the property value represents the address of an event handler or font, which cannot be determined at compile time.
                   The data length of the property has to match the pointer size in bytes for addresses.
      bit6..bit0 - the component type as it is registered at runtime
+
+
+     Check build number  "Build number"
+     bit15..bit0- Build number  Can be 0 only to explicitly mark a file as out of date. Otherwise, it represents build number.
+     
 
 
  Example of AllCreatedComponents array content:
@@ -720,7 +750,7 @@ SetDataFromIndex   |          4         |
     if IsString then
     begin
       {$IFDEF IsDesktop}
-        memcpy(PByte(DWord(PropertyAddress) - 1), @PropertyLength, 1);  // write a single byte, since constrained strings on PC, are short strings
+        memcpy(PByte(TPtr(PropertyAddress) - 1), @PropertyLength, 1);  // write a single byte, since constrained strings on PC, are short strings
       {$ELSE}
         TempBuffer := 0;
         memcpy(PByte(DWord(PropertyAddress) + PropertyLength), @TempBuffer, 1);  // write #0 to MyString[Length(MyString)] as null terminator  (MCU only, because on desktop, short strings are not null terminated)
@@ -728,7 +758,7 @@ SetDataFromIndex   |          4         |
     end;
 
 
-    PropertyContent := PByteArray(DWord(PropertyMetadata));
+    PropertyContent := PByteArray(TPtr(PropertyMetadata));
 
     if IsIndex then
     begin
@@ -807,18 +837,19 @@ SetDataFromIndex   |          4         |
     CreatedComp, DestroyingComp: PDynTFTBaseComponent;
     InstructionCode, InstructionOptions: Byte;
     PropertyLength: Byte;
+    //ConvRes: string[20]; //for debugging only
   begin
     NextComponentIndex := -1;
     InstructionSize := 0;
     NextInstruction := ABinaryComponentsData;  //point to the first instruction in ABinaryComponentsData
 
     if {$IFDEF IsDesktop} Assigned(GetDataCallback) {$ELSE} GetDataCallback <> nil {$ENDIF} then
-      GetDataCallback(nil, 0); //reset file pointer
+      GetDataCallback(nil, CRTTI_DataCallBackArg_ResetFilePointer);
 
     CreatedComp := nil;
     repeat
       if {$IFDEF IsDesktop} not Assigned(GetDataCallback) {$ELSE} GetDataCallback = nil {$ENDIF} then //no callback
-        NextInstruction := PDWordArray(DWord(NextInstruction) + InstructionSize shl 2)  //(InstructionSize [DWords]) shl 2  means Bytes
+        NextInstruction := PDWordArray(TPtr(NextInstruction) + InstructionSize shl 2)  //(InstructionSize [DWords]) shl 2  means Bytes
       else
       begin
         NextInstruction := ABinaryComponentsData;   //reset pointer to data whenever there is a callback, because the buffer is the same (ABinaryComponentsData)
@@ -934,6 +965,33 @@ SetDataFromIndex   |          4         |
             GetDataCallback(PDWordArray(TPtr(ABinaryComponentsData) + 4), (InstructionSize - 1) shl 2);  //multiple DWords    ("discount" header and convert to bytes)    -  max 256 bytes
 
           DynTFTComponent_SetProperty(NextInstruction, CreatedComp, HandlerAddresses);
+        end;
+
+        CRTTIInstruction_BuildVersion :
+        begin
+          InstructionSize := 1;
+          if {$IFDEF IsDesktop} Assigned(GetDataCallback) {$ELSE} GetDataCallback <> nil {$ENDIF} then
+          begin
+            ABinaryComponentsData^[1] := 0; //init value
+            GetDataCallback(PDWordArray(TPtr(ABinaryComponentsData) + 4), CRTTI_DataCallBackArg_GetDataBuildNumber);  //one DWord
+
+            (*
+            {$IFDEF IsDesktop} ConvRes := IntToHex(ABinaryComponentsData^[0], 8); {$ELSE} DWordToHexStr(ABinaryComponentsData^[0], ConvRes); {$ENDIF}
+            DynTFTDisplayErrorMessageAtPos(ConvRes, CL_FUCHSIA, 291, 26);
+            {$IFDEF IsDesktop} ConvRes := IntToHex(ABinaryComponentsData^[1], 8); {$ELSE} DWordToHexStr(ABinaryComponentsData^[1], ConvRes); {$ENDIF}
+            DynTFTDisplayErrorMessageAtPos(ConvRes, CL_FUCHSIA, 291, 56);
+            *)
+
+            if (ABinaryComponentsData^[1] and $0000FFFF) <> (ABinaryComponentsData^[0] and $0000FFFF) then      // [0] is the current instruction,  [1] is callback result
+            begin
+              DynTFTDisplayErrorMessage(CRTTIDATAOUTOFDATE, CL_RED);
+              {$IFDEF IsDesktop}
+                raise Exception.Create(CRTTIDATAOUTOFDATE + '.   The .dyntftui build number does not match the generated code. Please regenerate the code and .dyntftui files.  Const BuildNumber: ' + IntToStr(ABinaryComponentsData^[1] and $FFFF) + '  .dyntftui BuildNumber: ' + IntToStr(ABinaryComponentsData^[0] and $FFFF));
+              {$ELSE}
+                IsLastInstruction := True;
+              {$ENDIF}
+            end;
+          end;
         end;
 
         CRTTIInstruction_Header :

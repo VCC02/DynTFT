@@ -113,8 +113,8 @@ procedure DynTFTButton0_OnMouseUpUser(Sender: PPtrRec); //CodegenSym:header
 
 {$IFDEF RTTIREG}
 
-  procedure ExecuteDesignRTTIInstructions_Create(Filter: Byte);
-  procedure ExecuteDesignRTTIInstructions_Destroy(Filter: Byte);
+  procedure ExecuteDesignRTTIInstructions_Create(Filter: Byte);   //If a compiler complains about missing implementation, probably regenerating the output files from DynTFTCodeGen, will fix the issue.
+  procedure ExecuteDesignRTTIInstructions_Destroy(Filter: Byte);  //If a compiler complains about missing implementation, probably regenerating the output files from DynTFTCodeGen, will fix the issue.
 
   {$IFDEF IsDesktop} {$IFDEF DesktopApp_D2006} // Profile: "DesktopApp_D2006"
     // No handlers are used in the array of handlers for profile "DesktopApp_D2006".
@@ -135,6 +135,25 @@ procedure DynTFTButton0_OnMouseUpUser(Sender: PPtrRec); //CodegenSym:header
     // No handlers are used in the array of handlers for profile "DesktopApp_FP".
     procedure LinkHandlers;
   {$ENDIF} {$ENDIF} // IsDesktop
+
+  {$IFDEF IsMCU} {$IFDEF PIC32AppAddrArr} // Profile: "PIC32AppAddrArr"
+      var
+        AllBinHandlers: array[0..6] of TPtr;
+
+      procedure UpdateAllBinHandlerAddressArray;
+
+    procedure LinkHandlers;
+  {$ENDIF} {$ENDIF} // IsMCU
+
+  {$IFDEF IsMCU} {$IFDEF PIC32AppWithSDCard} // Profile: "PIC32AppWithSDCard"
+    // No handlers are used in the array of handlers for profile "PIC32AppWithSDCard".
+    procedure LinkHandlers;
+  {$ENDIF} {$ENDIF} // IsMCU
+
+  {$IFDEF IsMCU} {$IFDEF PIC32AppDWithSDCard} // Profile: "PIC32AppDWithSDCard"
+    // No handlers are used in the array of handlers for profile "PIC32AppDWithSDCard".
+    procedure LinkHandlers;
+  {$ENDIF} {$ENDIF} // IsMCU
 
   {$IFDEF IsDesktop}
       var
@@ -309,6 +328,132 @@ implementation
       {$ENDIF}
     end;
   {$ENDIF} {$ENDIF} // IsDesktop {$IFDEF DesktopApp_FP}
+
+  {$IFDEF IsMCU} {$IFDEF PIC32AppAddrArr} // Profile: "PIC32AppAddrArr"
+      procedure UpdateAllBinHandlerAddressArray;
+      begin
+        AllBinHandlers[0] := TPtr(@Verdana29x32_ItalicUnderLine);
+        AllBinHandlers[1] := TPtr(@DynTFTButton0_OnMouseUpUser);
+        AllBinHandlers[2] := TPtr(@VirtualKeyboard_OnCharKey);
+        AllBinHandlers[3] := TPtr(@VirtualKeyboard_OnSpecialKey);
+        AllBinHandlers[4] := TPtr(@TrackBar1_OnTrackBarChange);
+        AllBinHandlers[5] := TPtr(@TrackBar2_OnTrackBarChange);
+        AllBinHandlers[6] := TPtr(@btnShowMessageBox_OnMouseUpUser);
+      end;
+
+    procedure ExecuteDesignRTTIInstructions_Create(Filter: Byte);
+    var
+      GetDataCallback: {$IFDEF IsDesktop} TDynTFTExecRTTIInstructionCallback {$ELSE} PDynTFTExecRTTIInstructionCallback {$ENDIF};
+    begin
+      GetDataCallback := nil;  // no data provider callback is used. ExecuteRTTIInstructions expects that "C_RTTI_CreateInstructionData" holds all instructions.
+      ExecuteRTTIInstructions(@C_RTTI_CreateInstructionData, @CAllCreatedBinComponents, @AllBinHandlers, Filter, GetDataCallback);
+    end;
+
+    procedure ExecuteDesignRTTIInstructions_Destroy(Filter: Byte);
+    var
+      GetDataCallback: {$IFDEF IsDesktop} TDynTFTExecRTTIInstructionCallback {$ELSE} PDynTFTExecRTTIInstructionCallback {$ENDIF};
+    begin
+      GetDataCallback := nil;  // no data provider callback is used. ExecuteRTTIInstructions expects that "C_RTTI_DestroyInstructionData" holds all instructions.
+      ExecuteRTTIInstructions(@C_RTTI_DestroyInstructionData, @CAllCreatedBinComponents, @AllBinHandlers, Filter, GetDataCallback);
+    end;
+
+    procedure LinkHandlers;
+    {$IFDEF IsMCU}
+      var
+        Dummy: DWord; volatile;
+    {$ENDIF}
+    begin
+      SetFuncCall(DynTFTButton0_OnMouseUpUser);
+      SetFuncCall(VirtualKeyboard_OnCharKey);
+      SetFuncCall(VirtualKeyboard_OnSpecialKey);
+      SetFuncCall(TrackBar1_OnTrackBarChange);
+      SetFuncCall(TrackBar2_OnTrackBarChange);
+      SetFuncCall(btnShowMessageBox_OnMouseUpUser);
+      {$IFDEF IsMCU}
+        Dummy := DWord(@(Verdana29x32_ItalicUnderLine));  // If identifier is not found, please add its unit to DynTFTHandlersAdditionalUnits.inc, using "{$IFDEF IsMCU}" compiler directive.
+      {$ENDIF}
+    end;
+  {$ENDIF} {$ENDIF} // IsMCU {$IFDEF PIC32AppAddrArr}
+
+  {$IFDEF IsMCU} {$IFDEF PIC32AppWithSDCard} // Profile: "PIC32AppWithSDCard"
+    // No handlers are used in the array of handlers for profile "PIC32AppWithSDCard".
+    // It means that all handlers, fonts etc, have addresses in C_RTTI_CreateInstructionData from lst file.
+
+    procedure ExecuteDesignRTTIInstructions_Create(Filter: Byte);
+    var
+      GetDataCallback: {$IFDEF IsDesktop} TDynTFTExecRTTIInstructionCallback {$ELSE} PDynTFTExecRTTIInstructionCallback {$ENDIF};
+      InstructionBuffer: array[0..255] of Byte;
+    begin
+      GetDataCallback := {$IFDEF IsMCU} @ {$ENDIF} RTTICreateCallback;  //user defined callback (see TDynTFTExecRTTIInstructionCallback from DynTFTTypes.pas)
+      ExecuteRTTIInstructions(@InstructionBuffer, @CAllCreatedBinComponents, nil, Filter, GetDataCallback);
+    end;
+
+    procedure ExecuteDesignRTTIInstructions_Destroy(Filter: Byte);
+    var
+      GetDataCallback: {$IFDEF IsDesktop} TDynTFTExecRTTIInstructionCallback {$ELSE} PDynTFTExecRTTIInstructionCallback {$ENDIF};
+      InstructionBuffer: array[0..255] of Byte;
+    begin
+      GetDataCallback := {$IFDEF IsMCU} @ {$ENDIF} RTTIDestroyCallback;  //user defined callback (see TDynTFTExecRTTIInstructionCallback from DynTFTTypes.pas)
+      ExecuteRTTIInstructions(@InstructionBuffer, @CAllCreatedBinComponents, nil, Filter, GetDataCallback);
+    end;
+
+    procedure LinkHandlers;
+    {$IFDEF IsMCU}
+      var
+        Dummy: DWord; volatile;
+    {$ENDIF}
+    begin
+      SetFuncCall(DynTFTButton0_OnMouseUpUser);
+      SetFuncCall(VirtualKeyboard_OnCharKey);
+      SetFuncCall(VirtualKeyboard_OnSpecialKey);
+      SetFuncCall(TrackBar1_OnTrackBarChange);
+      SetFuncCall(TrackBar2_OnTrackBarChange);
+      SetFuncCall(btnShowMessageBox_OnMouseUpUser);
+      {$IFDEF IsMCU}
+        Dummy := DWord(@(Verdana29x32_ItalicUnderLine));  // If identifier is not found, please add its unit to DynTFTHandlersAdditionalUnits.inc, using "{$IFDEF IsMCU}" compiler directive.
+      {$ENDIF}
+    end;
+  {$ENDIF} {$ENDIF} // IsMCU {$IFDEF PIC32AppWithSDCard}
+
+  {$IFDEF IsMCU} {$IFDEF PIC32AppDWithSDCard} // Profile: "PIC32AppDWithSDCard"
+    // No handlers are used in the array of handlers for profile "PIC32AppDWithSDCard".
+    // It means that all handlers, fonts etc, have addresses in C_RTTI_CreateInstructionData from lst file.
+
+    procedure ExecuteDesignRTTIInstructions_Create(Filter: Byte);
+    var
+      GetDataCallback: {$IFDEF IsDesktop} TDynTFTExecRTTIInstructionCallback {$ELSE} PDynTFTExecRTTIInstructionCallback {$ENDIF};
+      InstructionBuffer: array[0..255] of Byte;
+    begin
+      GetDataCallback := {$IFDEF IsMCU} @ {$ENDIF} RTTICreateCallback;  //user defined callback (see TDynTFTExecRTTIInstructionCallback from DynTFTTypes.pas)
+      ExecuteRTTIInstructions(@InstructionBuffer, @CAllCreatedBinComponents, nil, Filter, GetDataCallback);
+    end;
+
+    procedure ExecuteDesignRTTIInstructions_Destroy(Filter: Byte);
+    var
+      GetDataCallback: {$IFDEF IsDesktop} TDynTFTExecRTTIInstructionCallback {$ELSE} PDynTFTExecRTTIInstructionCallback {$ENDIF};
+      InstructionBuffer: array[0..255] of Byte;
+    begin
+      GetDataCallback := {$IFDEF IsMCU} @ {$ENDIF} RTTIDestroyCallback;  //user defined callback (see TDynTFTExecRTTIInstructionCallback from DynTFTTypes.pas)
+      ExecuteRTTIInstructions(@InstructionBuffer, @CAllCreatedBinComponents, nil, Filter, GetDataCallback);
+    end;
+
+    procedure LinkHandlers;
+    {$IFDEF IsMCU}
+      var
+        Dummy: DWord; volatile;
+    {$ENDIF}
+    begin
+      SetFuncCall(DynTFTButton0_OnMouseUpUser);
+      SetFuncCall(VirtualKeyboard_OnCharKey);
+      SetFuncCall(VirtualKeyboard_OnSpecialKey);
+      SetFuncCall(TrackBar1_OnTrackBarChange);
+      SetFuncCall(TrackBar2_OnTrackBarChange);
+      SetFuncCall(btnShowMessageBox_OnMouseUpUser);
+      {$IFDEF IsMCU}
+        Dummy := DWord(@(Verdana29x32_ItalicUnderLine));  // If identifier is not found, please add its unit to DynTFTHandlersAdditionalUnits.inc, using "{$IFDEF IsMCU}" compiler directive.
+      {$ENDIF}
+    end;
+  {$ENDIF} {$ENDIF} // IsMCU {$IFDEF PIC32AppDWithSDCard}
 
 
   {$IFDEF IsDesktop}
@@ -595,10 +740,6 @@ procedure PageControl1_OnChange(Sender: PPtrRec); //CodegenSym:handler
 var
   i: Integer;
 begin //CodegenSym:handler:begin
-  DynTFT_Set_Pen(DynTFTAllComponentsContainer[PageControl1^.ActiveIndex].ScreenColor, 1);
-  DynTFT_Set_Brush(1, DynTFTAllComponentsContainer[PageControl1^.ActiveIndex].ScreenColor, 0, 0, 0, 0);
-  DynTFT_Rectangle(0, 21, TFT_DISP_WIDTH, TFT_DISP_HEIGHT);
-
   {$IFDEF IsDesktop}
     DynTFT_DebugConsole('--------------------------- changing tab to ' + IntToStr(PageControl1^.ActiveIndex + 1));
   {$ENDIF}
@@ -621,6 +762,10 @@ begin //CodegenSym:handler:begin
     5: CreateGUIGrp_Sixth;
   end;
 
+  DynTFT_Set_Pen(DynTFTAllComponentsContainer[PageControl1^.ActiveIndex + 1].ScreenColor, 1);
+  DynTFT_Set_Brush(1, DynTFTAllComponentsContainer[PageControl1^.ActiveIndex + 1].ScreenColor, 0, 0, 0, 0);
+  DynTFT_Rectangle(0, 21, TFT_DISP_WIDTH, TFT_DISP_HEIGHT);
+
   for i := 1 to PageControl1^.PageCount {- 1} do
   begin
     DynTFTAllComponentsContainer[i].Active := PageControl1^.ActiveIndex = i - 1;
@@ -628,6 +773,19 @@ begin //CodegenSym:handler:begin
       DynTFTRepaintScreenComponents(i, CREPAINTONSTARTUP, nil);
   end;
 
+  if PageControl1^.ActiveIndex = 0 then
+  begin
+    lblRTTIDataSrcInfo^.Caption := 'DataSrc ';
+    
+    {$IFDEF UseSDCard}
+      if (C_CreateDynTFTUI_DataSourceOption and C_DestroyDynTFTUI_DataSourceOption) = 1 then
+        lblRTTIDataSrcInfo^.Caption := lblRTTIDataSrcInfo^.Caption + '.dyntftui'
+      else
+    {$ENDIF}
+      lblRTTIDataSrcInfo^.Caption := lblRTTIDataSrcInfo^.Caption + 'CodeConst';
+
+    DynTFTDrawLabel(lblRTTIDataSrcInfo, True);  
+  end;
 end; //CodegenSym:handler:end
 
 

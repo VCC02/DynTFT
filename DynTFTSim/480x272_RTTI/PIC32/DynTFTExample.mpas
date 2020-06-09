@@ -1,7 +1,8 @@
 program DynTFTExample;
 
 uses
-  DynTFTMessageBox, ExternalResources, RTTIDataProvider;
+  DynTFTMessageBox, ExternalResources, {$IFDEF UseSDCard} RTTIDataProvider, {$ENDIF}
+  DynTFTBaseDrawing, DynTFTUtils;
   
 const HEAP_START: DWord = $A0000FDC;  //make sure this is a valid address and is DWord aligned !
 const HEAP_SIZE: DWord = 20000;   //Make sure enough memory is allocated. See the desktop application (simulator) for guidance.
@@ -38,6 +39,50 @@ var
   
   RTTI_Create_Handle: Integer;
   RTTI_Destroy_Handle: Integer;
+  
+  
+procedure DisplayDebugMessage(TextColor: DWord; var ErrStr: string; YOffset: Integer);
+begin
+  DynTFT_Set_Pen(CL_RED, 1);
+  DynTFT_Set_Brush(1, $FFFFFF, 0, 0, 0, 0);
+  DynTFT_Rectangle(250, 30 + YOffset, 470, 50 + YOffset);
+
+  DynTFT_Set_Font(@TFT_defaultFont, TextColor, 0);
+
+  DynTFT_Write_Text(ErrStr, 252, 32 + YOffset);
+end;
+  
+  
+procedure GenExcept;
+var
+  i: Integer;
+  Cause, Address: DWord;
+  CauseStr, AddressStr: array[20] of Char;
+begin
+  Cause := CP0_GET(CP0_CAUSE);
+  //Cause := (Cause and $7C) shr 2;
+  Address := CP0_GET(CP0_EPC);
+
+  DisplayDebugMessage(CL_RED, 'Exception', -10);
+
+  {
+  LongWordToHex(Cause, CauseStr);
+  LongWordToHex(Address, AddressStr);
+  }
+  
+  DisplayDebugMessage(CL_BLUE, 'Verify with DynTFTCodeGen ', 60);
+  DisplayDebugMessage(CL_BLUE, 'if handler addresses are sync.', 80);
+
+  LongIntToStr(Cause, CauseStr); //CauseStr := IntToStrClone(Cause); //DWordToHexClone(Cause);
+  DisplayDebugMessage(CL_RED, 'Cause: ' + CauseStr, 10);
+
+  LongIntToStr(Address, AddressStr); //AddressStr := IntToStrClone(Address); //DWordToHexClone(Address);
+  DisplayDebugMessage(CL_RED, 'Address: ' + AddressStr, 30);
+
+  repeat
+  until False;
+end;
+
 
 procedure PMPWaitBusy();
 begin
@@ -198,34 +243,66 @@ begin
     Result := STMPE610_OK;
 end;
 
-
-procedure InitSPI1_For_uSD;
-var
-  err: int8; volatile;
-  cnt: Byte;
-begin
-  SPI1CON.15 := 0; //Disable SPI
-  SPI1_Init_Advanced(_SPI_MASTER, _SPI_8_BIT, 80, _SPI_SS_DISABLE, _SPI_DATA_SAMPLE_END, _SPI_CLK_IDLE_HIGH, _SPI_ACTIVE_2_IDLE);
-
-  FAT32_Init;
-
-  cnt := 0;
-  while err < 0 do //  ...retry each second
+{$IFDEF UseSDCard}
+  procedure InitSPI1_For_uSD;
+  var
+    err: {$IFDEF UseFAT32D} Boolean; {$ELSE} int8; {$ENDIF} volatile;
+    cnt: Byte;
   begin
-    //BlinkTheLED;
+    SPI1CON.15 := 0; //Disable SPI
+    SPI1_Init_Advanced(_SPI_MASTER, _SPI_8_BIT, 80, _SPI_SS_DISABLE, _SPI_DATA_SAMPLE_END, _SPI_CLK_IDLE_HIGH, _SPI_ACTIVE_2_IDLE);
 
-    err := FAT32_Init;
+    cnt := 0;
 
-    Delay_ms(1000);
-    Inc(cnt);
-    if cnt = 5 then
-      Exit;
+    {$IFDEF UseFAT32D}
+      err := Mmc_Init;
+      while not err do //  ...retry each second
+      begin
+        err := FAT32_Init;
+
+        Delay_ms(1000);
+        Inc(cnt);
+        if cnt = 5 then
+          Exit;
+      end;
+
+      FAT32_Init;
+
+    {$ELSE}
+
+      err := FAT32_Init;
+      while err < 0 do //  ...retry each second
+      begin
+        err := FAT32_Init;
+
+        Delay_ms(1000);
+        Inc(cnt);
+        if cnt = 5 then
+          Exit;
+      end;
+    {$ENDIF}
+
+    SPI1CON.15 := 0; //Disable SPI
+    SPI1_Init_Advanced(_SPI_MASTER, _SPI_8_BIT, 4, _SPI_SS_DISABLE, _SPI_DATA_SAMPLE_END, _SPI_CLK_IDLE_HIGH, _SPI_ACTIVE_2_IDLE);
   end;
 
-  SPI1CON.15 := 0; //Disable SPI
-  SPI1_Init_Advanced(_SPI_MASTER, _SPI_8_BIT, 4, _SPI_SS_DISABLE, _SPI_DATA_SAMPLE_END, _SPI_CLK_IDLE_HIGH, _SPI_ACTIVE_2_IDLE);
-end;
+  {$IFDEF UseFAT32D}
+    function Fat32_Dev_Read_Sector(Sector: DWord; var Buffer: array[512] of byte): Boolean; // returns true when successful
+    begin
+      Result := Mmc_Read_Sector(Sector, Buffer) = 0;
+    end;
 
+    function Fat32_Dev_Write_Sector(Sector: DWord; var Buffer: array[512] of byte): boolean; // returns true when successful
+    begin
+      Result := Mmc_Write_Sector(Sector, Buffer) = 0;
+    end;
+
+    function Fat32_Dev_Capacity_Sectors: DWord; // medium size in sectors (used by "Fat32_Format")
+    begin
+      Result := 0;
+    end;
+  {$ENDIF}
+{$ENDIF}
 
 
 procedure MainLoopIteration;
@@ -277,28 +354,19 @@ begin
                  
   TFT_Set_Brush(1, CL_WHITE, 0, 0, 0, 0);
   TFT_Rectangle(0, 0, 480, 272);
-  
-  ////////////////////////////////////////////////// Uncomment if using dyntftui files
-  (*
-  InitSPI1_For_uSD;
-  {$IFDEF RTTIREG}
-    RTTI_Create_Handle := -1;
-    RTTI_Destroy_Handle := -1;
-    OpenRTTIFiles;
+
+  {$IFDEF UseSDCard}
+    InitSPI1_For_uSD;
+    {$IFDEF RTTIREG}
+      RTTI_Create_Handle := -1;
+      RTTI_Destroy_Handle := -1;
+      OpenRTTIFiles;
+    {$ENDIF}
   {$ENDIF}
-  *)
-  //////////////////////////////////////////////////
   
   DynTFT_GUI_Start;
   DynTFTSetScreenSizeForMessageBox(TFT_DISP_WIDTH, TFT_DISP_HEIGHT);
   DynTFTMessageBoxMainLoopHandler := @HandleMessageBox; //use this if you want modal MessageBox
-              {
-  IntToStr(TPConstsStruct.X_Min, AText);   TFT_Write_Text(AText, 330, 10);
-  IntToStr(TPConstsStruct.X_Max, AText);   TFT_Write_Text(AText, 330, 30);
-  IntToStr(TPConstsStruct.Y_Min, AText);   TFT_Write_Text(AText, 330, 50);
-  IntToStr(TPConstsStruct.Y_Max, AText);   TFT_Write_Text(AText, 330, 70);
-  IntToStr(TPConstsStruct.Rotate, AText);  TFT_Write_Text(AText, 330, 90);
-                   }
 
   repeat
     MainLoopIteration;

@@ -80,7 +80,7 @@ procedure DrawGUI; //Made available for debugging or various performance improve
 implementation
 
 
-// Project name: GUI_Example_480x272.dyntftcg //Do not delete or modify this line!
+// Project name: GUI_Example_480x272_RTTI.dyntftcg //Do not delete or modify this line!
 
 procedure SetScreenActivity;
 var
@@ -98,7 +98,7 @@ begin
   DynTFTAllComponentsContainer[1].ScreenColor := CL_DynTFTScreen_Background;
   DynTFTAllComponentsContainer[2].ScreenColor := CL_DynTFTScreen_Background;
   DynTFTAllComponentsContainer[3].ScreenColor := CL_DynTFTScreen_Background;
-  DynTFTAllComponentsContainer[4].ScreenColor := CL_DynTFTScreen_Background;
+  DynTFTAllComponentsContainer[4].ScreenColor := {$IFDEF IsDesktop} $0079FFBC {$ELSE} $BFEF {$ENDIF};
   DynTFTAllComponentsContainer[5].ScreenColor := CL_DynTFTScreen_Background;
   DynTFTAllComponentsContainer[6].ScreenColor := CL_DynTFTScreen_Background;
 
@@ -151,6 +151,12 @@ begin
   {$ELSE}
     PageControl1^.OnChange := @PageControl1_OnChange;
   {$ENDIF}
+
+
+  lblRTTIDataSrcInfo := DynTFTLabel_Create(0, 291, 3, 125, 20);
+  lblRTTIDataSrcInfo^.Caption := C_lblRTTIDataSrcInfo_Caption; //'DataSrc'
+  lblRTTIDataSrcInfo^.Color := {$IFDEF IsDesktop} $00FF8000 {$ELSE} $041F {$ENDIF};
+  lblRTTIDataSrcInfo^.Font_Color := CL_WHITE;
 
 end;
 
@@ -992,6 +998,558 @@ end;
     end;
   {$ENDIF} {$ENDIF} // profile: DesktopApp_FP {$IFDEF DesktopApp_FP}
 
+  {$IFDEF IsMCU} {$IFDEF PIC32AppAddrArr} // profile: PIC32AppAddrArr
+    function DynTFTButton_GetPropertyAddress(AComp: PDynTFTBaseComponent; PropertyIndex: Byte): PPtrRec;
+    var
+      ComponentProperties: array[0..5] of PPtrRec;
+      AComponent: PDynTFTButton;
+    begin
+      AComponent := PDynTFTButton(TPtrRec(AComp));
+      ComponentProperties[0] := @((AComponent^.Caption{$IFDEF IsDesktop}[1]{$ENDIF}));
+      ComponentProperties[1] := @((AComponent^.Font_Color));
+      ComponentProperties[2] := @((AComponent^.BaseProps.Enabled));
+      ComponentProperties[3] := @((AComponent^.BaseProps.CanHandleMessages));
+      ComponentProperties[4] := @((AComponent^.ActiveFont));
+      ComponentProperties[5] := {$IFDEF IsDesktop}PPtrRec(TPtr {$ELSE} @( {$ENDIF}(AComponent^.BaseProps.OnMouseUpUser));
+      Result := ComponentProperties[PropertyIndex];
+    end;
+
+    function DynTFTArrowButton_GetPropertyAddress(AComp: PDynTFTBaseComponent; PropertyIndex: Byte): PPtrRec;
+    var
+      ComponentProperties: array[0..1] of PPtrRec;
+      AComponent: PDynTFTArrowButton;
+    begin
+      AComponent := PDynTFTArrowButton(TPtrRec(AComp));
+      ComponentProperties[0] := @((AComponent^.Color));
+      ComponentProperties[1] := @((AComponent^.ArrowDir));
+      Result := ComponentProperties[PropertyIndex];
+    end;
+
+    function DynTFTPanel_GetPropertyAddress(AComp: PDynTFTBaseComponent; PropertyIndex: Byte): PPtrRec;
+    var
+      ComponentProperties: array[0..3] of PPtrRec;
+      AComponent: PDynTFTPanel;
+    begin
+      AComponent := PDynTFTPanel(TPtrRec(AComp));
+      ComponentProperties[0] := @((AComponent^.BaseProps.CanHandleMessages));
+      ComponentProperties[1] := @((AComponent^.Caption{$IFDEF IsDesktop}[1]{$ENDIF}));
+      ComponentProperties[2] := @((AComponent^.Color));
+      ComponentProperties[3] := @((AComponent^.Font_Color));
+      Result := ComponentProperties[PropertyIndex];
+    end;
+
+    function DynTFTCheckBox_GetPropertyAddress(AComp: PDynTFTBaseComponent; PropertyIndex: Byte): PPtrRec;
+    var
+      ComponentProperties: array[0..3] of PPtrRec;
+      AComponent: PDynTFTCheckBox;
+    begin
+      AComponent := PDynTFTCheckBox(TPtrRec(AComp));
+      ComponentProperties[0] := @((AComponent^.Caption{$IFDEF IsDesktop}[1]{$ENDIF}));
+      ComponentProperties[1] := @((AComponent^.Color));
+      ComponentProperties[2] := @((AComponent^.Font_Color));
+      ComponentProperties[3] := @((AComponent^.BaseProps.Enabled));
+      Result := ComponentProperties[PropertyIndex];
+    end;
+
+    function DynTFTScrollBar_GetPropertyAddress(AComp: PDynTFTBaseComponent; PropertyIndex: Byte): PPtrRec;
+    var
+      ComponentProperties: array[0..0] of PPtrRec;
+      AComponent: PDynTFTScrollBar;
+    begin
+      AComponent := PDynTFTScrollBar(TPtrRec(AComp));
+      ComponentProperties[0] := @((AComponent^.Direction));
+      Result := ComponentProperties[PropertyIndex];
+    end;
+
+    function DynTFTListBox_GetPropertyAddress(AComp: PDynTFTBaseComponent; PropertyIndex: Byte): PPtrRec;
+    var
+      ComponentProperties: array[0..12] of PPtrRec;
+      AComponent: PDynTFTListBox;
+    begin
+      AComponent := PDynTFTListBox(TPtrRec(AComp));
+      ComponentProperties[0] := @((AComponent^.Items^.BackgroundColor));
+      ComponentProperties[1] := @((AComponent^.Items^.Strings[0]{$IFDEF IsDesktop}[1]{$ENDIF}));
+      ComponentProperties[2] := @((AComponent^.Items^.Strings[1]{$IFDEF IsDesktop}[1]{$ENDIF}));
+      ComponentProperties[3] := @((AComponent^.Items^.Strings[2]{$IFDEF IsDesktop}[1]{$ENDIF}));
+      ComponentProperties[4] := @((AComponent^.Items^.Strings[3]{$IFDEF IsDesktop}[1]{$ENDIF}));
+      ComponentProperties[5] := @((AComponent^.Items^.Strings[4]{$IFDEF IsDesktop}[1]{$ENDIF}));
+      ComponentProperties[6] := @((AComponent^.Items^.Strings[5]{$IFDEF IsDesktop}[1]{$ENDIF}));
+      ComponentProperties[7] := @((AComponent^.Items^.Strings[6]{$IFDEF IsDesktop}[1]{$ENDIF}));
+      ComponentProperties[8] := @((AComponent^.Items^.Strings[7]{$IFDEF IsDesktop}[1]{$ENDIF}));
+      ComponentProperties[9] := @((AComponent^.Items^.Strings[8]{$IFDEF IsDesktop}[1]{$ENDIF}));
+      ComponentProperties[10] := @((AComponent^.Items^.Strings[9]{$IFDEF IsDesktop}[1]{$ENDIF}));
+      ComponentProperties[11] := @((AComponent^.Items^.ItemHeight));
+      ComponentProperties[12] := @((AComponent^.Items^.Count));
+      Result := ComponentProperties[PropertyIndex];
+    end;
+
+    function DynTFTLabel_GetPropertyAddress(AComp: PDynTFTBaseComponent; PropertyIndex: Byte): PPtrRec;
+    var
+      ComponentProperties: array[0..3] of PPtrRec;
+      AComponent: PDynTFTLabel;
+    begin
+      AComponent := PDynTFTLabel(TPtrRec(AComp));
+      ComponentProperties[0] := @((AComponent^.BaseProps.CanHandleMessages));
+      ComponentProperties[1] := @((AComponent^.Caption{$IFDEF IsDesktop}[1]{$ENDIF}));
+      ComponentProperties[2] := @((AComponent^.Color));
+      ComponentProperties[3] := @((AComponent^.Font_Color));
+      Result := ComponentProperties[PropertyIndex];
+    end;
+
+    function DynTFTVirtualKeyboard_GetPropertyAddress(AComp: PDynTFTBaseComponent; PropertyIndex: Byte): PPtrRec;
+    var
+      ComponentProperties: array[0..1] of PPtrRec;
+      AComponent: PDynTFTVirtualKeyboard;
+    begin
+      AComponent := PDynTFTVirtualKeyboard(TPtrRec(AComp));
+      ComponentProperties[0] := {$IFDEF IsDesktop}PPtrRec(TPtr {$ELSE} @( {$ENDIF}(AComponent^.OnCharKey));
+      ComponentProperties[1] := {$IFDEF IsDesktop}PPtrRec(TPtr {$ELSE} @( {$ENDIF}(AComponent^.OnSpecialKey));
+      Result := ComponentProperties[PropertyIndex];
+    end;
+
+    function DynTFTEdit_GetPropertyAddress(AComp: PDynTFTBaseComponent; PropertyIndex: Byte): PPtrRec;
+    var
+      ComponentProperties: array[0..0] of PPtrRec;
+      AComponent: PDynTFTEdit;
+    begin
+      AComponent := PDynTFTEdit(TPtrRec(AComp));
+      ComponentProperties[0] := @((AComponent^.Text{$IFDEF IsDesktop}[1]{$ENDIF}));
+      Result := ComponentProperties[PropertyIndex];
+    end;
+
+    function DynTFTComboBox_GetPropertyAddress(AComp: PDynTFTBaseComponent; PropertyIndex: Byte): PPtrRec;
+    var
+      ComponentProperties: array[0..14] of PPtrRec;
+      AComponent: PDynTFTComboBox;
+    begin
+      AComponent := PDynTFTComboBox(TPtrRec(AComp));
+      ComponentProperties[0] := @((AComponent^.ListBox^.Items^.BackgroundColor));
+      ComponentProperties[1] := @((AComponent^.ListBox^.Items^.Strings[0]{$IFDEF IsDesktop}[1]{$ENDIF}));
+      ComponentProperties[2] := @((AComponent^.ListBox^.Items^.Strings[1]{$IFDEF IsDesktop}[1]{$ENDIF}));
+      ComponentProperties[3] := @((AComponent^.ListBox^.Items^.Strings[2]{$IFDEF IsDesktop}[1]{$ENDIF}));
+      ComponentProperties[4] := @((AComponent^.ListBox^.Items^.Strings[3]{$IFDEF IsDesktop}[1]{$ENDIF}));
+      ComponentProperties[5] := @((AComponent^.ListBox^.Items^.Strings[4]{$IFDEF IsDesktop}[1]{$ENDIF}));
+      ComponentProperties[6] := @((AComponent^.ListBox^.Items^.Strings[5]{$IFDEF IsDesktop}[1]{$ENDIF}));
+      ComponentProperties[7] := @((AComponent^.ListBox^.Items^.Strings[6]{$IFDEF IsDesktop}[1]{$ENDIF}));
+      ComponentProperties[8] := @((AComponent^.ListBox^.Items^.Strings[7]{$IFDEF IsDesktop}[1]{$ENDIF}));
+      ComponentProperties[9] := @((AComponent^.ListBox^.Items^.Strings[8]{$IFDEF IsDesktop}[1]{$ENDIF}));
+      ComponentProperties[10] := @((AComponent^.ListBox^.Items^.Strings[9]{$IFDEF IsDesktop}[1]{$ENDIF}));
+      ComponentProperties[11] := @((AComponent^.ListBox^.Items^.ItemHeight));
+      ComponentProperties[12] := @((AComponent^.Edit^.Color));
+      ComponentProperties[13] := @((AComponent^.Editable));
+      ComponentProperties[14] := @((AComponent^.ListBox^.Items^.Count));
+      Result := ComponentProperties[PropertyIndex];
+    end;
+
+    function DynTFTTrackBar_GetPropertyAddress(AComp: PDynTFTBaseComponent; PropertyIndex: Byte): PPtrRec;
+    var
+      ComponentProperties: array[0..2] of PPtrRec;
+      AComponent: PDynTFTTrackBar;
+    begin
+      AComponent := PDynTFTTrackBar(TPtrRec(AComp));
+      ComponentProperties[0] := @((AComponent^.Position));
+      ComponentProperties[1] := {$IFDEF IsDesktop}PPtrRec(TPtr {$ELSE} @( {$ENDIF}(AComponent^.OnTrackBarChange));
+      ComponentProperties[2] := @((AComponent^.Orientation));
+      Result := ComponentProperties[PropertyIndex];
+    end;
+
+    function DynTFTProgressBar_GetPropertyAddress(AComp: PDynTFTBaseComponent; PropertyIndex: Byte): PPtrRec;
+    var
+      ComponentProperties: array[0..2] of PPtrRec;
+      AComponent: PDynTFTProgressBar;
+    begin
+      AComponent := PDynTFTProgressBar(TPtrRec(AComp));
+      ComponentProperties[0] := @((AComponent^.BaseProps.CanHandleMessages));
+      ComponentProperties[1] := @((AComponent^.Position));
+      ComponentProperties[2] := @((AComponent^.Orientation));
+      Result := ComponentProperties[PropertyIndex];
+    end;
+
+    procedure UpdatePropertyAddress_Registry;
+    begin
+      DynTFTRegisteredComponents[1].CompGetPropertyAddress := {$IFDEF IsDesktop} DynTFTButton_GetPropertyAddress {$ELSE} @DynTFTButton_GetPropertyAddress {$ENDIF};
+      DynTFTRegisteredComponents[2].CompGetPropertyAddress := {$IFDEF IsDesktop} DynTFTArrowButton_GetPropertyAddress {$ELSE} @DynTFTArrowButton_GetPropertyAddress {$ENDIF};
+      DynTFTRegisteredComponents[3].CompGetPropertyAddress := {$IFDEF IsDesktop} DynTFTPanel_GetPropertyAddress {$ELSE} @DynTFTPanel_GetPropertyAddress {$ENDIF};
+      DynTFTRegisteredComponents[4].CompGetPropertyAddress := {$IFDEF IsDesktop} DynTFTCheckBox_GetPropertyAddress {$ELSE} @DynTFTCheckBox_GetPropertyAddress {$ENDIF};
+      DynTFTRegisteredComponents[5].CompGetPropertyAddress := {$IFDEF IsDesktop} DynTFTScrollBar_GetPropertyAddress {$ELSE} @DynTFTScrollBar_GetPropertyAddress {$ENDIF};
+      DynTFTRegisteredComponents[7].CompGetPropertyAddress := {$IFDEF IsDesktop} DynTFTListBox_GetPropertyAddress {$ELSE} @DynTFTListBox_GetPropertyAddress {$ENDIF};
+      DynTFTRegisteredComponents[8].CompGetPropertyAddress := {$IFDEF IsDesktop} DynTFTLabel_GetPropertyAddress {$ELSE} @DynTFTLabel_GetPropertyAddress {$ENDIF};
+      DynTFTRegisteredComponents[15].CompGetPropertyAddress := {$IFDEF IsDesktop} DynTFTVirtualKeyboard_GetPropertyAddress {$ELSE} @DynTFTVirtualKeyboard_GetPropertyAddress {$ENDIF};
+      DynTFTRegisteredComponents[13].CompGetPropertyAddress := {$IFDEF IsDesktop} DynTFTEdit_GetPropertyAddress {$ELSE} @DynTFTEdit_GetPropertyAddress {$ENDIF};
+      DynTFTRegisteredComponents[16].CompGetPropertyAddress := {$IFDEF IsDesktop} DynTFTComboBox_GetPropertyAddress {$ELSE} @DynTFTComboBox_GetPropertyAddress {$ENDIF};
+      DynTFTRegisteredComponents[17].CompGetPropertyAddress := {$IFDEF IsDesktop} DynTFTTrackBar_GetPropertyAddress {$ELSE} @DynTFTTrackBar_GetPropertyAddress {$ENDIF};
+      DynTFTRegisteredComponents[18].CompGetPropertyAddress := {$IFDEF IsDesktop} DynTFTProgressBar_GetPropertyAddress {$ELSE} @DynTFTProgressBar_GetPropertyAddress {$ENDIF};
+    end;
+  {$ENDIF} {$ENDIF} // profile: PIC32AppAddrArr {$IFDEF PIC32AppAddrArr}
+
+  {$IFDEF IsMCU} {$IFDEF PIC32AppWithSDCard} // profile: PIC32AppWithSDCard
+    function DynTFTButton_GetPropertyAddress(AComp: PDynTFTBaseComponent; PropertyIndex: Byte): PPtrRec;
+    var
+      ComponentProperties: array[0..5] of PPtrRec;
+      AComponent: PDynTFTButton;
+    begin
+      AComponent := PDynTFTButton(TPtrRec(AComp));
+      ComponentProperties[0] := @((AComponent^.Caption{$IFDEF IsDesktop}[1]{$ENDIF}));
+      ComponentProperties[1] := @((AComponent^.Font_Color));
+      ComponentProperties[2] := @((AComponent^.BaseProps.Enabled));
+      ComponentProperties[3] := @((AComponent^.BaseProps.CanHandleMessages));
+      ComponentProperties[4] := @((AComponent^.ActiveFont));
+      ComponentProperties[5] := {$IFDEF IsDesktop}PPtrRec(TPtr {$ELSE} @( {$ENDIF}(AComponent^.BaseProps.OnMouseUpUser));
+      Result := ComponentProperties[PropertyIndex];
+    end;
+
+    function DynTFTArrowButton_GetPropertyAddress(AComp: PDynTFTBaseComponent; PropertyIndex: Byte): PPtrRec;
+    var
+      ComponentProperties: array[0..1] of PPtrRec;
+      AComponent: PDynTFTArrowButton;
+    begin
+      AComponent := PDynTFTArrowButton(TPtrRec(AComp));
+      ComponentProperties[0] := @((AComponent^.Color));
+      ComponentProperties[1] := @((AComponent^.ArrowDir));
+      Result := ComponentProperties[PropertyIndex];
+    end;
+
+    function DynTFTPanel_GetPropertyAddress(AComp: PDynTFTBaseComponent; PropertyIndex: Byte): PPtrRec;
+    var
+      ComponentProperties: array[0..3] of PPtrRec;
+      AComponent: PDynTFTPanel;
+    begin
+      AComponent := PDynTFTPanel(TPtrRec(AComp));
+      ComponentProperties[0] := @((AComponent^.BaseProps.CanHandleMessages));
+      ComponentProperties[1] := @((AComponent^.Caption{$IFDEF IsDesktop}[1]{$ENDIF}));
+      ComponentProperties[2] := @((AComponent^.Color));
+      ComponentProperties[3] := @((AComponent^.Font_Color));
+      Result := ComponentProperties[PropertyIndex];
+    end;
+
+    function DynTFTCheckBox_GetPropertyAddress(AComp: PDynTFTBaseComponent; PropertyIndex: Byte): PPtrRec;
+    var
+      ComponentProperties: array[0..3] of PPtrRec;
+      AComponent: PDynTFTCheckBox;
+    begin
+      AComponent := PDynTFTCheckBox(TPtrRec(AComp));
+      ComponentProperties[0] := @((AComponent^.Caption{$IFDEF IsDesktop}[1]{$ENDIF}));
+      ComponentProperties[1] := @((AComponent^.Color));
+      ComponentProperties[2] := @((AComponent^.Font_Color));
+      ComponentProperties[3] := @((AComponent^.BaseProps.Enabled));
+      Result := ComponentProperties[PropertyIndex];
+    end;
+
+    function DynTFTScrollBar_GetPropertyAddress(AComp: PDynTFTBaseComponent; PropertyIndex: Byte): PPtrRec;
+    var
+      ComponentProperties: array[0..0] of PPtrRec;
+      AComponent: PDynTFTScrollBar;
+    begin
+      AComponent := PDynTFTScrollBar(TPtrRec(AComp));
+      ComponentProperties[0] := @((AComponent^.Direction));
+      Result := ComponentProperties[PropertyIndex];
+    end;
+
+    function DynTFTListBox_GetPropertyAddress(AComp: PDynTFTBaseComponent; PropertyIndex: Byte): PPtrRec;
+    var
+      ComponentProperties: array[0..12] of PPtrRec;
+      AComponent: PDynTFTListBox;
+    begin
+      AComponent := PDynTFTListBox(TPtrRec(AComp));
+      ComponentProperties[0] := @((AComponent^.Items^.BackgroundColor));
+      ComponentProperties[1] := @((AComponent^.Items^.Strings[0]{$IFDEF IsDesktop}[1]{$ENDIF}));
+      ComponentProperties[2] := @((AComponent^.Items^.Strings[1]{$IFDEF IsDesktop}[1]{$ENDIF}));
+      ComponentProperties[3] := @((AComponent^.Items^.Strings[2]{$IFDEF IsDesktop}[1]{$ENDIF}));
+      ComponentProperties[4] := @((AComponent^.Items^.Strings[3]{$IFDEF IsDesktop}[1]{$ENDIF}));
+      ComponentProperties[5] := @((AComponent^.Items^.Strings[4]{$IFDEF IsDesktop}[1]{$ENDIF}));
+      ComponentProperties[6] := @((AComponent^.Items^.Strings[5]{$IFDEF IsDesktop}[1]{$ENDIF}));
+      ComponentProperties[7] := @((AComponent^.Items^.Strings[6]{$IFDEF IsDesktop}[1]{$ENDIF}));
+      ComponentProperties[8] := @((AComponent^.Items^.Strings[7]{$IFDEF IsDesktop}[1]{$ENDIF}));
+      ComponentProperties[9] := @((AComponent^.Items^.Strings[8]{$IFDEF IsDesktop}[1]{$ENDIF}));
+      ComponentProperties[10] := @((AComponent^.Items^.Strings[9]{$IFDEF IsDesktop}[1]{$ENDIF}));
+      ComponentProperties[11] := @((AComponent^.Items^.ItemHeight));
+      ComponentProperties[12] := @((AComponent^.Items^.Count));
+      Result := ComponentProperties[PropertyIndex];
+    end;
+
+    function DynTFTLabel_GetPropertyAddress(AComp: PDynTFTBaseComponent; PropertyIndex: Byte): PPtrRec;
+    var
+      ComponentProperties: array[0..3] of PPtrRec;
+      AComponent: PDynTFTLabel;
+    begin
+      AComponent := PDynTFTLabel(TPtrRec(AComp));
+      ComponentProperties[0] := @((AComponent^.BaseProps.CanHandleMessages));
+      ComponentProperties[1] := @((AComponent^.Caption{$IFDEF IsDesktop}[1]{$ENDIF}));
+      ComponentProperties[2] := @((AComponent^.Color));
+      ComponentProperties[3] := @((AComponent^.Font_Color));
+      Result := ComponentProperties[PropertyIndex];
+    end;
+
+    function DynTFTVirtualKeyboard_GetPropertyAddress(AComp: PDynTFTBaseComponent; PropertyIndex: Byte): PPtrRec;
+    var
+      ComponentProperties: array[0..1] of PPtrRec;
+      AComponent: PDynTFTVirtualKeyboard;
+    begin
+      AComponent := PDynTFTVirtualKeyboard(TPtrRec(AComp));
+      ComponentProperties[0] := {$IFDEF IsDesktop}PPtrRec(TPtr {$ELSE} @( {$ENDIF}(AComponent^.OnCharKey));
+      ComponentProperties[1] := {$IFDEF IsDesktop}PPtrRec(TPtr {$ELSE} @( {$ENDIF}(AComponent^.OnSpecialKey));
+      Result := ComponentProperties[PropertyIndex];
+    end;
+
+    function DynTFTEdit_GetPropertyAddress(AComp: PDynTFTBaseComponent; PropertyIndex: Byte): PPtrRec;
+    var
+      ComponentProperties: array[0..0] of PPtrRec;
+      AComponent: PDynTFTEdit;
+    begin
+      AComponent := PDynTFTEdit(TPtrRec(AComp));
+      ComponentProperties[0] := @((AComponent^.Text{$IFDEF IsDesktop}[1]{$ENDIF}));
+      Result := ComponentProperties[PropertyIndex];
+    end;
+
+    function DynTFTComboBox_GetPropertyAddress(AComp: PDynTFTBaseComponent; PropertyIndex: Byte): PPtrRec;
+    var
+      ComponentProperties: array[0..14] of PPtrRec;
+      AComponent: PDynTFTComboBox;
+    begin
+      AComponent := PDynTFTComboBox(TPtrRec(AComp));
+      ComponentProperties[0] := @((AComponent^.ListBox^.Items^.BackgroundColor));
+      ComponentProperties[1] := @((AComponent^.ListBox^.Items^.Strings[0]{$IFDEF IsDesktop}[1]{$ENDIF}));
+      ComponentProperties[2] := @((AComponent^.ListBox^.Items^.Strings[1]{$IFDEF IsDesktop}[1]{$ENDIF}));
+      ComponentProperties[3] := @((AComponent^.ListBox^.Items^.Strings[2]{$IFDEF IsDesktop}[1]{$ENDIF}));
+      ComponentProperties[4] := @((AComponent^.ListBox^.Items^.Strings[3]{$IFDEF IsDesktop}[1]{$ENDIF}));
+      ComponentProperties[5] := @((AComponent^.ListBox^.Items^.Strings[4]{$IFDEF IsDesktop}[1]{$ENDIF}));
+      ComponentProperties[6] := @((AComponent^.ListBox^.Items^.Strings[5]{$IFDEF IsDesktop}[1]{$ENDIF}));
+      ComponentProperties[7] := @((AComponent^.ListBox^.Items^.Strings[6]{$IFDEF IsDesktop}[1]{$ENDIF}));
+      ComponentProperties[8] := @((AComponent^.ListBox^.Items^.Strings[7]{$IFDEF IsDesktop}[1]{$ENDIF}));
+      ComponentProperties[9] := @((AComponent^.ListBox^.Items^.Strings[8]{$IFDEF IsDesktop}[1]{$ENDIF}));
+      ComponentProperties[10] := @((AComponent^.ListBox^.Items^.Strings[9]{$IFDEF IsDesktop}[1]{$ENDIF}));
+      ComponentProperties[11] := @((AComponent^.ListBox^.Items^.ItemHeight));
+      ComponentProperties[12] := @((AComponent^.Edit^.Color));
+      ComponentProperties[13] := @((AComponent^.Editable));
+      ComponentProperties[14] := @((AComponent^.ListBox^.Items^.Count));
+      Result := ComponentProperties[PropertyIndex];
+    end;
+
+    function DynTFTTrackBar_GetPropertyAddress(AComp: PDynTFTBaseComponent; PropertyIndex: Byte): PPtrRec;
+    var
+      ComponentProperties: array[0..2] of PPtrRec;
+      AComponent: PDynTFTTrackBar;
+    begin
+      AComponent := PDynTFTTrackBar(TPtrRec(AComp));
+      ComponentProperties[0] := @((AComponent^.Position));
+      ComponentProperties[1] := {$IFDEF IsDesktop}PPtrRec(TPtr {$ELSE} @( {$ENDIF}(AComponent^.OnTrackBarChange));
+      ComponentProperties[2] := @((AComponent^.Orientation));
+      Result := ComponentProperties[PropertyIndex];
+    end;
+
+    function DynTFTProgressBar_GetPropertyAddress(AComp: PDynTFTBaseComponent; PropertyIndex: Byte): PPtrRec;
+    var
+      ComponentProperties: array[0..2] of PPtrRec;
+      AComponent: PDynTFTProgressBar;
+    begin
+      AComponent := PDynTFTProgressBar(TPtrRec(AComp));
+      ComponentProperties[0] := @((AComponent^.BaseProps.CanHandleMessages));
+      ComponentProperties[1] := @((AComponent^.Position));
+      ComponentProperties[2] := @((AComponent^.Orientation));
+      Result := ComponentProperties[PropertyIndex];
+    end;
+
+    procedure UpdatePropertyAddress_Registry;
+    begin
+      DynTFTRegisteredComponents[1].CompGetPropertyAddress := {$IFDEF IsDesktop} DynTFTButton_GetPropertyAddress {$ELSE} @DynTFTButton_GetPropertyAddress {$ENDIF};
+      DynTFTRegisteredComponents[2].CompGetPropertyAddress := {$IFDEF IsDesktop} DynTFTArrowButton_GetPropertyAddress {$ELSE} @DynTFTArrowButton_GetPropertyAddress {$ENDIF};
+      DynTFTRegisteredComponents[3].CompGetPropertyAddress := {$IFDEF IsDesktop} DynTFTPanel_GetPropertyAddress {$ELSE} @DynTFTPanel_GetPropertyAddress {$ENDIF};
+      DynTFTRegisteredComponents[4].CompGetPropertyAddress := {$IFDEF IsDesktop} DynTFTCheckBox_GetPropertyAddress {$ELSE} @DynTFTCheckBox_GetPropertyAddress {$ENDIF};
+      DynTFTRegisteredComponents[5].CompGetPropertyAddress := {$IFDEF IsDesktop} DynTFTScrollBar_GetPropertyAddress {$ELSE} @DynTFTScrollBar_GetPropertyAddress {$ENDIF};
+      DynTFTRegisteredComponents[7].CompGetPropertyAddress := {$IFDEF IsDesktop} DynTFTListBox_GetPropertyAddress {$ELSE} @DynTFTListBox_GetPropertyAddress {$ENDIF};
+      DynTFTRegisteredComponents[8].CompGetPropertyAddress := {$IFDEF IsDesktop} DynTFTLabel_GetPropertyAddress {$ELSE} @DynTFTLabel_GetPropertyAddress {$ENDIF};
+      DynTFTRegisteredComponents[15].CompGetPropertyAddress := {$IFDEF IsDesktop} DynTFTVirtualKeyboard_GetPropertyAddress {$ELSE} @DynTFTVirtualKeyboard_GetPropertyAddress {$ENDIF};
+      DynTFTRegisteredComponents[13].CompGetPropertyAddress := {$IFDEF IsDesktop} DynTFTEdit_GetPropertyAddress {$ELSE} @DynTFTEdit_GetPropertyAddress {$ENDIF};
+      DynTFTRegisteredComponents[16].CompGetPropertyAddress := {$IFDEF IsDesktop} DynTFTComboBox_GetPropertyAddress {$ELSE} @DynTFTComboBox_GetPropertyAddress {$ENDIF};
+      DynTFTRegisteredComponents[17].CompGetPropertyAddress := {$IFDEF IsDesktop} DynTFTTrackBar_GetPropertyAddress {$ELSE} @DynTFTTrackBar_GetPropertyAddress {$ENDIF};
+      DynTFTRegisteredComponents[18].CompGetPropertyAddress := {$IFDEF IsDesktop} DynTFTProgressBar_GetPropertyAddress {$ELSE} @DynTFTProgressBar_GetPropertyAddress {$ENDIF};
+    end;
+  {$ENDIF} {$ENDIF} // profile: PIC32AppWithSDCard {$IFDEF PIC32AppWithSDCard}
+
+  {$IFDEF IsMCU} {$IFDEF PIC32AppDWithSDCard} // profile: PIC32AppDWithSDCard
+    function DynTFTButton_GetPropertyAddress(AComp: PDynTFTBaseComponent; PropertyIndex: Byte): PPtrRec;
+    var
+      ComponentProperties: array[0..5] of PPtrRec;
+      AComponent: PDynTFTButton;
+    begin
+      AComponent := PDynTFTButton(TPtrRec(AComp));
+      ComponentProperties[0] := @((AComponent^.Caption{$IFDEF IsDesktop}[1]{$ENDIF}));
+      ComponentProperties[1] := @((AComponent^.Font_Color));
+      ComponentProperties[2] := @((AComponent^.BaseProps.Enabled));
+      ComponentProperties[3] := @((AComponent^.BaseProps.CanHandleMessages));
+      ComponentProperties[4] := @((AComponent^.ActiveFont));
+      ComponentProperties[5] := {$IFDEF IsDesktop}PPtrRec(TPtr {$ELSE} @( {$ENDIF}(AComponent^.BaseProps.OnMouseUpUser));
+      Result := ComponentProperties[PropertyIndex];
+    end;
+
+    function DynTFTArrowButton_GetPropertyAddress(AComp: PDynTFTBaseComponent; PropertyIndex: Byte): PPtrRec;
+    var
+      ComponentProperties: array[0..1] of PPtrRec;
+      AComponent: PDynTFTArrowButton;
+    begin
+      AComponent := PDynTFTArrowButton(TPtrRec(AComp));
+      ComponentProperties[0] := @((AComponent^.Color));
+      ComponentProperties[1] := @((AComponent^.ArrowDir));
+      Result := ComponentProperties[PropertyIndex];
+    end;
+
+    function DynTFTPanel_GetPropertyAddress(AComp: PDynTFTBaseComponent; PropertyIndex: Byte): PPtrRec;
+    var
+      ComponentProperties: array[0..3] of PPtrRec;
+      AComponent: PDynTFTPanel;
+    begin
+      AComponent := PDynTFTPanel(TPtrRec(AComp));
+      ComponentProperties[0] := @((AComponent^.BaseProps.CanHandleMessages));
+      ComponentProperties[1] := @((AComponent^.Caption{$IFDEF IsDesktop}[1]{$ENDIF}));
+      ComponentProperties[2] := @((AComponent^.Color));
+      ComponentProperties[3] := @((AComponent^.Font_Color));
+      Result := ComponentProperties[PropertyIndex];
+    end;
+
+    function DynTFTCheckBox_GetPropertyAddress(AComp: PDynTFTBaseComponent; PropertyIndex: Byte): PPtrRec;
+    var
+      ComponentProperties: array[0..3] of PPtrRec;
+      AComponent: PDynTFTCheckBox;
+    begin
+      AComponent := PDynTFTCheckBox(TPtrRec(AComp));
+      ComponentProperties[0] := @((AComponent^.Caption{$IFDEF IsDesktop}[1]{$ENDIF}));
+      ComponentProperties[1] := @((AComponent^.Color));
+      ComponentProperties[2] := @((AComponent^.Font_Color));
+      ComponentProperties[3] := @((AComponent^.BaseProps.Enabled));
+      Result := ComponentProperties[PropertyIndex];
+    end;
+
+    function DynTFTScrollBar_GetPropertyAddress(AComp: PDynTFTBaseComponent; PropertyIndex: Byte): PPtrRec;
+    var
+      ComponentProperties: array[0..0] of PPtrRec;
+      AComponent: PDynTFTScrollBar;
+    begin
+      AComponent := PDynTFTScrollBar(TPtrRec(AComp));
+      ComponentProperties[0] := @((AComponent^.Direction));
+      Result := ComponentProperties[PropertyIndex];
+    end;
+
+    function DynTFTListBox_GetPropertyAddress(AComp: PDynTFTBaseComponent; PropertyIndex: Byte): PPtrRec;
+    var
+      ComponentProperties: array[0..12] of PPtrRec;
+      AComponent: PDynTFTListBox;
+    begin
+      AComponent := PDynTFTListBox(TPtrRec(AComp));
+      ComponentProperties[0] := @((AComponent^.Items^.BackgroundColor));
+      ComponentProperties[1] := @((AComponent^.Items^.Strings[0]{$IFDEF IsDesktop}[1]{$ENDIF}));
+      ComponentProperties[2] := @((AComponent^.Items^.Strings[1]{$IFDEF IsDesktop}[1]{$ENDIF}));
+      ComponentProperties[3] := @((AComponent^.Items^.Strings[2]{$IFDEF IsDesktop}[1]{$ENDIF}));
+      ComponentProperties[4] := @((AComponent^.Items^.Strings[3]{$IFDEF IsDesktop}[1]{$ENDIF}));
+      ComponentProperties[5] := @((AComponent^.Items^.Strings[4]{$IFDEF IsDesktop}[1]{$ENDIF}));
+      ComponentProperties[6] := @((AComponent^.Items^.Strings[5]{$IFDEF IsDesktop}[1]{$ENDIF}));
+      ComponentProperties[7] := @((AComponent^.Items^.Strings[6]{$IFDEF IsDesktop}[1]{$ENDIF}));
+      ComponentProperties[8] := @((AComponent^.Items^.Strings[7]{$IFDEF IsDesktop}[1]{$ENDIF}));
+      ComponentProperties[9] := @((AComponent^.Items^.Strings[8]{$IFDEF IsDesktop}[1]{$ENDIF}));
+      ComponentProperties[10] := @((AComponent^.Items^.Strings[9]{$IFDEF IsDesktop}[1]{$ENDIF}));
+      ComponentProperties[11] := @((AComponent^.Items^.ItemHeight));
+      ComponentProperties[12] := @((AComponent^.Items^.Count));
+      Result := ComponentProperties[PropertyIndex];
+    end;
+
+    function DynTFTLabel_GetPropertyAddress(AComp: PDynTFTBaseComponent; PropertyIndex: Byte): PPtrRec;
+    var
+      ComponentProperties: array[0..3] of PPtrRec;
+      AComponent: PDynTFTLabel;
+    begin
+      AComponent := PDynTFTLabel(TPtrRec(AComp));
+      ComponentProperties[0] := @((AComponent^.BaseProps.CanHandleMessages));
+      ComponentProperties[1] := @((AComponent^.Caption{$IFDEF IsDesktop}[1]{$ENDIF}));
+      ComponentProperties[2] := @((AComponent^.Color));
+      ComponentProperties[3] := @((AComponent^.Font_Color));
+      Result := ComponentProperties[PropertyIndex];
+    end;
+
+    function DynTFTVirtualKeyboard_GetPropertyAddress(AComp: PDynTFTBaseComponent; PropertyIndex: Byte): PPtrRec;
+    var
+      ComponentProperties: array[0..1] of PPtrRec;
+      AComponent: PDynTFTVirtualKeyboard;
+    begin
+      AComponent := PDynTFTVirtualKeyboard(TPtrRec(AComp));
+      ComponentProperties[0] := {$IFDEF IsDesktop}PPtrRec(TPtr {$ELSE} @( {$ENDIF}(AComponent^.OnCharKey));
+      ComponentProperties[1] := {$IFDEF IsDesktop}PPtrRec(TPtr {$ELSE} @( {$ENDIF}(AComponent^.OnSpecialKey));
+      Result := ComponentProperties[PropertyIndex];
+    end;
+
+    function DynTFTEdit_GetPropertyAddress(AComp: PDynTFTBaseComponent; PropertyIndex: Byte): PPtrRec;
+    var
+      ComponentProperties: array[0..0] of PPtrRec;
+      AComponent: PDynTFTEdit;
+    begin
+      AComponent := PDynTFTEdit(TPtrRec(AComp));
+      ComponentProperties[0] := @((AComponent^.Text{$IFDEF IsDesktop}[1]{$ENDIF}));
+      Result := ComponentProperties[PropertyIndex];
+    end;
+
+    function DynTFTComboBox_GetPropertyAddress(AComp: PDynTFTBaseComponent; PropertyIndex: Byte): PPtrRec;
+    var
+      ComponentProperties: array[0..14] of PPtrRec;
+      AComponent: PDynTFTComboBox;
+    begin
+      AComponent := PDynTFTComboBox(TPtrRec(AComp));
+      ComponentProperties[0] := @((AComponent^.ListBox^.Items^.BackgroundColor));
+      ComponentProperties[1] := @((AComponent^.ListBox^.Items^.Strings[0]{$IFDEF IsDesktop}[1]{$ENDIF}));
+      ComponentProperties[2] := @((AComponent^.ListBox^.Items^.Strings[1]{$IFDEF IsDesktop}[1]{$ENDIF}));
+      ComponentProperties[3] := @((AComponent^.ListBox^.Items^.Strings[2]{$IFDEF IsDesktop}[1]{$ENDIF}));
+      ComponentProperties[4] := @((AComponent^.ListBox^.Items^.Strings[3]{$IFDEF IsDesktop}[1]{$ENDIF}));
+      ComponentProperties[5] := @((AComponent^.ListBox^.Items^.Strings[4]{$IFDEF IsDesktop}[1]{$ENDIF}));
+      ComponentProperties[6] := @((AComponent^.ListBox^.Items^.Strings[5]{$IFDEF IsDesktop}[1]{$ENDIF}));
+      ComponentProperties[7] := @((AComponent^.ListBox^.Items^.Strings[6]{$IFDEF IsDesktop}[1]{$ENDIF}));
+      ComponentProperties[8] := @((AComponent^.ListBox^.Items^.Strings[7]{$IFDEF IsDesktop}[1]{$ENDIF}));
+      ComponentProperties[9] := @((AComponent^.ListBox^.Items^.Strings[8]{$IFDEF IsDesktop}[1]{$ENDIF}));
+      ComponentProperties[10] := @((AComponent^.ListBox^.Items^.Strings[9]{$IFDEF IsDesktop}[1]{$ENDIF}));
+      ComponentProperties[11] := @((AComponent^.ListBox^.Items^.ItemHeight));
+      ComponentProperties[12] := @((AComponent^.Edit^.Color));
+      ComponentProperties[13] := @((AComponent^.Editable));
+      ComponentProperties[14] := @((AComponent^.ListBox^.Items^.Count));
+      Result := ComponentProperties[PropertyIndex];
+    end;
+
+    function DynTFTTrackBar_GetPropertyAddress(AComp: PDynTFTBaseComponent; PropertyIndex: Byte): PPtrRec;
+    var
+      ComponentProperties: array[0..2] of PPtrRec;
+      AComponent: PDynTFTTrackBar;
+    begin
+      AComponent := PDynTFTTrackBar(TPtrRec(AComp));
+      ComponentProperties[0] := @((AComponent^.Position));
+      ComponentProperties[1] := {$IFDEF IsDesktop}PPtrRec(TPtr {$ELSE} @( {$ENDIF}(AComponent^.OnTrackBarChange));
+      ComponentProperties[2] := @((AComponent^.Orientation));
+      Result := ComponentProperties[PropertyIndex];
+    end;
+
+    function DynTFTProgressBar_GetPropertyAddress(AComp: PDynTFTBaseComponent; PropertyIndex: Byte): PPtrRec;
+    var
+      ComponentProperties: array[0..2] of PPtrRec;
+      AComponent: PDynTFTProgressBar;
+    begin
+      AComponent := PDynTFTProgressBar(TPtrRec(AComp));
+      ComponentProperties[0] := @((AComponent^.BaseProps.CanHandleMessages));
+      ComponentProperties[1] := @((AComponent^.Position));
+      ComponentProperties[2] := @((AComponent^.Orientation));
+      Result := ComponentProperties[PropertyIndex];
+    end;
+
+    procedure UpdatePropertyAddress_Registry;
+    begin
+      DynTFTRegisteredComponents[1].CompGetPropertyAddress := {$IFDEF IsDesktop} DynTFTButton_GetPropertyAddress {$ELSE} @DynTFTButton_GetPropertyAddress {$ENDIF};
+      DynTFTRegisteredComponents[2].CompGetPropertyAddress := {$IFDEF IsDesktop} DynTFTArrowButton_GetPropertyAddress {$ELSE} @DynTFTArrowButton_GetPropertyAddress {$ENDIF};
+      DynTFTRegisteredComponents[3].CompGetPropertyAddress := {$IFDEF IsDesktop} DynTFTPanel_GetPropertyAddress {$ELSE} @DynTFTPanel_GetPropertyAddress {$ENDIF};
+      DynTFTRegisteredComponents[4].CompGetPropertyAddress := {$IFDEF IsDesktop} DynTFTCheckBox_GetPropertyAddress {$ELSE} @DynTFTCheckBox_GetPropertyAddress {$ENDIF};
+      DynTFTRegisteredComponents[5].CompGetPropertyAddress := {$IFDEF IsDesktop} DynTFTScrollBar_GetPropertyAddress {$ELSE} @DynTFTScrollBar_GetPropertyAddress {$ENDIF};
+      DynTFTRegisteredComponents[7].CompGetPropertyAddress := {$IFDEF IsDesktop} DynTFTListBox_GetPropertyAddress {$ELSE} @DynTFTListBox_GetPropertyAddress {$ENDIF};
+      DynTFTRegisteredComponents[8].CompGetPropertyAddress := {$IFDEF IsDesktop} DynTFTLabel_GetPropertyAddress {$ELSE} @DynTFTLabel_GetPropertyAddress {$ENDIF};
+      DynTFTRegisteredComponents[15].CompGetPropertyAddress := {$IFDEF IsDesktop} DynTFTVirtualKeyboard_GetPropertyAddress {$ELSE} @DynTFTVirtualKeyboard_GetPropertyAddress {$ENDIF};
+      DynTFTRegisteredComponents[13].CompGetPropertyAddress := {$IFDEF IsDesktop} DynTFTEdit_GetPropertyAddress {$ELSE} @DynTFTEdit_GetPropertyAddress {$ENDIF};
+      DynTFTRegisteredComponents[16].CompGetPropertyAddress := {$IFDEF IsDesktop} DynTFTComboBox_GetPropertyAddress {$ELSE} @DynTFTComboBox_GetPropertyAddress {$ENDIF};
+      DynTFTRegisteredComponents[17].CompGetPropertyAddress := {$IFDEF IsDesktop} DynTFTTrackBar_GetPropertyAddress {$ELSE} @DynTFTTrackBar_GetPropertyAddress {$ENDIF};
+      DynTFTRegisteredComponents[18].CompGetPropertyAddress := {$IFDEF IsDesktop} DynTFTProgressBar_GetPropertyAddress {$ELSE} @DynTFTProgressBar_GetPropertyAddress {$ENDIF};
+    end;
+  {$ENDIF} {$ENDIF} // profile: PIC32AppDWithSDCard {$IFDEF PIC32AppDWithSDCard}
+
 {$ENDIF} // RTTIREG
 
 
@@ -1003,6 +1561,9 @@ begin
     // No indexed handler addresses found for profile: PIC32App
     // No indexed handler addresses found for profile: DesktopApp_D10_2
     // No indexed handler addresses found for profile: DesktopApp_FP
+    {$IFDEF IsMCU} {$IFDEF PIC32AppAddrArr} UpdateAllBinHandlerAddressArray; {$ENDIF} {$ENDIF} // Profile: PIC32AppAddrArr
+    // No indexed handler addresses found for profile: PIC32AppWithSDCard
+    // No indexed handler addresses found for profile: PIC32AppDWithSDCard
   {$ENDIF}
 
   CreateGUI_Screen_0;
@@ -1036,6 +1597,33 @@ end;
   {$ENDIF}
 {$ENDIF}
 
+  {$IFDEF RTTIREG}
+    function CheckIntegerAndPointerSize: Boolean;  // returs True for success
+    {$IFDEF IsMCU}
+      type
+        Pointer = ^Integer;
+    {$ENDIF}
+    begin
+      if SizeOf(Integer) <> C_ProfileIntegerSize then
+      begin
+        DynTFTDisplayErrorMessage(CRTTIBADINTEGERSIZE, CL_BLUE);
+        {$IFDEF IsDesktop} DynTFT_DebugConsole('.................................... ' + CRTTIBADINTEGERSIZE + ' ...  SizeOf(Integer) <> ' + IntToStr(C_ProfileIntegerSize) + '  See profile settings.'); {$ENDIF}
+        Result := False;
+        Exit;
+      end;
+
+      if SizeOf(Pointer) <> C_ProfilePointerSize then
+      begin
+        DynTFTDisplayErrorMessage(CRTTIBADIPOINTERSIZE, CL_BLUE);
+        {$IFDEF IsDesktop} DynTFT_DebugConsole('.................................... ' + CRTTIBADIPOINTERSIZE + ' ...  SizeOf(Pointer) <> ' + IntToStr(C_ProfilePointerSize) + '  See profile settings.'); {$ENDIF}
+        Result := False;
+        Exit;
+      end;
+
+      Result := True;
+    end;
+  {$ENDIF}
+
 
 procedure DynTFT_GUI_Start;
 begin
@@ -1058,6 +1646,12 @@ begin
   RegisterAllComponentsEvents;
 
   SetScreenActivity;
+
+  {$IFDEF RTTIREG}
+    if not CheckIntegerAndPointerSize then
+      Exit;
+  {$ENDIF}
+
   DrawGUI;
 end;
 
