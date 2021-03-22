@@ -206,6 +206,9 @@ type
     OnMouseDownUser: PDynTFTOnMouseEvent;
     OnMouseMoveUser: PDynTFTOnMouseEvent;
     OnMouseUpUser: PDynTFTOnMouseEvent;
+    {$IFDEF MouseClickSupport}
+      OnClickUser: PDynTFTOnMouseEvent;
+    {$ENDIF}
     //Please update InitBaseHandlersAndProperties and FreeBaseHandlersAndProperties from DynTFTBaseDrawing, if adding pointers (like events)
 
     {$IFDEF ComponentsHaveName}
@@ -266,6 +269,10 @@ type
     MouseDownEvent: PDynTFTGenericEventHandler;
     MouseMoveEvent: PDynTFTGenericEventHandler;
     MouseUpEvent: PDynTFTGenericEventHandler;
+    {$IFDEF MouseClickSupport}
+      ClickEvent: PDynTFTGenericEventHandler;
+    {$ENDIF}
+
     Repaint: PDynTFTRepaintHandler;
     BlinkCaretState: PDynTFTGenericEventHandler;
 
@@ -276,8 +283,16 @@ type
       CompGetPropertyAddress: {$IFDEF IsMCU} PDynTFTGetPropertyAddressProc {$ELSE} TDynTFTGetPropertyAddressProc {$ENDIF};
     {$ENDIF}
 
-    //when adding events, please update SetComponentTypeInRegistry function and AllocateInternalHandlers, DisposeInternalHandlers, InitComponentTypeRegistration and RegisterComponentContainerEvents procedures.
-    //also, make sure all components, which use these handlers, implement them properly
+    {When adding events, please update the following functions/procedures (see DynTFTBaseDrawing.pas):
+     DynTFTSetComponentTypeInRegistry
+     DynTFTAllocateInternalHandlers
+     DynTFTDisposeInternalHandlers
+     DynTFTInitBaseHandlersToNil
+     RegisterComponentContainerEvents
+     DynTFTFreeBaseHandlersAndProperties
+     
+    also, make sure all components, which use these handlers, implement them properly
+    }
   end;
   PDynTFTBaseEventReg = ^TDynTFTBaseEventReg;
 

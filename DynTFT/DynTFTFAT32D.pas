@@ -30,7 +30,7 @@
 unit DynTFTFAT32D;
 
 {
-  This file is a "Desktop" replacement for some of the functions from Dany's FAT32 library.
+  This file is a "Desktop" replacement for some of the functions in the Dany's FAT32 library.
   Original implementation for MCU (by Dany Rosseel):
     https://libstock.mikroe.com/projects/view/58/fat
     http://wwww.rosseeld.be/DRO/PIC/Fat32_1.htm

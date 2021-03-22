@@ -95,6 +95,10 @@ procedure btnShowMessageBox_OnMouseUpUser(Sender: PPtrRec); //CodegenSym:header
 procedure PageControl1_OnChange(Sender: PPtrRec); //CodegenSym:header
 procedure TrackBar1_OnTrackBarChange(Sender: PPtrRec); //CodegenSym:header
 procedure TrackBar2_OnTrackBarChange(Sender: PPtrRec); //CodegenSym:header
+procedure Arrow5_OnClickUser(Sender: PPtrRec); //CodegenSym:header
+procedure ComboBoxItems_OnClickUser(Sender: PPtrRec); //CodegenSym:header
+procedure ListBoxItems_OnClickUser(Sender: PPtrRec); //CodegenSym:header
+procedure rdgrpTest_OnClickUser(Sender: PPtrRec); //CodegenSym:header
 
 //CodegenSym:AllBinHandlersBegin
 
@@ -124,6 +128,7 @@ implementation
 {$ENDIF} // RTTIREG
 
 //CodegenSym:UpdateBinHandlersProcEnd
+
 //CodegenSym:CreationGroups
 
 //CodegenSym:HandlersImplementation
@@ -264,6 +269,42 @@ begin //CodegenSym:handler:begin
   ProgressBar2^.Position := TrackBar2^.Position;
   DynTFTDrawProgressBar(ProgressBar2, False);
 end; //CodegenSym:handler:end
+
+
+procedure Arrow5_OnClickUser(Sender: PPtrRec); //CodegenSym:handler
+begin //CodegenSym:handler:begin
+  {$IFDEF IsDesktop}
+    DynTFT_DebugConsole('Arrow5_OnClickUser');
+  {$ENDIF}
+end; //CodegenSym:handler:end
+
+
+procedure ComboBoxItems_OnClickUser(Sender: PPtrRec); //CodegenSym:handler
+begin //CodegenSym:handler:begin
+  {$IFDEF IsDesktop}
+    DynTFT_DebugConsole('ComboBoxItems_OnClickUser');
+  {$ENDIF}
+end; //CodegenSym:handler:end
+
+
+procedure ListBoxItems_OnClickUser(Sender: PPtrRec); //CodegenSym:handler
+begin //CodegenSym:handler:begin
+  {$IFDEF IsDesktop}
+    DynTFT_DebugConsole('ListBoxItems_OnClickUser');
+  {$ENDIF}
+end; //CodegenSym:handler:end
+
+
+procedure rdgrpTest_OnClickUser(Sender: PPtrRec); //CodegenSym:handler
+begin //CodegenSym:handler:begin
+  {$IFDEF IsDesktop}
+    DynTFT_DebugConsole('rdgrpTest_OnClickUser');
+  {$ENDIF}
+end; //CodegenSym:handler:end
+
+
+
+
 
 
 

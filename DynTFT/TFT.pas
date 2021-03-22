@@ -64,7 +64,7 @@ procedure TFT_Init(display_width, display_height: Word);
 procedure TFT_Set_Pen(pen_color: TColor; pen_width: Byte);
 procedure TFT_Set_Brush(brush_enabled: Byte; brush_color: TColor; gradient_enabled, gradient_orientation: Byte; gradient_color_from, gradient_color_to: TColor);
 procedure TFT_Set_Font(activeFont: PByte; font_color: TColor; font_orientation: Word);
-procedure TFT_Set_Ext_Font(activeFont: DWord; font_color: TColor; font_orientation: Word);
+procedure TFT_Set_Ext_Font(activeFont: {$IFDEF CPU64} QWord; {$ELSE} DWord; {$ENDIF} font_color: TColor; font_orientation: Word);
 procedure TFT_Write_Text(AText: string; x, y: Word);
 procedure TFT_Line(x1, y1, x2, y2: Integer);
 procedure TFT_H_Line(x_start, x_end, y_pos: Integer);
@@ -273,7 +273,7 @@ begin
 end;
 
 
-procedure TFT_Set_Ext_Font(activeFont: DWord; font_color: TColor; font_orientation: Word);
+procedure TFT_Set_Ext_Font(activeFont: {$IFDEF CPU64} QWord; {$ELSE} DWord; {$ENDIF} font_color: TColor; font_orientation: Word);
 begin
   TFT_Set_Font(PByte(activeFont), font_color, font_orientation); // use the same function on desktop
 end;

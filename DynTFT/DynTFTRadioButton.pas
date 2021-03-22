@@ -65,6 +65,9 @@ type
     OnOwnerInternalMouseDown: PDynTFTGenericEventHandler;
     OnOwnerInternalMouseMove: PDynTFTGenericEventHandler;
     OnOwnerInternalMouseUp: PDynTFTGenericEventHandler;
+    {$IFDEF MouseClickSupport}
+      OnOwnerInternalClick: PDynTFTGenericEventHandler;
+    {$ENDIF}
     OnOwnerInternalBeforeDestroy: PDynTFTGenericEventHandler;
   end;
   PDynTFTRadioButton = ^TDynTFTRadioButton;
@@ -183,16 +186,25 @@ begin
     New(Result^.OnOwnerInternalMouseDown);
     New(Result^.OnOwnerInternalMouseMove);
     New(Result^.OnOwnerInternalMouseUp);
+    {$IFDEF MouseClickSupport}
+      New(Result^.OnOwnerInternalClick);
+    {$ENDIF}
     New(Result^.OnOwnerInternalBeforeDestroy);
 
     Result^.OnOwnerInternalMouseDown^ := nil;
     Result^.OnOwnerInternalMouseMove^ := nil;
     Result^.OnOwnerInternalMouseUp^ := nil;
+    {$IFDEF MouseClickSupport}
+      Result^.OnOwnerInternalClick^ := nil;
+    {$ENDIF}
     Result^.OnOwnerInternalBeforeDestroy^ := nil;
   {$ELSE}
     Result^.OnOwnerInternalMouseDown := nil;
     Result^.OnOwnerInternalMouseMove := nil;
     Result^.OnOwnerInternalMouseUp := nil;
+    {$IFDEF MouseClickSupport}
+      Result^.OnOwnerInternalClick := nil;
+    {$ENDIF}
     Result^.OnOwnerInternalBeforeDestroy := nil;
   {$ENDIF}
 
@@ -232,11 +244,17 @@ begin
     Dispose(ARadioButton^.OnOwnerInternalMouseDown);
     Dispose(ARadioButton^.OnOwnerInternalMouseMove);
     Dispose(ARadioButton^.OnOwnerInternalMouseUp);
+    {$IFDEF MouseClickSupport}
+      Dispose(ARadioButton^.OnOwnerInternalClick);
+    {$ENDIF}
     Dispose(ARadioButton^.OnOwnerInternalBeforeDestroy);
 
     ARadioButton^.OnOwnerInternalMouseDown := nil;
     ARadioButton^.OnOwnerInternalMouseMove := nil;
     ARadioButton^.OnOwnerInternalMouseUp := nil;
+    {$IFDEF MouseClickSupport}
+      ARadioButton^.OnOwnerInternalClick := nil;
+    {$ENDIF}
     ARadioButton^.OnOwnerInternalBeforeDestroy := nil;
   {$ENDIF}
 
@@ -314,6 +332,20 @@ begin
 end;
 
 
+{$IFDEF MouseClickSupport}
+  procedure TDynTFTRadioButton_OnDynTFTBaseInternalClick(ABase: PDynTFTBaseComponent);
+  begin
+    {$IFDEF IsDesktop}
+      if Assigned(PDynTFTRadioButton(TPtrRec(ABase))^.OnOwnerInternalClick) then
+        if Assigned(PDynTFTRadioButton(TPtrRec(ABase))^.OnOwnerInternalClick^) then
+    {$ELSE}
+      if PDynTFTRadioButton(TPtrRec(ABase))^.OnOwnerInternalClick <> nil then
+    {$ENDIF}
+        PDynTFTRadioButton(TPtrRec(ABase))^.OnOwnerInternalClick^(ABase);
+  end;
+{$ENDIF}
+
+
 procedure TDynTFRadioButton_OnDynTFTBaseInternalRepaint(ABase: PDynTFTBaseComponent; FullRepaint: Boolean; Options: TPtr; ComponentFromArea: PDynTFTBaseComponent);
 begin
   if Options = CREPAINTONMOUSEUP then
@@ -335,6 +367,9 @@ begin
     ABaseEventReg.MouseDownEvent^ := TDynTFTRadioButton_OnDynTFTBaseInternalMouseDown;
     //ABaseEventReg.MouseMoveEvent^ := TDynTFTRadioButton_OnDynTFTBaseInternalMouseMove;
     ABaseEventReg.MouseUpEvent^ := TDynTFTRadioButton_OnDynTFTBaseInternalMouseUp;
+    {$IFDEF MouseClickSupport}
+      ABaseEventReg.ClickEvent^ := TDynTFTRadioButton_OnDynTFTBaseInternalClick;
+    {$ENDIF}
     ABaseEventReg.Repaint^ := TDynTFRadioButton_OnDynTFTBaseInternalRepaint;
 
     {$IFDEF RTTIREG}
@@ -345,6 +380,9 @@ begin
     ABaseEventReg.MouseDownEvent := @TDynTFTRadioButton_OnDynTFTBaseInternalMouseDown;
     //ABaseEventReg.MouseMoveEvent := @TDynTFTRadioButton_OnDynTFTBaseInternalMouseMove;
     ABaseEventReg.MouseUpEvent := @TDynTFTRadioButton_OnDynTFTBaseInternalMouseUp;
+    {$IFDEF MouseClickSupport}
+      ABaseEventReg.ClickEvent := @TDynTFTRadioButton_OnDynTFTBaseInternalClick;
+    {$ENDIF}
     ABaseEventReg.Repaint := @TDynTFRadioButton_OnDynTFTBaseInternalRepaint;
 
     {$IFDEF RTTIREG}

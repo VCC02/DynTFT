@@ -241,6 +241,27 @@ begin
   end; //if is ComboBox
 end;
 
+
+{$IFDEF MouseClickSupport}
+  procedure TDynTFTComboBox_OnDynTFTChildListBoxInternalClick(ABase: PDynTFTBaseComponent);
+  var
+    AComboBox: PDynTFTComboBox;
+  begin
+    if PDynTFTBaseComponent(TPtrRec(PDynTFTListBox(TPtrRec(ABase))^.BaseProps.Parent))^.BaseProps.ComponentType = ComponentType then
+    begin
+      AComboBox := PDynTFTComboBox(TPtrRec(PDynTFTListBox(TPtrRec(ABase))^.BaseProps.Parent));
+
+      {$IFDEF IsDesktop}
+        if Assigned(AComboBox^.BaseProps.OnClickUser) then
+          if Assigned(AComboBox^.BaseProps.OnClickUser^) then
+      {$ELSE}
+        if AComboBox^.BaseProps.OnClickUser <> nil then
+      {$ENDIF}
+          AComboBox^.BaseProps.OnClickUser^(PPtrRec(TPtrRec(AComboBox)));
+    end;
+  end;
+{$ENDIF}
+
 ///
 
 procedure TDynTFTComboBox_OnDynTFTChildArrowButtonInternalMouseDown(ABase: PDynTFTBaseComponent);
@@ -330,10 +351,12 @@ begin
   Result^.ExteriorLabel := DynTFTLabel_Create(ScreenIndex, 0, 0, 32767, 32767);     //bigger than any screen
 
   {$IFDEF ComponentsHaveName}
-    Result^.Edit^.BaseProps.Name := 'cmb.Edit';
-    Result^.ListBox^.BaseProps.Name := 'cmb.ListBox';
-    Result^.ArrowButton^.BaseProps.Name := 'cmb.ArrowButton';
-    Result^.ExteriorLabel^.BaseProps.Name := 'cmb.ExteriorLabel';
+    {$IFDEF IsDesktop}
+      Result^.Edit^.BaseProps.Name := 'cmb.Edit';
+      Result^.ListBox^.BaseProps.Name := 'cmb.ListBox';
+      Result^.ArrowButton^.BaseProps.Name := 'cmb.ArrowButton';
+      Result^.ExteriorLabel^.BaseProps.Name := 'cmb.ExteriorLabel';
+    {$ENDIF}
   {$ENDIF}
 
   Result^.ArrowButton^.ArrowDir := CDownArrow;
@@ -361,10 +384,16 @@ begin
     //Result^.ListBox^.OnOwnerInternalMouseDown^ := nil; //TDynTFTComboBox_OnDynTFTChildListBoxInternalMouseDown;
     //Result^.ListBox^.OnOwnerInternalMouseMove^ := nil; //TDynTFTComboBox_OnDynTFTChildListBoxInternalMouseMove;
     Result^.ListBox^.OnOwnerInternalMouseUp^ := TDynTFTComboBox_OnDynTFTChildListBoxInternalMouseUp;
+    {$IFDEF MouseClickSupport}
+      Result^.ListBox^.OnOwnerInternalClick^ := TDynTFTComboBox_OnDynTFTChildListBoxInternalClick;
+    {$ENDIF}
   {$ELSE}
     //Result^.ListBox^.OnOwnerInternalMouseDown := nil; //@TDynTFTComboBox_OnDynTFTChildListBoxInternalMouseDown;
     //Result^.ListBox^.OnOwnerInternalMouseMove := nil; //@TDynTFTComboBox_OnDynTFTChildListBoxInternalMouseMove;
     Result^.ListBox^.OnOwnerInternalMouseUp := @TDynTFTComboBox_OnDynTFTChildListBoxInternalMouseUp;
+    {$IFDEF MouseClickSupport}
+      Result^.ListBox^.OnOwnerInternalClick := @TDynTFTComboBox_OnDynTFTChildListBoxInternalClick;
+    {$ENDIF}
   {$ENDIF}
 
   {$IFDEF IsDesktop}
@@ -424,10 +453,12 @@ begin
   {$ENDIF}
 
   {$IFDEF ComponentsHaveName}
-    AComboBox^.Edit^.BaseProps.Name := AComboBox^.BaseProps.Name + '.Edit';
-    AComboBox^.ListBox^.BaseProps.Name := AComboBox^.BaseProps.Name + '.ListBox';
-    AComboBox^.ArrowButton^.BaseProps.Name := AComboBox^.BaseProps.Name + '.ArrowButton';
-    AComboBox^.ExteriorLabel^.BaseProps.Name := AComboBox^.BaseProps.Name + '.ExteriorLabel';
+    {$IFDEF IsDesktop}
+      AComboBox^.Edit^.BaseProps.Name := AComboBox^.BaseProps.Name + '.Edit';
+      AComboBox^.ListBox^.BaseProps.Name := AComboBox^.BaseProps.Name + '.ListBox';
+      AComboBox^.ArrowButton^.BaseProps.Name := AComboBox^.BaseProps.Name + '.ArrowButton';
+      AComboBox^.ExteriorLabel^.BaseProps.Name := AComboBox^.BaseProps.Name + '.ExteriorLabel';
+    {$ENDIF}
   {$ENDIF}
 
   DynTFTEdit_Destroy(AComboBox^.Edit);
@@ -513,6 +544,22 @@ begin
 end;
 
 
+{$IFDEF MouseClickSupport}
+  procedure TDynTFTComboBox_OnDynTFTBaseInternalClick(ABase: PDynTFTBaseComponent);
+  begin
+    (*  implement these if ComboBox can be part of a more complex component
+    {$IFDEF IsDesktop}
+      if Assigned(PDynTFTComboBox(TPtrRec(ABase))^.OnOwnerInternalClick) then
+        if Assigned(PDynTFTComboBox(TPtrRec(ABase))^.OnOwnerInternalClick^) then
+    {$ELSE}
+      if PDynTFTComboBox(TPtrRec(ABase))^.OnOwnerInternalClick <> nil then
+    {$ENDIF}
+        PDynTFTComboBox(TPtrRec(ABase))^.OnOwnerInternalClick^(ABase);
+    *)
+  end;
+{$ENDIF}
+
+
 procedure TDynTFTComboBox_OnDynTFTBaseInternalRepaint(ABase: PDynTFTBaseComponent; FullRepaint: Boolean; Options: TPtr; ComponentFromArea: PDynTFTBaseComponent);
 {var
   AComboBox: PDynTFTComboBox;}
@@ -560,6 +607,9 @@ begin
     //ABaseEventReg.MouseDownEvent^ := TDynTFTComboBox_OnDynTFTBaseInternalMouseDown;
     //ABaseEventReg.MouseMoveEvent^ := TDynTFTComboBox_OnDynTFTBaseInternalMouseMove;
     //ABaseEventReg.MouseUpEvent^ := TDynTFTComboBox_OnDynTFTBaseInternalMouseUp;
+    {$IFDEF MouseClickSupport}
+      //ABaseEventReg.ClickEvent^ := TDynTFTComboBox_OnDynTFTBaseInternalClick;
+    {$ENDIF}
     ABaseEventReg.Repaint^ := TDynTFTComboBox_OnDynTFTBaseInternalRepaint;
 
     {$IFDEF RTTIREG}
@@ -570,6 +620,9 @@ begin
     //ABaseEventReg.MouseDownEvent := @TDynTFTComboBox_OnDynTFTBaseInternalMouseDown;
     //ABaseEventReg.MouseMoveEvent := @TDynTFTComboBox_OnDynTFTBaseInternalMouseMove;
     //ABaseEventReg.MouseUpEvent := @TDynTFTComboBox_OnDynTFTBaseInternalMouseUp;
+    {$IFDEF MouseClickSupport}
+      //ABaseEventReg.ClickEvent := @TDynTFTComboBox_OnDynTFTBaseInternalClick;
+    {$ENDIF}
     ABaseEventReg.Repaint := @TDynTFTComboBox_OnDynTFTBaseInternalRepaint;
     
     {$IFDEF RTTIREG}

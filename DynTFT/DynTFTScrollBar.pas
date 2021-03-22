@@ -78,6 +78,9 @@ type
     OnOwnerInternalMouseDown: PDynTFTGenericEventHandler;
     OnOwnerInternalMouseMove: PDynTFTGenericEventHandler;
     OnOwnerInternalMouseUp: PDynTFTGenericEventHandler;
+    {$IFDEF MouseClickSupport}
+      //OnOwnerInternalClick: PDynTFTGenericEventHandler; //Uncomment if really needed.   Also, see further in code, to uncomment.
+    {$ENDIF}
     OnOwnerInternalAdjustScrollBar: POnOwnerInternalAdjustScrollBar;
     OnOwnerInternalAfterAdjustScrollBar: POnOwnerInternalAdjustScrollBar;
     
@@ -303,10 +306,16 @@ begin
     AScrBar^.BtnInc^.BaseProps.OnMouseDownUser^ := AScrBar^.BaseProps.OnMouseDownUser^;      // content := content, not pointer !!!
     AScrBar^.BtnInc^.BaseProps.OnMouseMoveUser^ := AScrBar^.BaseProps.OnMouseMoveUser^;
     AScrBar^.BtnInc^.BaseProps.OnMouseUpUser^ := AScrBar^.BaseProps.OnMouseUpUser^;
+    {$IFDEF MouseClickSupport}
+      AScrBar^.BtnInc^.BaseProps.OnClickUser^ := AScrBar^.BaseProps.OnClickUser^;
+    {$ENDIF}
 
     AScrBar^.BtnDec^.BaseProps.OnMouseDownUser^ := AScrBar^.BaseProps.OnMouseDownUser^;
     AScrBar^.BtnDec^.BaseProps.OnMouseMoveUser^ := AScrBar^.BaseProps.OnMouseMoveUser^;
     AScrBar^.BtnDec^.BaseProps.OnMouseUpUser^ := AScrBar^.BaseProps.OnMouseUpUser^;
+    {$IFDEF MouseClickSupport}
+      AScrBar^.BtnDec^.BaseProps.OnClickUser^ := AScrBar^.BaseProps.OnClickUser^;
+    {$ENDIF}
 
     AScrBar^.BtnScroll^.BaseProps.OnMouseDownUser^ := AScrBar^.BaseProps.OnMouseDownUser^;
     AScrBar^.BtnScroll^.BaseProps.OnMouseMoveUser^ := AScrBar^.BaseProps.OnMouseMoveUser^;
@@ -315,10 +324,16 @@ begin
     AScrBar^.BtnInc^.BaseProps.OnMouseDownUser := AScrBar^.BaseProps.OnMouseDownUser;      // pointer := pointer, not content !!!
     AScrBar^.BtnInc^.BaseProps.OnMouseMoveUser := AScrBar^.BaseProps.OnMouseMoveUser;
     AScrBar^.BtnInc^.BaseProps.OnMouseUpUser := AScrBar^.BaseProps.OnMouseUpUser;
+    {$IFDEF MouseClickSupport}
+      AScrBar^.BtnInc^.BaseProps.OnClickUser := AScrBar^.BaseProps.OnClickUser;
+    {$ENDIF}
 
     AScrBar^.BtnDec^.BaseProps.OnMouseDownUser := AScrBar^.BaseProps.OnMouseDownUser;
     AScrBar^.BtnDec^.BaseProps.OnMouseMoveUser := AScrBar^.BaseProps.OnMouseMoveUser;
     AScrBar^.BtnDec^.BaseProps.OnMouseUpUser := AScrBar^.BaseProps.OnMouseUpUser;
+    {$IFDEF MouseClickSupport}
+      AScrBar^.BtnDec^.BaseProps.OnClickUser := AScrBar^.BaseProps.OnClickUser;
+    {$ENDIF}
 
     AScrBar^.BtnScroll^.BaseProps.OnMouseDownUser := AScrBar^.BaseProps.OnMouseDownUser;
     AScrBar^.BtnScroll^.BaseProps.OnMouseMoveUser := AScrBar^.BaseProps.OnMouseMoveUser;
@@ -565,6 +580,9 @@ begin
     New(Result^.OnOwnerInternalMouseDown);
     New(Result^.OnOwnerInternalMouseMove);
     New(Result^.OnOwnerInternalMouseUp);
+    {$IFDEF MouseClickSupport}
+      //New(Result^.OnOwnerInternalClick);
+    {$ENDIF}
     New(Result^.OnScrollBarChange);
     New(Result^.OnOwnerInternalAdjustScrollBar);
     New(Result^.OnOwnerInternalAfterAdjustScrollBar);
@@ -578,20 +596,32 @@ begin
     Result^.BtnInc^.OnOwnerInternalMouseDown^ := TDynTFTScrollBar_OnDynTFTChildArrowButtonInternalMouseDown;
     Result^.BtnInc^.OnOwnerInternalMouseMove^ := nil; //TDynTFTScrollBar_OnDynTFTChildArrowButtonInternalMouseMove;
     Result^.BtnInc^.OnOwnerInternalMouseUp^ := nil; //TDynTFTScrollBar_OnDynTFTChildArrowButtonInternalMouseUp;
+    {$IFDEF MouseClickSupport}
+      //user event is used
+    {$ENDIF}
   {$ELSE}
     Result^.BtnInc^.OnOwnerInternalMouseDown := @TDynTFTScrollBar_OnDynTFTChildArrowButtonInternalMouseDown;
     Result^.BtnInc^.OnOwnerInternalMouseMove := nil; //@TDynTFTScrollBar_OnDynTFTChildArrowButtonInternalMouseMove;
     Result^.BtnInc^.OnOwnerInternalMouseUp := nil; //@TDynTFTScrollBar_OnDynTFTChildArrowButtonInternalMouseUp;
+    {$IFDEF MouseClickSupport}
+      //user event is used
+    {$ENDIF}
   {$ENDIF}
 
   {$IFDEF IsDesktop}
     Result^.BtnDec^.OnOwnerInternalMouseDown^ := TDynTFTScrollBar_OnDynTFTChildArrowButtonInternalMouseDown;
     Result^.BtnDec^.OnOwnerInternalMouseMove^ := nil; //TDynTFTScrollBar_OnDynTFTChildArrowButtonInternalMouseMove;
     Result^.BtnDec^.OnOwnerInternalMouseUp^ := nil; //TDynTFTScrollBar_OnDynTFTChildArrowButtonInternalMouseUp;
+    {$IFDEF MouseClickSupport}
+      //user event is used
+    {$ENDIF}
   {$ELSE}
     Result^.BtnDec^.OnOwnerInternalMouseDown := @TDynTFTScrollBar_OnDynTFTChildArrowButtonInternalMouseDown;
     Result^.BtnDec^.OnOwnerInternalMouseMove := nil; //@TDynTFTScrollBar_OnDynTFTChildArrowButtonInternalMouseMove;
     Result^.BtnDec^.OnOwnerInternalMouseUp := nil; //@TDynTFTScrollBar_OnDynTFTChildArrowButtonInternalMouseUp;
+    {$IFDEF MouseClickSupport}
+      //user event is used
+    {$ENDIF}
   {$ENDIF}
 
   {$IFDEF IsDesktop}
@@ -610,9 +640,11 @@ begin
   Result^.OldPosition := -1;
 
   {$IFDEF ComponentsHaveName}
-    Result^.BtnInc^.BaseProps.Name := 'scrbar.BtnInc';
-    Result^.BtnDec^.BaseProps.Name := 'scrbar.BtnDec';
-    Result^.BtnScroll^.BaseProps.Name := 'scrbar.BtnScroll';
+    {$IFDEF IsDesktop}
+      Result^.BtnInc^.BaseProps.Name := 'scrbar.BtnInc';
+      Result^.BtnDec^.BaseProps.Name := 'scrbar.BtnDec';
+      Result^.BtnScroll^.BaseProps.Name := 'scrbar.BtnScroll';
+    {$ENDIF}
   {$ENDIF}
                                               
   //these event handlers will be set by a listbox if the scrollbar belongs to that listbox:
@@ -620,6 +652,9 @@ begin
     Result^.OnOwnerInternalMouseDown^ := nil;
     Result^.OnOwnerInternalMouseMove^ := nil;
     Result^.OnOwnerInternalMouseUp^ := nil;
+    {$IFDEF MouseClickSupport}
+      //Result^.OnOwnerInternalClick^ := nil;
+    {$ENDIF}
     Result^.OnScrollBarChange^ := nil;
     Result^.OnOwnerInternalAdjustScrollBar^ := nil;
     Result^.OnOwnerInternalAfterAdjustScrollBar^ := nil;
@@ -627,6 +662,9 @@ begin
     Result^.OnOwnerInternalMouseDown := nil;
     Result^.OnOwnerInternalMouseMove := nil;
     Result^.OnOwnerInternalMouseUp := nil;
+    {$IFDEF MouseClickSupport}
+      //Result^.OnOwnerInternalClick := nil;
+    {$ENDIF}
     Result^.OnScrollBarChange := nil;
     Result^.OnOwnerInternalAdjustScrollBar := nil;
     Result^.OnOwnerInternalAfterAdjustScrollBar := nil;
@@ -635,6 +673,7 @@ begin
   DynTFTUpdateScrollbarEventHandlers(Result);
 
   {$IFDEF ComponentsHaveName}
+    {$IFDEF IsDesktop}
         {DynTFT_DebugConsole('--- Allocating user event handlers of scroll bar $' + IntToHex(TPTr(Result), 8) +
                             '  Addr(Down) = $' + IntToHex(TPTr(Result^.OnOwnerInternalMouseDown), 8) +
                             '  Addr(Move) = $' + IntToHex(TPTr(Result^.OnOwnerInternalMouseMove), 8) +
@@ -643,6 +682,7 @@ begin
                             '  Addr(Adjust) = $' + IntToHex(TPTr(Result^.OnOwnerInternalAdjustScrollBar), 8) +
                             '  Addr(AfterAdjust) = $' + IntToHex(TPTr(Result^.OnOwnerInternalAfterAdjustScrollBar), 8)
                             );}
+    {$ENDIF}
   {$ENDIF}
 end;
 
@@ -666,33 +706,43 @@ procedure DynTFTScrollBar_Destroy(var AScrollBar: PDynTFTScrollBar);
 {$ENDIF}
 begin
   {$IFDEF ComponentsHaveName}
-    AScrollBar^.BtnInc^.BaseProps.Name := AScrollBar^.BaseProps.Name + '.BtnInc';
-    AScrollBar^.BtnDec^.BaseProps.Name := AScrollBar^.BaseProps.Name + '.BtnDec';
-    AScrollBar^.BtnScroll^.BaseProps.Name := AScrollBar^.BaseProps.Name + '.BtnScroll';
+    {$IFDEF IsDesktop}
+      AScrollBar^.BtnInc^.BaseProps.Name := AScrollBar^.BaseProps.Name + '.BtnInc';
+      AScrollBar^.BtnDec^.BaseProps.Name := AScrollBar^.BaseProps.Name + '.BtnDec';
+      AScrollBar^.BtnScroll^.BaseProps.Name := AScrollBar^.BaseProps.Name + '.BtnScroll';
+    {$ENDIF}
   {$ENDIF}
 
   {$IFDEF ComponentsHaveName}
-    {DynTFT_DebugConsole('/// Disposing internal event handlers of scroll bar: ' + AScrollBar^.BaseProps.Name +
-                        '  Addr(Down) = $' + IntToHex(TPTr(AScrollBar^.OnOwnerInternalMouseDown), 8) +
-                        '  Addr(Move) = $' + IntToHex(TPTr(AScrollBar^.OnOwnerInternalMouseMove), 8) +
-                        '  Addr(Up) = $' + IntToHex(TPTr(AScrollBar^.OnOwnerInternalMouseUp), 8) +
-                        '  Addr(Change) = $' + IntToHex(TPTr(AScrollBar^.OnScrollBarChange), 8) +
-                        '  Addr(Adjust) = $' + IntToHex(TPTr(AScrollBar^.OnOwnerInternalAdjustScrollBar), 8) +
-                        '  Addr(AfterAdjust) = $' + IntToHex(TPTr(AScrollBar^.OnOwnerInternalAfterAdjustScrollBar), 8)
-                        );}
+    {$IFDEF IsDesktop}
+      {DynTFT_DebugConsole('/// Disposing internal event handlers of scroll bar: ' + AScrollBar^.BaseProps.Name +
+                          '  Addr(Down) = $' + IntToHex(TPTr(AScrollBar^.OnOwnerInternalMouseDown), 8) +
+                          '  Addr(Move) = $' + IntToHex(TPTr(AScrollBar^.OnOwnerInternalMouseMove), 8) +
+                          '  Addr(Up) = $' + IntToHex(TPTr(AScrollBar^.OnOwnerInternalMouseUp), 8) +
+                          '  Addr(Change) = $' + IntToHex(TPTr(AScrollBar^.OnScrollBarChange), 8) +
+                          '  Addr(Adjust) = $' + IntToHex(TPTr(AScrollBar^.OnOwnerInternalAdjustScrollBar), 8) +
+                          '  Addr(AfterAdjust) = $' + IntToHex(TPTr(AScrollBar^.OnOwnerInternalAfterAdjustScrollBar), 8)
+                          );}
+    {$ENDIF}
   {$ENDIF}
-  
+
   {$IFDEF IsDesktop}
     Dispose(AScrollBar^.OnOwnerInternalMouseDown);
     Dispose(AScrollBar^.OnOwnerInternalMouseMove);
     Dispose(AScrollBar^.OnOwnerInternalMouseUp);
+    {$IFDEF MouseClickSupport}
+      //Dispose(AScrollBar^.OnOwnerInternalClick);
+    {$ENDIF}
     Dispose(AScrollBar^.OnScrollBarChange);
     Dispose(AScrollBar^.OnOwnerInternalAdjustScrollBar);
     Dispose(AScrollBar^.OnOwnerInternalAfterAdjustScrollBar);
-    
+
     AScrollBar^.OnOwnerInternalMouseDown := nil;
     AScrollBar^.OnOwnerInternalMouseMove := nil;
     AScrollBar^.OnOwnerInternalMouseUp := nil;
+    {$IFDEF MouseClickSupport}
+      //AScrollBar^.OnOwnerInternalClick := nil;
+    {$ENDIF}
     AScrollBar^.OnScrollBarChange := nil;
     AScrollBar^.OnOwnerInternalAdjustScrollBar := nil;
     AScrollBar^.OnOwnerInternalAfterAdjustScrollBar := nil;
@@ -773,6 +823,22 @@ begin
 end;
 
 
+{$IFDEF MouseClickSupport}
+  (*
+  procedure TDynTFTScrollBar_OnDynTFTBaseInternalClick(ABase: PDynTFTBaseComponent);
+  begin
+    {$IFDEF IsDesktop}
+      if Assigned(PDynTFTScrollBar(TPtrRec(ABase))^.OnOwnerInternalClick) then
+        if Assigned(PDynTFTScrollBar(TPtrRec(ABase))^.OnOwnerInternalClick^) then
+    {$ELSE}
+      if PDynTFTScrollBar(TPtrRec(ABase))^.OnOwnerInternalClick <> nil then
+    {$ENDIF}
+        PDynTFTScrollBar(TPtrRec(ABase))^.OnOwnerInternalClick^(ABase);
+  end;
+  *)
+{$ENDIF}
+
+
 procedure TDynTFTScrollBar_OnDynTFTBaseInternalRepaint(ABase: PDynTFTBaseComponent; FullRepaint: Boolean; Options: TPtr; ComponentFromArea: PDynTFTBaseComponent);
 begin
   if Options = CREPAINTONMOUSEUP then
@@ -819,6 +885,9 @@ begin
     ABaseEventReg.MouseDownEvent^ := TDynTFTScrollBar_OnDynTFTBaseInternalMouseDown;
     ABaseEventReg.MouseMoveEvent^ := TDynTFTScrollBar_OnDynTFTBaseInternalMouseMove;
     ABaseEventReg.MouseUpEvent^ := TDynTFTScrollBar_OnDynTFTBaseInternalMouseUp;
+    {$IFDEF MouseClickSupport}
+      //ABaseEventReg.ClickEvent^ := TDynTFTScrollBar_OnDynTFTBaseInternalClick; //uncomment if needed
+    {$ENDIF}
     ABaseEventReg.Repaint^ := TDynTFTScrollBar_OnDynTFTBaseInternalRepaint;
 
     {$IFDEF RTTIREG}
@@ -829,6 +898,9 @@ begin
     ABaseEventReg.MouseDownEvent := @TDynTFTScrollBar_OnDynTFTBaseInternalMouseDown;
     ABaseEventReg.MouseMoveEvent := @TDynTFTScrollBar_OnDynTFTBaseInternalMouseMove;
     ABaseEventReg.MouseUpEvent := @TDynTFTScrollBar_OnDynTFTBaseInternalMouseUp;
+    {$IFDEF MouseClickSupport}
+      //ABaseEventReg.ClickEvent := @TDynTFTScrollBar_OnDynTFTBaseInternalClick; //uncomment if needed
+    {$ENDIF}
     ABaseEventReg.Repaint := @TDynTFTScrollBar_OnDynTFTBaseInternalRepaint;
 
     {$IFDEF RTTIREG}

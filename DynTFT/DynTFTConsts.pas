@@ -101,9 +101,11 @@ const
       CL_HIGHLIGHT = $34DF;
       CL_CREAM = $F7DF;
     {$ELSE}
-      FO_HORIZONTAL = 0;  //these might interfere with user constants
-      FO_VERTICAL = 1;
-
+      {$IFNDEF ReuseTFTConsts} //Define this when the TFT library is included in the MCU project  AND  the TFT functions are used from a different library, which does not use the TFT one. This line, "{$IFNDEF ReuseTFTConsts}" should also be used to "undefine" TFT_DISP_WIDTH, TFT_DISP_HEIGHT and others from the user TFT library, to avoid conflicts with the MCU TFT library.
+        FO_HORIZONTAL = 0;  //these might interfere with user constants
+        FO_VERTICAL = 1;
+      {$ENDIF}
+      
       {$I MCUUserColors.inc}
     {$ENDIF}
   {$ENDIF}

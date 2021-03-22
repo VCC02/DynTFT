@@ -125,7 +125,7 @@
 			<Directories Name="PackageDCPOutputDir"></Directories>
 			<Directories Name="SearchPath"></Directories>
 			<Directories Name="Packages"></Directories>
-			<Directories Name="Conditionals">DynTFTFontSupport</Directories>
+			<Directories Name="Conditionals">DynTFTFontSupport;MouseClickSupport</Directories>
 			<Directories Name="DebugSourceDirs"></Directories>
 			<Directories Name="UsePackages">False</Directories>
 		</Directories>

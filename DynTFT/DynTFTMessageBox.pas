@@ -285,12 +285,22 @@ begin
   Result^.ExteriorLabel^.BaseProps.Parent := PPtrRec(TPtrRec(Result));
 
   {$IFDEF IsDesktop}
-    Result^.BtnOK^.BaseProps.OnMouseUpUser^ := TDynTFTMessageBox_OnDynTFTChildOKButtonInternalMouseUp;
-    Result^.BtnCancel^.BaseProps.OnMouseUpUser^ := TDynTFTMessageBox_OnDynTFTChildCancelButtonInternalMouseUp;
+    {$IFDEF MouseClickSupport}
+      Result^.BtnOK^.BaseProps.OnClickUser^ := TDynTFTMessageBox_OnDynTFTChildOKButtonInternalMouseUp;         //assign click event if available
+      Result^.BtnCancel^.BaseProps.OnClickUser^ := TDynTFTMessageBox_OnDynTFTChildCancelButtonInternalMouseUp; //assign click event if available
+    {$ELSE}
+      Result^.BtnOK^.BaseProps.OnMouseUpUser^ := TDynTFTMessageBox_OnDynTFTChildOKButtonInternalMouseUp;
+      Result^.BtnCancel^.BaseProps.OnMouseUpUser^ := TDynTFTMessageBox_OnDynTFTChildCancelButtonInternalMouseUp;
+    {$ENDIF}
     Result^.ExteriorLabel^.BaseProps.OnMouseDownUser^ := TDynTFTMessageBox_OnDynTFTChildExtLabelInternalMouseDown;
   {$ELSE}
-    Result^.BtnOK^.BaseProps.OnMouseUpUser := @TDynTFTMessageBox_OnDynTFTChildOKButtonInternalMouseUp;
-    Result^.BtnCancel^.BaseProps.OnMouseUpUser := @TDynTFTMessageBox_OnDynTFTChildCancelButtonInternalMouseUp;
+    {$IFDEF MouseClickSupport}
+      Result^.BtnOK^.BaseProps.OnClickUser := @TDynTFTMessageBox_OnDynTFTChildOKButtonInternalMouseUp;
+      Result^.BtnCancel^.BaseProps.OnClickUser := @TDynTFTMessageBox_OnDynTFTChildCancelButtonInternalMouseUp;
+    {$ELSE}
+      Result^.BtnOK^.BaseProps.OnMouseUpUser := @TDynTFTMessageBox_OnDynTFTChildOKButtonInternalMouseUp;
+      Result^.BtnCancel^.BaseProps.OnMouseUpUser := @TDynTFTMessageBox_OnDynTFTChildCancelButtonInternalMouseUp;
+    {$ENDIF}
     Result^.ExteriorLabel^.BaseProps.OnMouseDownUser := @TDynTFTMessageBox_OnDynTFTChildExtLabelInternalMouseDown;
   {$ENDIF}
 

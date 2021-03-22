@@ -183,6 +183,13 @@ begin
 
   Arrow5 := DynTFTArrowButton_CreateWithArrow(1, 17, 165, 45, 45, CUpArrow);
   Arrow5^.Color := {$IFDEF IsDesktop} $00A0E632 {$ELSE} $3734 {$ENDIF};
+  {$IFDEF MouseClickSupport} 
+    {$IFDEF IsDesktop}
+      Arrow5^.BaseProps.OnClickUser^ := Arrow5_OnClickUser;
+    {$ELSE}
+      Arrow5^.BaseProps.OnClickUser := @Arrow5_OnClickUser;
+    {$ENDIF}
+  {$ENDIF} 
 
   Arrow6 := DynTFTArrowButton_CreateWithArrow(1, 17, 221, 45, 45, CDownArrow);
   Arrow6^.Color := {$IFDEF IsDesktop} $00A0E632 {$ELSE} $3734 {$ENDIF};
@@ -324,6 +331,13 @@ begin
   {$ENDIF}
   rdgrpTest^.Caption := C_rdgrpTest_Caption; //'Radio Group 1'
   rdgrpTest^.ItemIndex := 2;
+  {$IFDEF MouseClickSupport} 
+    {$IFDEF IsDesktop}
+      rdgrpTest^.BaseProps.OnClickUser^ := rdgrpTest_OnClickUser;
+    {$ELSE}
+      rdgrpTest^.BaseProps.OnClickUser := @rdgrpTest_OnClickUser;
+    {$ENDIF}
+  {$ENDIF} 
 
   rdgrpTest1 := DynTFTRadioGroup_Create(3, 249, 93, 160, 160);
   PDynTFTRadioGroup_CreateAllRadioButtons(249 + 5, 93 + 15 +  - 1, 160 - 5 - 6, 15, 8, rdgrpTest1, CrdgrpTest1_Captions);
@@ -411,6 +425,13 @@ begin
   {$IFDEF ItemsVisibility} 
     ComboBox2^.ListBox^.Items^.TotalVisibleCount := 10;
   {$ENDIF} 
+  {$IFDEF MouseClickSupport} 
+    {$IFDEF IsDesktop}
+      ComboBox2^.BaseProps.OnClickUser^ := ComboBoxItems_OnClickUser;
+    {$ELSE}
+      ComboBox2^.BaseProps.OnClickUser := @ComboBoxItems_OnClickUser;
+    {$ENDIF}
+  {$ENDIF} 
   {$IFDEF UseExternalItems} 
     {$IFDEF IsDesktop}
       ComboBox2^.ListBox^.Items^.OnGetItem^ := ComboBoxItemsGetItemText;
@@ -449,6 +470,13 @@ begin
   ListBox2^.Items^.Count := 10;
   {$IFDEF ItemsVisibility} 
     ListBox2^.Items^.TotalVisibleCount := 10;
+  {$ENDIF} 
+  {$IFDEF MouseClickSupport} 
+    {$IFDEF IsDesktop}
+      ListBox2^.BaseProps.OnClickUser^ := ListBoxItems_OnClickUser;
+    {$ELSE}
+      ListBox2^.BaseProps.OnClickUser := @ListBoxItems_OnClickUser;
+    {$ENDIF}
   {$ENDIF} 
   {$IFDEF UseExternalItems} 
     {$IFDEF IsDesktop}
@@ -554,6 +582,33 @@ end;
   {$ENDIF}
 {$ENDIF}
 
+  {$IFDEF RTTIREG}
+    function CheckIntegerAndPointerSize: Boolean;  // returs True for success
+    {$IFDEF IsMCU}
+      type
+        Pointer = ^Integer;
+    {$ENDIF}
+    begin
+      if SizeOf(Integer) <> C_ProfileIntegerSize then
+      begin
+        DynTFTDisplayErrorMessage(CRTTIBADINTEGERSIZE, CL_BLUE);
+        {$IFDEF IsDesktop} DynTFT_DebugConsole('.................................... ' + CRTTIBADINTEGERSIZE + ' ...  SizeOf(Integer) <> ' + IntToStr(C_ProfileIntegerSize) + '  See profile settings.'); {$ENDIF}
+        Result := False;
+        Exit;
+      end;
+
+      if SizeOf(Pointer) <> C_ProfilePointerSize then
+      begin
+        DynTFTDisplayErrorMessage(CRTTIBADIPOINTERSIZE, CL_BLUE);
+        {$IFDEF IsDesktop} DynTFT_DebugConsole('.................................... ' + CRTTIBADIPOINTERSIZE + ' ...  SizeOf(Pointer) <> ' + IntToStr(C_ProfilePointerSize) + '  See profile settings.'); {$ENDIF}
+        Result := False;
+        Exit;
+      end;
+
+      Result := True;
+    end;
+  {$ENDIF}
+
 
 procedure DynTFT_GUI_Start;
 begin
@@ -576,6 +631,12 @@ begin
   RegisterAllComponentsEvents;
 
   SetScreenActivity;
+
+  {$IFDEF RTTIREG}
+    if not CheckIntegerAndPointerSize then
+      Exit;
+  {$ENDIF}
+
   DrawGUI;
 end;
 

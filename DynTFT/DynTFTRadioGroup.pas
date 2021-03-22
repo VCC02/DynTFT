@@ -217,7 +217,7 @@ end;
 
 procedure TDynTFTRadioGroup_OnDynTFTChildRadioButtonInternalMouseUp(ABase: PDynTFTBaseComponent);
 var
-  ARadioGroup: PDynTFTRadioGroup; 
+  ARadioGroup: PDynTFTRadioGroup;
 begin
   ARadioGroup := PDynTFTRadioGroup(TPtrRec(PDynTFTRadioButton(TPtrRec(ABase))^.BaseProps.Parent));
 
@@ -233,6 +233,24 @@ begin
         ARadioGroup^.OnSelectionChanged^(PPtrRec(TPtrRec(ARadioGroup)));
   end;
 end;
+
+
+{$IFDEF MouseClickSupport}
+  procedure TDynTFTRadioGroup_OnDynTFTChildRadioButtonInternalClick(ABase: PDynTFTBaseComponent);
+  var
+    ARadioGroup: PDynTFTRadioGroup;
+  begin
+    ARadioGroup := PDynTFTRadioGroup(TPtrRec(PDynTFTRadioButton(TPtrRec(ABase))^.BaseProps.Parent));
+
+    {$IFDEF IsDesktop}
+      if Assigned(ARadioGroup^.BaseProps.OnClickUser) then
+        if Assigned(ARadioGroup^.BaseProps.OnClickUser^) then
+    {$ELSE}
+      if ARadioGroup^.BaseProps.OnClickUser <> nil then
+    {$ENDIF}
+        ARadioGroup^.BaseProps.OnClickUser^(PPtrRec(TPtrRec(ARadioGroup)));
+  end;
+{$ENDIF}
 
 
 procedure TDynTFTRadioGroup_OnDynTFTChildRadioButtonInternalBeforeDestroy(ABase: PDynTFTBaseComponent);
@@ -394,11 +412,17 @@ begin
     ARadioButton^.OnOwnerInternalMouseDown^ := TDynTFTRadioGroup_OnDynTFTChildRadioButtonInternalMouseDown;
     ARadioButton^.OnOwnerInternalMouseMove^ := TDynTFTRadioGroup_OnDynTFTChildRadioButtonInternalMouseMove;
     ARadioButton^.OnOwnerInternalMouseUp^ := TDynTFTRadioGroup_OnDynTFTChildRadioButtonInternalMouseUp;
+    {$IFDEF MouseClickSupport}
+      ARadioButton^.OnOwnerInternalClick^ := TDynTFTRadioGroup_OnDynTFTChildRadioButtonInternalClick;
+    {$ENDIF}
     ARadioButton^.OnOwnerInternalBeforeDestroy^ := TDynTFTRadioGroup_OnDynTFTChildRadioButtonInternalBeforeDestroy;
   {$ELSE}
     ARadioButton^.OnOwnerInternalMouseDown := @TDynTFTRadioGroup_OnDynTFTChildRadioButtonInternalMouseDown;
     ARadioButton^.OnOwnerInternalMouseMove := @TDynTFTRadioGroup_OnDynTFTChildRadioButtonInternalMouseMove;
     ARadioButton^.OnOwnerInternalMouseUp := @TDynTFTRadioGroup_OnDynTFTChildRadioButtonInternalMouseUp;
+    {$IFDEF MouseClickSupport}
+      ARadioButton^.OnOwnerInternalClick := @TDynTFTRadioGroup_OnDynTFTChildRadioButtonInternalClick;
+    {$ENDIF}
     ARadioButton^.OnOwnerInternalBeforeDestroy := @TDynTFTRadioGroup_OnDynTFTChildRadioButtonInternalBeforeDestroy;
   {$ENDIF}
 end;
@@ -444,6 +468,22 @@ begin
       PDynTFTRadioGroup(TPtrRec(ABase))^.OnOwnerInternalMouseUp^(ABase);
   *)
 end;
+
+
+{$IFDEF MouseClickSupport}
+  procedure TDynTFTRadioGroup_OnDynTFTBaseInternalClick(ABase: PDynTFTBaseComponent);
+  begin
+    (* implement these if RadioGroup can be part of a more complex component
+    {$IFDEF IsDesktop}
+      if Assigned(PDynTFTRadioGroup(TPtrRec(ABase))^.OnOwnerInternalClick) then
+        if Assigned(PDynTFTRadioGroup(TPtrRec(ABase))^.OnOwnerInternalClick^) then
+    {$ELSE}
+      if PDynTFTRadioGroup(TPtrRec(ABase))^.OnOwnerInternalClick <> nil then
+    {$ENDIF}
+        PDynTFTRadioGroup(TPtrRec(ABase))^.OnOwnerInternalClick^(ABase);
+    *)
+  end;
+{$ENDIF}
 
 
 procedure TDynTFRadioGroup_OnDynTFTBaseInternalRepaint(ABase: PDynTFTBaseComponent; FullRepaint: Boolean; Options: TPtr; ComponentFromArea: PDynTFTBaseComponent);
@@ -505,6 +545,9 @@ begin
     //ABaseEventReg.MouseDownEvent^ := TDynTFTRadioGroup_OnDynTFTBaseInternalMouseDown;
     //ABaseEventReg.MouseMoveEvent^ := TDynTFTRadioGroup_OnDynTFTBaseInternalMouseMove;
     //ABaseEventReg.MouseUpEvent^ := TDynTFTRadioGroup_OnDynTFTBaseInternalMouseUp;
+    {$IFDEF MouseClickSupport}
+      //ABaseEventReg.ClickEvent^ := TDynTFTRadioGroup_OnDynTFTBaseInternalClick;
+    {$ENDIF}
     ABaseEventReg.Repaint^ := TDynTFRadioGroup_OnDynTFTBaseInternalRepaint;
 
     {$IFDEF RTTIREG}
@@ -515,6 +558,9 @@ begin
     //ABaseEventReg.MouseDownEvent := @TDynTFTRadioGroup_OnDynTFTBaseInternalMouseDown;
     //ABaseEventReg.MouseMoveEvent := @TDynTFTRadioGroup_OnDynTFTBaseInternalMouseMove;
     //ABaseEventReg.MouseUpEvent := @TDynTFTRadioGroup_OnDynTFTBaseInternalMouseUp;
+    {$IFDEF MouseClickSupport}
+      //ABaseEventReg.ClickEvent := @TDynTFTRadioGroup_OnDynTFTBaseInternalClick;
+    {$ENDIF}
     ABaseEventReg.Repaint := @TDynTFRadioGroup_OnDynTFTBaseInternalRepaint;
 
     {$IFDEF RTTIREG}

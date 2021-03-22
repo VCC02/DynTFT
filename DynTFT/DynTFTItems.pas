@@ -90,6 +90,9 @@ type
     OnOwnerInternalMouseDown: PDynTFTGenericEventHandler;
     OnOwnerInternalMouseMove: PDynTFTGenericEventHandler;
     OnOwnerInternalMouseUp: PDynTFTGenericEventHandler;
+    {$IFDEF MouseClickSupport}
+      OnOwnerInternalClick: PDynTFTGenericEventHandler;
+    {$ENDIF}
 
     {$IFDEF UseExternalItems}
       OnGetItem: POnGetItemEvent;
@@ -464,6 +467,7 @@ var
   {$IFNDEF UseExternalItems}
     i: Word;
   {$ENDIF}
+  TempStr: string[3];
 begin
   Result := PDynTFTItems(TPtrRec(DynTFTComponent_Create(ScreenIndex, SizeOf(Result^))));
 
@@ -481,13 +485,18 @@ begin
   //DynTFTInitComponentDimensions(PDynTFTBaseComponent(TPtrRec(Result)), ComponentType, True, Left, Top, Width, Height);
   DynTFTInitBasicStatePropertiesToDefault(PDynTFTBaseComponent(TPtrRec(Result)));
 
-  GetTextWidthAndHeight('fp', DummyTextWidth, Result^.ItemHeight);    //fp is a text with great height
+  TempStr := 'fp';
+  GetTextWidthAndHeight(TempStr, DummyTextWidth, Result^.ItemHeight);    //fp is a text with great height
   Result^.ItemHeight := Result^.ItemHeight + 3;
 
   {$IFDEF IsDesktop}
     New(Result^.OnOwnerInternalMouseDown);
     New(Result^.OnOwnerInternalMouseMove);
     New(Result^.OnOwnerInternalMouseUp);
+    {$IFDEF MouseClickSupport}
+      New(Result^.OnOwnerInternalClick);
+    {$ENDIF}
+
     {$IFDEF UseExternalItems}
       New(Result^.OnGetItem);
       Result^.OnGetItem^ := nil;
@@ -496,14 +505,20 @@ begin
     Result^.OnOwnerInternalMouseDown^ := nil;
     Result^.OnOwnerInternalMouseMove^ := nil;
     Result^.OnOwnerInternalMouseUp^ := nil;
+    {$IFDEF MouseClickSupport}
+      Result^.OnOwnerInternalClick^ := nil;
+    {$ENDIF}
   {$ELSE}
     {$IFDEF UseExternalItems}
       Result^.OnGetItem := nil;
     {$ENDIF}
-    
+
     Result^.OnOwnerInternalMouseDown := nil;
     Result^.OnOwnerInternalMouseMove := nil;
     Result^.OnOwnerInternalMouseUp := nil;
+    {$IFDEF MouseClickSupport}
+      Result^.OnOwnerInternalClick := nil;
+    {$ENDIF}
   {$ENDIF}
 
   Result^.ItemIndex := -1;
@@ -564,10 +579,16 @@ begin
     Dispose(AItems^.OnOwnerInternalMouseDown);
     Dispose(AItems^.OnOwnerInternalMouseMove);
     Dispose(AItems^.OnOwnerInternalMouseUp);
+    {$IFDEF MouseClickSupport}
+      Dispose(AItems^.OnOwnerInternalClick);
+    {$ENDIF}
 
     AItems^.OnOwnerInternalMouseDown := nil;
     AItems^.OnOwnerInternalMouseMove := nil;
     AItems^.OnOwnerInternalMouseUp := nil;
+    {$IFDEF MouseClickSupport}
+      AItems^.OnOwnerInternalClick := nil;
+    {$ENDIF}
   {$ENDIF}
   
   {$IFDEF UseExternalItems}
@@ -648,6 +669,20 @@ begin
 end;
 
 
+{$IFDEF MouseClickSupport}
+  procedure TDynTFTItems_OnDynTFTBaseInternalClick(ABase: PDynTFTBaseComponent);
+  begin
+    {$IFDEF IsDesktop}
+      if Assigned(PDynTFTItems(TPtrRec(ABase))^.OnOwnerInternalClick) then
+        if Assigned(PDynTFTItems(TPtrRec(ABase))^.OnOwnerInternalClick^) then
+    {$ELSE}
+      if PDynTFTItems(TPtrRec(ABase))^.OnOwnerInternalClick <> nil then
+    {$ENDIF}
+        PDynTFTItems(TPtrRec(ABase))^.OnOwnerInternalClick^(ABase);
+  end;
+{$ENDIF}
+
+
 procedure TDynTFTItems_OnDynTFTBaseInternalRepaint(ABase: PDynTFTBaseComponent; FullRepaint: Boolean; Options: TPtr; ComponentFromArea: PDynTFTBaseComponent);
 begin                                     
   if Options = CSETSUBCOMPONENTSVISIBLEONSHOWREPAINT then
@@ -672,6 +707,9 @@ begin
     ABaseEventReg.MouseDownEvent^ := TDynTFTItems_OnDynTFTBaseInternalMouseDown;
     ABaseEventReg.MouseMoveEvent^ := TDynTFTItems_OnDynTFTBaseInternalMouseMove;
     ABaseEventReg.MouseUpEvent^ := TDynTFTItems_OnDynTFTBaseInternalMouseUp;
+    {$IFDEF MouseClickSupport}
+      ABaseEventReg.ClickEvent^ := TDynTFTItems_OnDynTFTBaseInternalClick;
+    {$ENDIF}
     ABaseEventReg.Repaint^ := TDynTFTItems_OnDynTFTBaseInternalRepaint;
 
     {$IFDEF RTTIREG}
@@ -682,6 +720,9 @@ begin
     ABaseEventReg.MouseDownEvent := @TDynTFTItems_OnDynTFTBaseInternalMouseDown;
     ABaseEventReg.MouseMoveEvent := @TDynTFTItems_OnDynTFTBaseInternalMouseMove;
     ABaseEventReg.MouseUpEvent := @TDynTFTItems_OnDynTFTBaseInternalMouseUp;
+    {$IFDEF MouseClickSupport}
+      ABaseEventReg.ClickEvent := @TDynTFTItems_OnDynTFTBaseInternalClick;
+    {$ENDIF}
     ABaseEventReg.Repaint := @TDynTFTItems_OnDynTFTBaseInternalRepaint;
 
     {$IFDEF RTTIREG}

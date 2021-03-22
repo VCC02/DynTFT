@@ -53,7 +53,7 @@ type
 
     //Label properties
     Caption: string[CMaxLabelStringLength];
-    Color: TColor;      //Negative values means transparent. If changing from color to transparent on run time, call ClearComponentAreaWithScreenColor or RepaintScreenComponentsFromArea to repaint the background under the label.  
+    Color: TColor;      //When negative values, it means transparent. If changing from color to transparent on run time, call ClearComponentAreaWithScreenColor or RepaintScreenComponentsFromArea to repaint the background under the label.  
     Font_Color: TColor;
     {$IFDEF DynTFTFontSupport}
       ActiveFont: PByte;
@@ -63,6 +63,9 @@ type
     OnOwnerInternalMouseDown: PDynTFTGenericEventHandler;
     OnOwnerInternalMouseMove: PDynTFTGenericEventHandler;
     OnOwnerInternalMouseUp: PDynTFTGenericEventHandler;
+    {$IFDEF MouseClickSupport}
+      OnOwnerInternalClick: PDynTFTGenericEventHandler;
+    {$ENDIF}
   end;
   PDynTFTLabel = ^TDynTFTLabel;
 
@@ -70,6 +73,8 @@ procedure DynTFTDrawLabel(ALabel: PDynTFTLabel; FullRedraw: Boolean);
 function DynTFTLabel_Create(ScreenIndex: Byte; Left, Top, Width, Height: TSInt): PDynTFTLabel;
 procedure DynTFTLabel_Destroy(var ALabel: PDynTFTLabel);
 procedure DynTFTLabel_DestroyAndPaint(var ALabel: PDynTFTLabel);
+
+procedure DynTFTLabel_UpdateCaption(ALabel: PDynTFTLabel; {$IFDEF IsMCU} var {$ENDIF} NewCaption: string);  //reduced flicker - caption update
 
 procedure DynTFTRegisterLabelEvents;
 function DynTFTGetLabelComponentType: TDynTFTComponentType;
@@ -148,28 +153,39 @@ begin
 
   {$IFDEF DynTFTFontSupport}
     Result^.ActiveFont := @TFT_defaultFont;
-  {$ENDIF} 
+  {$ENDIF}
 
   {$IFDEF IsDesktop}
     New(Result^.OnOwnerInternalMouseDown);
     New(Result^.OnOwnerInternalMouseMove);
     New(Result^.OnOwnerInternalMouseUp);
+    {$IFDEF MouseClickSupport}
+      New(Result^.OnOwnerInternalClick);
+    {$ENDIF}
 
     Result^.OnOwnerInternalMouseDown^ := nil;
     Result^.OnOwnerInternalMouseMove^ := nil;
     Result^.OnOwnerInternalMouseUp^ := nil;
+    {$IFDEF MouseClickSupport}
+      Result^.OnOwnerInternalClick^ := nil;
+    {$ENDIF}
   {$ELSE}
     Result^.OnOwnerInternalMouseDown := nil;
     Result^.OnOwnerInternalMouseMove := nil;
     Result^.OnOwnerInternalMouseUp := nil;
+    {$IFDEF MouseClickSupport}
+      Result^.OnOwnerInternalClick := nil;
+    {$ENDIF}
   {$ENDIF}
 
   {$IFDEF ComponentsHaveName}
+    {$IFDEF IsDesktop}
         {DynTFT_DebugConsole('--- Allocating user event handlers of label $' + IntToHex(TPTr(Result), 8) +
                             '  Addr(Down) = $' + IntToHex(TPTr(Result^.OnOwnerInternalMouseDown), 8) +
                             '  Addr(Move) = $' + IntToHex(TPTr(Result^.OnOwnerInternalMouseMove), 8) +
                             '  Addr(Up) = $' + IntToHex(TPTr(Result^.OnOwnerInternalMouseUp), 8)
                             );}
+    {$ENDIF}
   {$ENDIF}
 end;
 
@@ -187,21 +203,29 @@ procedure DynTFTLabel_Destroy(var ALabel: PDynTFTLabel);
 {$ENDIF}
 begin
   {$IFDEF ComponentsHaveName}
-    {DynTFT_DebugConsole('/// Disposing internal event handlers of label: ' + ALabel^.BaseProps.Name +
-                        '  Addr(Down) = $' + IntToHex(TPTr(ALabel^.OnOwnerInternalMouseDown), 8) +
-                        '  Addr(Move) = $' + IntToHex(TPTr(ALabel^.OnOwnerInternalMouseMove), 8) +
-                        '  Addr(Up) = $' + IntToHex(TPTr(ALabel^.OnOwnerInternalMouseUp), 8)
-                        );}
+    {$IFDEF IsDesktop}
+      {DynTFT_DebugConsole('/// Disposing internal event handlers of label: ' + ALabel^.BaseProps.Name +
+                          '  Addr(Down) = $' + IntToHex(TPTr(ALabel^.OnOwnerInternalMouseDown), 8) +
+                          '  Addr(Move) = $' + IntToHex(TPTr(ALabel^.OnOwnerInternalMouseMove), 8) +
+                          '  Addr(Up) = $' + IntToHex(TPTr(ALabel^.OnOwnerInternalMouseUp), 8)
+                          );}
+    {$ENDIF}
   {$ENDIF}
 
   {$IFDEF IsDesktop}
     Dispose(ALabel^.OnOwnerInternalMouseDown);
     Dispose(ALabel^.OnOwnerInternalMouseMove);
     Dispose(ALabel^.OnOwnerInternalMouseUp);
-    
+    {$IFDEF MouseClickSupport}
+      Dispose(ALabel^.OnOwnerInternalClick);
+    {$ENDIF}
+
     ALabel^.OnOwnerInternalMouseDown := nil;
     ALabel^.OnOwnerInternalMouseMove := nil;
     ALabel^.OnOwnerInternalMouseUp := nil;
+    {$IFDEF MouseClickSupport}
+      ALabel^.OnOwnerInternalClick := nil;
+    {$ENDIF}
 
     DynTFTComponent_Destroy(PDynTFTBaseComponent(TPtrRec(ALabel)), SizeOf(ALabel^));
   {$ELSE}
@@ -217,6 +241,31 @@ procedure DynTFTLabel_DestroyAndPaint(var ALabel: PDynTFTLabel);
 begin
   DynTFTClearComponentAreaWithScreenColor(PDynTFTBaseComponent(TPtrRec(ALabel)));
   DynTFTLabel_Destroy(ALabel);
+end;
+
+
+procedure DynTFTLabel_UpdateCaption(ALabel: PDynTFTLabel; {$IFDEF IsMCU} var {$ENDIF} NewCaption: string);
+var
+  TempColor: TColor;
+begin
+  TempColor := ALabel^.Font_Color;
+
+  ALabel^.Font_Color := ALabel^.Color;
+  DynTFTDrawLabel(ALabel, False);
+
+  if Length(NewCaption) > CMaxLabelStringLength then
+  begin
+    {$IFDEF IsDesktop}
+      ALabel^.Caption := Copy(NewCaption, 1, CMaxLabelStringLength);
+    {$ELSE}
+      DynTFTCopyStr(NewCaption, 0, CMaxLabelStringLength, ALabel^.Caption);
+    {$ENDIF}
+  end
+  else
+    ALabel^.Caption := NewCaption;
+
+  ALabel^.Font_Color := TempColor;
+  DynTFTDrawLabel(ALabel, False);
 end;
 
 
@@ -277,6 +326,20 @@ begin
 end;
 
 
+{$IFDEF MouseClickSupport}
+  procedure TDynTFTLabel_OnDynTFTBaseInternalClick(ABase: PDynTFTBaseComponent);
+  begin
+    {$IFDEF IsDesktop}
+      if Assigned(PDynTFTLabel(TPtrRec(ABase))^.OnOwnerInternalClick) then
+        if Assigned(PDynTFTLabel(TPtrRec(ABase))^.OnOwnerInternalClick^) then
+    {$ELSE}
+      if PDynTFTLabel(TPtrRec(ABase))^.OnOwnerInternalClick <> nil then
+    {$ENDIF}
+        PDynTFTLabel(TPtrRec(ABase))^.OnOwnerInternalClick^(ABase);
+  end;
+{$ENDIF}
+
+
 procedure TDynTFTLabel_OnDynTFTBaseInternalRepaint(ABase: PDynTFTBaseComponent; FullRepaint: Boolean; Options: TPtr; ComponentFromArea: PDynTFTBaseComponent);
 begin
   if Options = CREPAINTONMOUSEUP then
@@ -295,6 +358,9 @@ begin
     ABaseEventReg.MouseDownEvent^ := TDynTFTLabel_OnDynTFTBaseInternalMouseDown;
     //ABaseEventReg.MouseMoveEvent^ := TDynTFTLabel_OnDynTFTBaseInternalMouseMove;
     //ABaseEventReg.MouseUpEvent^ := TDynTFTLabel_OnDynTFTBaseInternalMouseUp;
+    {$IFDEF MouseClickSupport}
+      ABaseEventReg.ClickEvent^ := TDynTFTLabel_OnDynTFTBaseInternalClick;
+    {$ENDIF}
     ABaseEventReg.Repaint^ := TDynTFTLabel_OnDynTFTBaseInternalRepaint;
 
     {$IFDEF RTTIREG}
@@ -305,6 +371,9 @@ begin
     ABaseEventReg.MouseDownEvent := @TDynTFTLabel_OnDynTFTBaseInternalMouseDown;
     //ABaseEventReg.MouseMoveEvent := @TDynTFTLabel_OnDynTFTBaseInternalMouseMove;
     //ABaseEventReg.MouseUpEvent := @TDynTFTLabel_OnDynTFTBaseInternalMouseUp;
+    {$IFDEF MouseClickSupport}
+      ABaseEventReg.ClickEvent := @TDynTFTLabel_OnDynTFTBaseInternalClick;
+    {$ENDIF}
     ABaseEventReg.Repaint := @TDynTFTLabel_OnDynTFTBaseInternalRepaint;
 
     {$IFDEF RTTIREG}

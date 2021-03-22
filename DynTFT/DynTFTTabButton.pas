@@ -64,6 +64,9 @@ type
     OnOwnerInternalMouseDown: PDynTFTGenericEventHandler;
     OnOwnerInternalMouseMove: PDynTFTGenericEventHandler;
     OnOwnerInternalMouseUp: PDynTFTGenericEventHandler;
+    {$IFDEF MouseClickSupport}
+      //OnOwnerInternalClick: PDynTFTGenericEventHandler;    //Uncomment if needed. See further in code.
+    {$ENDIF}
     OnOwnerInternalBeforeDestroy: PDynTFTGenericEventHandler;
   end;
   PDynTFTTabButton = ^TDynTFTTabButton;
@@ -202,22 +205,31 @@ begin
 
   {$IFDEF DynTFTFontSupport}
     Result^.ActiveFont := @TFT_defaultFont;
-  {$ENDIF} 
+  {$ENDIF}
 
   {$IFDEF IsDesktop}
     New(Result^.OnOwnerInternalMouseDown);
     New(Result^.OnOwnerInternalMouseMove);
     New(Result^.OnOwnerInternalMouseUp);
+    {$IFDEF MouseClickSupport}
+      //New(Result^.OnOwnerInternalClick);
+    {$ENDIF}
     New(Result^.OnOwnerInternalBeforeDestroy);
 
     Result^.OnOwnerInternalMouseDown^ := nil;
     Result^.OnOwnerInternalMouseMove^ := nil;
     Result^.OnOwnerInternalMouseUp^ := nil;
+    {$IFDEF MouseClickSupport}
+      //Result^.OnOwnerInternalClick^ := nil;
+    {$ENDIF}
     Result^.OnOwnerInternalBeforeDestroy^ := nil;
   {$ELSE}
     Result^.OnOwnerInternalMouseDown := nil;
     Result^.OnOwnerInternalMouseMove := nil;
     Result^.OnOwnerInternalMouseUp := nil;
+    {$IFDEF MouseClickSupport}
+      //Result^.OnOwnerInternalClick := nil;
+    {$ENDIF}
     Result^.OnOwnerInternalBeforeDestroy := nil;
   {$ENDIF}
 end;
@@ -247,11 +259,17 @@ begin
     Dispose(ATabButton^.OnOwnerInternalMouseDown);
     Dispose(ATabButton^.OnOwnerInternalMouseMove);
     Dispose(ATabButton^.OnOwnerInternalMouseUp);
+    {$IFDEF MouseClickSupport}
+      //Dispose(ATabButton^.OnOwnerInternalClick);
+    {$ENDIF}
     Dispose(ATabButton^.OnOwnerInternalBeforeDestroy);
 
     ATabButton^.OnOwnerInternalMouseDown := nil;
     ATabButton^.OnOwnerInternalMouseMove := nil;
     ATabButton^.OnOwnerInternalMouseUp := nil;
+    {$IFDEF MouseClickSupport}
+      //ATabButton^.OnOwnerInternalClick := nil;
+    {$ENDIF}
     ATabButton^.OnOwnerInternalBeforeDestroy := nil;
   {$ENDIF}
 
@@ -330,6 +348,22 @@ begin
 end;
 
 
+{$IFDEF MouseClickSupport}
+  procedure TDynTFTTabButton_OnDynTFTBaseInternalClick(ABase: PDynTFTBaseComponent);
+  begin
+    (* implement these if TabButton can be part of a more complex component
+    {$IFDEF IsDesktop}
+      if Assigned(PDynTFTTabButton(TPtrRec(ABase))^.OnOwnerInternalClick) then
+        if Assigned(PDynTFTTabButton(TPtrRec(ABase))^.OnOwnerInternalClick^) then
+    {$ELSE}
+      if PDynTFTTabButton(TPtrRec(ABase))^.OnOwnerInternalClick <> nil then
+    {$ENDIF}
+        PDynTFTTabButton(TPtrRec(ABase))^.OnOwnerInternalClick^(ABase);
+    *)
+  end;
+{$ENDIF}
+
+
 procedure TDynTFTabButton_OnDynTFTBaseInternalRepaint(ABase: PDynTFTBaseComponent; FullRepaint: Boolean; Options: TPtr; ComponentFromArea: PDynTFTBaseComponent);
 begin
   if Options = CREPAINTONMOUSEUP then
@@ -351,6 +385,9 @@ begin
     ABaseEventReg.MouseDownEvent^ := TDynTFTTabButton_OnDynTFTBaseInternalMouseDown;
     //ABaseEventReg.MouseMoveEvent^ := TDynTFTTabButton_OnDynTFTBaseInternalMouseMove;
     //ABaseEventReg.MouseUpEvent^ := TDynTFTTabButton_OnDynTFTBaseInternalMouseUp;
+    {$IFDEF MouseClickSupport}
+      //ABaseEventRegClickEvent^ := TDynTFTTabButton_OnDynTFTBaseInternalClick;
+    {$ENDIF}
     ABaseEventReg.Repaint^ := TDynTFTabButton_OnDynTFTBaseInternalRepaint;
 
     {$IFDEF RTTIREG}
@@ -361,6 +398,9 @@ begin
     ABaseEventReg.MouseDownEvent := @TDynTFTTabButton_OnDynTFTBaseInternalMouseDown;
     //ABaseEventReg.MouseMoveEvent := @TDynTFTTabButton_OnDynTFTBaseInternalMouseMove;
     //ABaseEventReg.MouseUpEvent := @TDynTFTTabButton_OnDynTFTBaseInternalMouseUp;
+    {$IFDEF MouseClickSupport}
+      //ABaseEventRegClickEvent := @TDynTFTTabButton_OnDynTFTBaseInternalClick;
+    {$ENDIF}
     ABaseEventReg.Repaint := @TDynTFTabButton_OnDynTFTBaseInternalRepaint;
 
     {$IFDEF RTTIREG}

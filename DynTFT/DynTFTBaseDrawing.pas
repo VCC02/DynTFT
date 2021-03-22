@@ -259,16 +259,22 @@ type
     New(ABase^.BaseProps.OnMouseDownUser);
     New(ABase^.BaseProps.OnMouseMoveUser);
     New(ABase^.BaseProps.OnMouseUpUser);
-    {$IFDEF ComponentsHaveName}
-      ABase^.BaseProps.Name := ''; //New(ABase^.BaseProps.Name);
+    {$IFDEF MouseClickSupport}
+      New(ABase^.BaseProps.OnClickUser);
     {$ENDIF}
 
     {$IFDEF ComponentsHaveName}
+      ABase^.BaseProps.Name := '';
+    {$ENDIF}
+
+    {$IFDEF ComponentsHaveName}
+      {$IFDEF IsDesktop}
         {DynTFT_DebugConsole('--- Allocating user event handlers of component $' + IntToHex(TPTr(ABase), 8) +
                             '  Addr(Down) = $' + IntToHex(TPTr(ABase^.BaseProps.OnMouseDownUser), 8) +
                             '  Addr(Move) = $' + IntToHex(TPTr(ABase^.BaseProps.OnMouseMoveUser), 8) +
                             '  Addr(Up) = $' + IntToHex(TPTr(ABase^.BaseProps.OnMouseUpUser), 8)
                             );}
+      {$ENDIF}
     {$ENDIF}
   end;
 
@@ -277,24 +283,32 @@ type
   begin
     try
       {$IFDEF ComponentsHaveName}
-        {DynTFT_DebugConsole('--- Disposing user event handlers of component $' + IntToHex(TPTr(ABase), 8) +  ': ' + ABase^.BaseProps.Name +
-                            '  Addr(Down) = $' + IntToHex(TPTr(ABase^.BaseProps.OnMouseDownUser), 8) +
-                            '  Addr(Move) = $' + IntToHex(TPTr(ABase^.BaseProps.OnMouseMoveUser), 8) +
-                            '  Addr(Up) = $' + IntToHex(TPTr(ABase^.BaseProps.OnMouseUpUser), 8)
-                            );}
+        {$IFDEF IsDesktop}
+          {DynTFT_DebugConsole('--- Disposing user event handlers of component $' + IntToHex(TPTr(ABase), 8) +  ': ' + ABase^.BaseProps.Name +
+                              '  Addr(Down) = $' + IntToHex(TPTr(ABase^.BaseProps.OnMouseDownUser), 8) +
+                              '  Addr(Move) = $' + IntToHex(TPTr(ABase^.BaseProps.OnMouseMoveUser), 8) +
+                              '  Addr(Up) = $' + IntToHex(TPTr(ABase^.BaseProps.OnMouseUpUser), 8)
+                              );}
+        {$ENDIF}
       {$ENDIF}
 
       Dispose(ABase^.BaseProps.OnMouseDownUser);
       Dispose(ABase^.BaseProps.OnMouseMoveUser);
       Dispose(ABase^.BaseProps.OnMouseUpUser);
+      {$IFDEF MouseClickSupport}
+        Dispose(ABase^.BaseProps.OnClickUser);
+      {$ENDIF}
+
       {$IFDEF ComponentsHaveName}
-        //Dispose(ABase^.BaseProps.Name);
         ABase^.BaseProps.Name := ''; //ABase^.BaseProps.Name := nil;
       {$ENDIF}
 
       ABase^.BaseProps.OnMouseDownUser := nil;
       ABase^.BaseProps.OnMouseMoveUser := nil;
       ABase^.BaseProps.OnMouseUpUser := nil;
+      {$IFDEF MouseClickSupport}
+        ABase^.BaseProps.OnClickUser := nil;
+      {$ENDIF}
     except
       on E: Exception do
         raise Exception.Create('DynTFTFreeBaseHandlersAndProperties: ' + E.Message);
@@ -317,10 +331,16 @@ begin
     ABase^.BaseProps.OnMouseDownUser^ := nil;
     ABase^.BaseProps.OnMouseMoveUser^ := nil;
     ABase^.BaseProps.OnMouseUpUser^ := nil;
+    {$IFDEF MouseClickSupport}
+      ABase^.BaseProps.OnClickUser^ := nil;
+    {$ENDIF}
   {$ELSE}
     ABase^.BaseProps.OnMouseDownUser := nil;
     ABase^.BaseProps.OnMouseMoveUser := nil;
     ABase^.BaseProps.OnMouseUpUser := nil;
+    {$IFDEF MouseClickSupport}
+      ABase^.BaseProps.OnClickUser := nil;
+    {$ENDIF}
   {$ENDIF}
 end;
 
@@ -383,8 +403,11 @@ end;
 
 
 procedure DisplayOutOfMemory(TextColor: DWord);
+var
+  TempStr: string[23];
 begin
-  DynTFTDisplayErrorMessage(COUTOFMEMORYMESSAGE_MCU, TextColor);
+  TempStr := COUTOFMEMORYMESSAGE_MCU;
+  DynTFTDisplayErrorMessage(TempStr, TextColor);
 
   {if MM_error then //See MemManager
   begin
@@ -393,7 +416,8 @@ begin
 
     DynTFT_Set_Font(@TFT_defaultFont, TextColor, 0);  
 
-    DynTFT_Write_Text('Memory Eror', 10, 20);
+    TempStr := 'Memory Eror';
+    DynTFT_Write_Text(TempStr, 10, 20);
   end;}
 end;
 
@@ -563,7 +587,7 @@ end;
 {$IFDEF RTTIREG}
   {
     The purpose of DynTFTComponent_CreateFromReg and DynTFTComponent_DestroyFromReg is to create and destroy a component,
-    without directly call its "constructor" and "destructor". They are called via function/procedure pointers.
+    without directly calling its "constructor" and "destructor". They are called via function/procedure pointers.
 
     This is useful to automate creation and destruction of components, based on their ComponentType information,
     using commands stored externally (SD card, USB drive etc).
@@ -725,6 +749,7 @@ Header              |          5         |                           0          
     IsIndex: Boolean;
     TempBuffer: TPtr;  //pointer size (2, 4, or 8 bytes)
     IndexOfHandlerOrFont: Byte;
+    TempStr: string[23];
   begin
     FirstDWord := PropertyMetadata^[0]; //DWord(PropertyMetadata^);
 
@@ -767,7 +792,8 @@ Header              |          5         |                           0          
         {$IFDEF IsDesktop}
           DynTFT_DebugConsole('Expected an array of handlers (and/or fonts) to be provided to ExecuteRTTIInstructions procedure. This handler or font is not set.');
         {$ELSE}
-          DynTFTDisplayErrorMessage(CHANDLERSARRAYNOTSET, CL_RED); //Display an error even on MCU, to detect a bad setting (or bug). This happens when the instruction is set to use handler indexes instead of addresses (bit "IsIndex" is 1), but there is no array of addresses to be indexed.  The "IsIndex" bit is usually set if no .lst file is provided when generating the instructions (either code or .dyntftui file).
+          TempStr := CHANDLERSARRAYNOTSET;
+          DynTFTDisplayErrorMessage(TempStr, CL_RED); //Display an error even on MCU, to detect a bad setting (or bug). This happens when the instruction is set to use handler indexes instead of addresses (bit "IsIndex" is 1), but there is no array of addresses to be indexed.  The "IsIndex" bit is usually set if no .lst file is provided when generating the instructions (either code or .dyntftui file).
         {$ENDIF}
         Exit;
       end;
@@ -838,6 +864,7 @@ Header              |          5         |                           0          
     InstructionCode, InstructionOptions: Byte;
     PropertyLength: Byte;
     //ConvRes: string[20]; //for debugging only
+    TempStr: string[26];
   begin
     NextComponentIndex := -1;
     InstructionSize := 0;
@@ -887,7 +914,7 @@ Header              |          5         |                           0          
               begin
                 {$IFDEF IsDesktop}
                   if AllCreatedComponents^[NextComponentIndex]^ <> nil then
-                    DynTFT_DebugConsole('Recreating component from instruction (maybe it was already created on startup).  IndexOfComponent: ' + IntToStr(NextComponentIndex) + '   Comptype: ' + IntToStr(AllCreatedComponents^[NextComponentIndex]^^.BaseProps.ComponentType) + '  ScreenIndex: ' + IntToStr(AllCreatedComponents^[NextComponentIndex]^^.BaseProps.ScreenIndex) + '  Left: ' + IntToStr(AllCreatedComponents^[NextComponentIndex]^^.BaseProps.Left) + '  Top: ' + IntToStr(AllCreatedComponents^[NextComponentIndex]^^.BaseProps.Top));
+                    DynTFT_DebugConsole('Error: Recreating component from instruction (maybe it was already created on startup).  IndexOfComponent: ' + IntToStr(NextComponentIndex) + '   Comptype: ' + IntToStr(AllCreatedComponents^[NextComponentIndex]^^.BaseProps.ComponentType) + '  ScreenIndex: ' + IntToStr(AllCreatedComponents^[NextComponentIndex]^^.BaseProps.ScreenIndex) + '  Left: ' + IntToStr(AllCreatedComponents^[NextComponentIndex]^^.BaseProps.Left) + '  Top: ' + IntToStr(AllCreatedComponents^[NextComponentIndex]^^.BaseProps.Top));
                 {$ENDIF}
 
                 {$IFDEF IsDesktop}
@@ -984,7 +1011,8 @@ Header              |          5         |                           0          
 
             if (ABinaryComponentsData^[1] and $0000FFFF) <> (ABinaryComponentsData^[0] and $0000FFFF) then      // [0] is the current instruction,  [1] is callback result
             begin
-              DynTFTDisplayErrorMessage(CRTTIDATAOUTOFDATE, CL_RED);
+              TempStr := CRTTIDATAOUTOFDATE;
+              DynTFTDisplayErrorMessage(TempStr, CL_RED);
               {$IFDEF IsDesktop}
                 raise Exception.Create(CRTTIDATAOUTOFDATE + '.   The .dyntftui build number does not match the generated code. Please regenerate the code and .dyntftui files.  Const BuildNumber: ' + IntToStr(ABinaryComponentsData^[1] and $FFFF) + '  .dyntftui BuildNumber: ' + IntToStr(ABinaryComponentsData^[0] and $FFFF));
               {$ELSE}
@@ -997,7 +1025,8 @@ Header              |          5         |                           0          
         CRTTIInstruction_Header :
         begin
           InstructionSize := 1;
-          DynTFTDisplayErrorMessage(CRTTIFILEPOINTERNOTSETTOINSTRUCTION, CL_RED);
+          TempStr := CRTTIFILEPOINTERNOTSETTOINSTRUCTION;
+          DynTFTDisplayErrorMessage(TempStr, CL_RED);
           {$IFDEF IsDesktop}
             DynTFT_DebugConsole(CRTTIFILEPOINTERNOTSETTOINSTRUCTION + '.   The file pointer in .dyntftui file has to be set to the first instruction, before starting the RTTI instruction execution, i.e. before calling DynTFT_GUI_Start.');
           {$ENDIF}
@@ -1021,6 +1050,9 @@ begin
     New(ABaseEventReg.MouseDownEvent);
     New(ABaseEventReg.MouseMoveEvent);
     New(ABaseEventReg.MouseUpEvent);
+    {$IFDEF MouseClickSupport}
+      New(ABaseEventReg.ClickEvent);
+    {$ENDIF}
     New(ABaseEventReg.Repaint);
     New(ABaseEventReg.BlinkCaretState);
 
@@ -1032,6 +1064,9 @@ begin
     ABaseEventReg.MouseDownEvent^ := nil;
     ABaseEventReg.MouseMoveEvent^ := nil;
     ABaseEventReg.MouseUpEvent^ := nil;
+    {$IFDEF MouseClickSupport}
+      ABaseEventReg.ClickEvent^ := nil;
+    {$ENDIF}
     ABaseEventReg.Repaint^ := nil;
     ABaseEventReg.BlinkCaretState^ := nil;
 
@@ -1044,6 +1079,9 @@ begin
     ABaseEventReg.MouseDownEvent := nil;
     ABaseEventReg.MouseMoveEvent := nil;
     ABaseEventReg.MouseUpEvent := nil;
+    {$IFDEF MouseClickSupport}
+      ABaseEventReg.ClickEvent := nil;
+    {$ENDIF}
     ABaseEventReg.Repaint := nil;
     ABaseEventReg.BlinkCaretState := nil;
 
@@ -1066,6 +1104,9 @@ end;
     Dispose(ABaseEventReg.MouseDownEvent);
     Dispose(ABaseEventReg.MouseMoveEvent);
     Dispose(ABaseEventReg.MouseUpEvent);
+    {$IFDEF MouseClickSupport}
+      Dispose(ABaseEventReg.ClickEvent);
+    {$ENDIF}
     Dispose(ABaseEventReg.Repaint);
     Dispose(ABaseEventReg.BlinkCaretState);
 
@@ -1077,6 +1118,9 @@ end;
     ABaseEventReg.MouseDownEvent := nil;
     ABaseEventReg.MouseMoveEvent := nil;
     ABaseEventReg.MouseUpEvent := nil;
+    {$IFDEF MouseClickSupport}
+      ABaseEventReg.ClickEvent := nil;
+    {$ENDIF}
     ABaseEventReg.Repaint := nil;
     ABaseEventReg.BlinkCaretState := nil;
 
@@ -1200,6 +1244,9 @@ begin
     DynTFTRegisteredComponents[DynTFTRegisteredComponentCount].MouseDownEvent^ := ABaseEventReg^.MouseDownEvent^;
     DynTFTRegisteredComponents[DynTFTRegisteredComponentCount].MouseMoveEvent^ := ABaseEventReg^.MouseMoveEvent^;
     DynTFTRegisteredComponents[DynTFTRegisteredComponentCount].MouseUpEvent^ := ABaseEventReg^.MouseUpEvent^;
+    {$IFDEF MouseClickSupport}
+      DynTFTRegisteredComponents[DynTFTRegisteredComponentCount].ClickEvent^ := ABaseEventReg^.ClickEvent^;
+    {$ENDIF}
     DynTFTRegisteredComponents[DynTFTRegisteredComponentCount].Repaint^ := ABaseEventReg^.Repaint^;
     DynTFTRegisteredComponents[DynTFTRegisteredComponentCount].BlinkCaretState^ := ABaseEventReg^.BlinkCaretState^;
 
@@ -1211,6 +1258,9 @@ begin
     DynTFTRegisteredComponents[DynTFTRegisteredComponentCount].MouseDownEvent := ABaseEventReg^.MouseDownEvent;
     DynTFTRegisteredComponents[DynTFTRegisteredComponentCount].MouseMoveEvent := ABaseEventReg^.MouseMoveEvent;
     DynTFTRegisteredComponents[DynTFTRegisteredComponentCount].MouseUpEvent := ABaseEventReg^.MouseUpEvent;
+    {$IFDEF MouseClickSupport}
+      DynTFTRegisteredComponents[DynTFTRegisteredComponentCount].ClickEvent := ABaseEventReg^.ClickEvent;
+    {$ENDIF}
     DynTFTRegisteredComponents[DynTFTRegisteredComponentCount].Repaint := ABaseEventReg^.Repaint;
     DynTFTRegisteredComponents[DynTFTRegisteredComponentCount].BlinkCaretState := ABaseEventReg^.BlinkCaretState;
 
@@ -1305,11 +1355,14 @@ var
 begin
   DynTFTAllocateInternalHandlers(ABaseEventReg);
   {$IFDEF IsDesktop}
-    //The following assignments, which are commented, are not used, because these fields are initialized in InitComponentTypeRegistration.
+    //The following assignments, which are commented, are not used, because these fields are initialized in InitComponentTypeRegistration (see DynTFTAllocateInternalHandlers).
 
     //ABaseEventReg.MouseDownEvent^ := nil;
     //ABaseEventReg.MouseMoveEvent^ := nil;
     //ABaseEventReg.MouseUpEvent^ := nil;
+    {$IFDEF MouseClickSupport}
+      //ABaseEventReg.ClickEvent^ := nil;
+    {$ENDIF}
     ABaseEventReg.Repaint^ := TDynTFTComponentContainer_OnDynTFTBaseInternalRepaint;
     //ABaseEventReg.BlinkCaretState^ := nil;
 
@@ -1321,6 +1374,9 @@ begin
     //ABaseEventReg.MouseDownEvent := nil;
     //ABaseEventReg.MouseMoveEvent := nil;
     //ABaseEventReg.MouseUpEvent := nil;
+    {$IFDEF MouseClickSupport}
+      //ABaseEventReg.ClickEvent := nil;
+    {$ENDIF}
     ABaseEventReg.Repaint := @TDynTFTComponentContainer_OnDynTFTBaseInternalRepaint;
     //ABaseEventReg.BlinkCaretState := nil;
     {$IFDEF RTTIREG}
@@ -1793,11 +1849,11 @@ end;
 
 
 {$IFDEF IsDesktop}
-var
-  iii: Integer;
-begin
-  for iii := 0 to CDynTFTMaxComponentsContainer - 1 do
-    DynTFTAllComponentsContainer[iii].ScreenContainer := nil;
+  var
+    iii: Integer;
+  begin
+    for iii := 0 to CDynTFTMaxComponentsContainer - 1 do
+      DynTFTAllComponentsContainer[iii].ScreenContainer := nil;
 {$ENDIF}
 
 end.

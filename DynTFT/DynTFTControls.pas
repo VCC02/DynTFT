@@ -131,8 +131,36 @@ begin
   {$ELSE}
     if ABase^.BaseProps.OnMouseUpUser <> nil then
   {$ENDIF}
-      ABase^.BaseProps.OnMouseUpUser^(PPtrRec(TPtrRec(ABase)));                  
+      ABase^.BaseProps.OnMouseUpUser^(PPtrRec(TPtrRec(ABase)));
 end;
+
+
+{$IFDEF MouseClickSupport}
+  procedure OnDynTFTBaseInternalClick(ABase: PDynTFTBaseComponent);
+  var
+    ComponentTypeIndex: Integer;
+  begin
+    ComponentTypeIndex := ABase^.BaseProps.ComponentType;
+
+    //Internal handler
+    {$IFDEF IsDesktop}
+      if Assigned(DynTFTRegisteredComponents[ComponentTypeIndex].ClickEvent) then    //If the compiler says something like "Undeclared identifier MouseClickEvent", then please rebuild the whole project.
+        if Assigned(DynTFTRegisteredComponents[ComponentTypeIndex].ClickEvent^) then
+    {$ELSE}
+      if DynTFTRegisteredComponents[ComponentTypeIndex].ClickEvent <> nil then
+    {$ENDIF}
+        DynTFTRegisteredComponents[ComponentTypeIndex].ClickEvent^(ABase);
+
+    //user handler
+    {$IFDEF IsDesktop}
+      if Assigned(ABase^.BaseProps.OnClickUser) then
+        if Assigned(ABase^.BaseProps.OnClickUser^) then
+    {$ELSE}
+      if ABase^.BaseProps.OnClickUser <> nil then
+    {$ENDIF}
+        ABase^.BaseProps.OnClickUser^(PPtrRec(TPtrRec(ABase)));
+  end;
+{$ENDIF}
 
 
 procedure ExecuteComponentHandlers_FirstAction(ScreenIndex: Byte; MouseIsDown: Boolean);
@@ -194,7 +222,10 @@ begin
               if ComponentPressed then
               begin
                 ABase^.BaseProps.CompState := ABase^.BaseProps.CompState xor CPRESSED; //MouseIsDown
-                OnDynTFTBaseInternalMouseUp(ABase);        //this can be used for OnClick, because it is over component
+                OnDynTFTBaseInternalMouseUp(ABase);
+                {$IFDEF MouseClickSupport}
+                  OnDynTFTBaseInternalClick(ABase);
+                {$ENDIF}
               end;
             end;
           end
