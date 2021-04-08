@@ -45,7 +45,15 @@ uses
   ;
 
 const
-  CMaxKeyButtonStringLength = 11; //n * 4 - 1
+  {$IFDEF UseExternalKeyButtonStringLength}
+    {$IFDEF ExternalKeyButtonStringLengthAtProjectLevel}
+      {$I ExternalKeyButtonStringLength.inc}
+    {$ELSE}
+      {$I ..\ExternalKeyButtonStringLength.inc}
+    {$ENDIF}
+  {$ELSE}
+    CMaxKeyButtonStringLength = 11; //n * 4 - 1
+  {$ENDIF}
 
 type
   TDynTFTKeyButtonCaption = string[CMaxKeyButtonStringLength];
@@ -221,6 +229,10 @@ begin
     Result^.OnGenerateDrawingUser^ := nil;
   {$ELSE}
     Result^.OnGenerateDrawingUser := nil;
+  {$ENDIF}
+
+  {$IFDEF IsDesktop}
+    DynTFTDisplayErrorOnStringConstLength(CMaxKeyButtonStringLength, 'PDynTFTKeyButton');
   {$ENDIF}
 end;
 

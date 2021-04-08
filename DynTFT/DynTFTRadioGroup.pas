@@ -46,7 +46,16 @@ uses
   ;
 
 const
-  CMaxRadioGroupStringLength = 19; //n * 4 - 1
+  {$IFDEF UseExternalRadioGroupStringLength}
+    {$IFDEF ExternalRadioGroupStringLengthAtProjectLevel}
+      {$I ExternalRadioGroupStringLength.inc}
+    {$ELSE}
+      {$I ..\ExternalRadioGroupStringLength.inc}
+    {$ENDIF}
+  {$ELSE}
+    CMaxRadioGroupStringLength = 19; //n * 4 - 1
+  {$ENDIF}
+
   CMaxRadioGroupButtonCount = 20;
 
 type
@@ -321,7 +330,11 @@ begin
 
   {$IFDEF DynTFTFontSupport}
     Result^.ActiveFont := @TFT_defaultFont;
-  {$ENDIF} 
+  {$ENDIF}
+
+  {$IFDEF IsDesktop}
+    DynTFTDisplayErrorOnStringConstLength(CMaxRadioGroupStringLength, 'PDynTFTRadioGroup');
+  {$ENDIF}
 end;
 
 

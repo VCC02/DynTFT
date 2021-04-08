@@ -99,6 +99,7 @@ procedure Arrow5_OnClickUser(Sender: PPtrRec); //CodegenSym:header
 procedure ComboBoxItems_OnClickUser(Sender: PPtrRec); //CodegenSym:header
 procedure ListBoxItems_OnClickUser(Sender: PPtrRec); //CodegenSym:header
 procedure rdgrpTest_OnClickUser(Sender: PPtrRec); //CodegenSym:header
+procedure trbBacklight_OnTrackBarChange(Sender: PPtrRec); //CodegenSym:header
 
 //CodegenSym:AllBinHandlersBegin
 
@@ -202,8 +203,8 @@ procedure btnShowMessageBox_OnMouseUpUser(Sender: PPtrRec); //CodegenSym:handler
 var
   AButton: PDynTFTButton;
   Res: Integer;                                
-  MBMsg: string {$IFNDEF IsDesktop}[CMessageBoxMaxTextLength] {$ENDIF};
-  MBTitle: string {$IFNDEF IsDesktop}[CMessageBoxMaxTitleLength] {$ENDIF};
+  MBMsg: string {$IFNDEF IsDesktop}[CMaxMessageBoxTextLength] {$ENDIF};
+  MBTitle: string {$IFNDEF IsDesktop}[CMaxMessageBoxTitleLength] {$ENDIF};
 begin //CodegenSym:handler:begin
   AButton := PDynTFTButton(TPtrRec(Sender));
   MBMsg := 'This is a very long messagebox.';
@@ -245,7 +246,7 @@ var
 begin //CodegenSym:handler:begin
   DynTFT_Set_Pen(DynTFTAllComponentsContainer[PageControl1^.ActiveIndex].ScreenColor, 1);
   DynTFT_Set_Brush(1, DynTFTAllComponentsContainer[PageControl1^.ActiveIndex].ScreenColor, 0, 0, 0, 0);
-  DynTFT_Rectangle(0, 21, TFT_DISP_WIDTH, TFT_DISP_HEIGHT);
+  DynTFT_Rectangle(0, PageControl1^.BaseProps.Height + 2, TFT_DISP_WIDTH, TFT_DISP_HEIGHT);
 
   for i := 1 to PageControl1^.PageCount {- 1} do
   begin
@@ -301,6 +302,29 @@ begin //CodegenSym:handler:begin
     DynTFT_DebugConsole('rdgrpTest_OnClickUser');
   {$ENDIF}
 end; //CodegenSym:handler:end
+
+
+procedure trbBacklight_OnTrackBarChange(Sender: PPtrRec); //CodegenSym:handler
+var
+  TrbPosStr: string {$IFDEF IsMCU}[4]{$ENDIF};
+  NewCaption: string {$IFDEF IsMCU}[20]{$ENDIF};
+begin //CodegenSym:handler:begin
+  NewCaption := 'Backlight: ';
+  
+  {$IFDEF IsMCU}
+    TFT_Set_DBC_SSD1963(trbBackLight^.Position);
+
+    ByteToStr(Lo(trbBackLight^.Position), TrbPosStr);
+
+    StrCat(NewCaption, TrbPosStr);
+  {$ELSE}
+    TrbPosStr := IntToStr(trbBackLight^.Position);
+    NewCaption := NewCaption + TrbPosStr;
+  {$ENDIF}
+  
+  DynTFTLabel_UpdateCaption(lblBacklight, NewCaption);
+end; //CodegenSym:handler:end
+
 
 
 

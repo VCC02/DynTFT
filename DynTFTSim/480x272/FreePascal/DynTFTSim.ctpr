@@ -105,7 +105,9 @@
       </Options>
     </Linking>
     <Other>
-      <CustomOptions Value="-dDynTFTFontSupport"/>
+      <CustomOptions Value="-dDynTFTFontSupport
+-dMouseClickSupport
+-dColorThemeFromLib"/>
     </Other>
   </CompilerOptions>
   <Debugging>

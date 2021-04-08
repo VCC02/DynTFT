@@ -45,7 +45,15 @@ uses
   ;
 
 const
-  CMaxLabelStringLength = 19; //n * 4 - 1
+  {$IFDEF UseExternalLabelStringLength}
+    {$IFDEF ExternalLabelStringLengthAtProjectLevel}
+      {$I ExternalLabelStringLength.inc}
+    {$ELSE}
+      {$I ..\ExternalLabelStringLength.inc}
+    {$ENDIF}
+  {$ELSE}
+    CMaxLabelStringLength = 19; //n * 4 - 1
+  {$ENDIF}
 
 type
   TDynTFTLabel = record
@@ -186,6 +194,10 @@ begin
                             '  Addr(Up) = $' + IntToHex(TPTr(Result^.OnOwnerInternalMouseUp), 8)
                             );}
     {$ENDIF}
+  {$ENDIF}
+
+  {$IFDEF IsDesktop}
+    DynTFTDisplayErrorOnStringConstLength(CMaxLabelStringLength, 'PDynTFTLabel');
   {$ENDIF}
 end;
 

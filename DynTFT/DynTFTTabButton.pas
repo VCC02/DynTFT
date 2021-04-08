@@ -45,7 +45,15 @@ uses
   ;
 
 const
-  CMaxTabButtonStringLength = 19; //n * 4 - 1
+  {$IFDEF UseExternalTabButtonStringLength}
+    {$IFDEF ExternalTabButtonStringLengthAtProjectLevel}
+      {$I ExternalTabButtonStringLength.inc}
+    {$ELSE}
+      {$I ..\ExternalTabButtonStringLength.inc}
+    {$ENDIF}
+  {$ELSE}
+    CMaxTabButtonStringLength = 19; //n * 4 - 1
+  {$ENDIF}
 
 type
   TDynTFTTabButton = record
@@ -231,6 +239,10 @@ begin
       //Result^.OnOwnerInternalClick := nil;
     {$ENDIF}
     Result^.OnOwnerInternalBeforeDestroy := nil;
+  {$ENDIF}
+
+  {$IFDEF IsDesktop}
+    DynTFTDisplayErrorOnStringConstLength(CMaxTabButtonStringLength, 'PDynTFTTabButton');
   {$ENDIF}
 end;
 

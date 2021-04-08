@@ -555,6 +555,23 @@ begin
   {$ELSE}
     btnShowMessageBox^.BaseProps.OnMouseUpUser := @btnShowMessageBox_OnMouseUpUser;
   {$ENDIF}
+
+  trbBacklight := DynTFTTrackBar_CreateWithDir(6, 298, 226, 170, 27, CTrackBarHorizDir);
+  {$DEFINE trbBacklight_Enabled_1}
+  {$IFDEF trbBacklight_Enabled_0}
+    DynTFTDisableTrackBar(trbBacklight);
+  {$ENDIF}
+  trbBacklight^.Min := 30;
+  trbBacklight^.Max := 255;
+  trbBacklight^.Position := 50;
+  {$IFDEF IsDesktop}
+    trbBacklight^.OnTrackBarChange^ := trbBacklight_OnTrackBarChange;
+  {$ELSE}
+    trbBacklight^.OnTrackBarChange := @trbBacklight_OnTrackBarChange;
+  {$ENDIF}
+
+  lblBacklight := DynTFTLabel_Create(6, 298, 193, 95, 22);
+  lblBacklight^.Caption := C_lblBacklight_Caption; //'Backlight'
 end;
 
 procedure DrawGUI;

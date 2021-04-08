@@ -47,7 +47,16 @@ uses
 const
   CEditSpacing = 4; //px
   CEditTotalSpacing = CEditSpacing * 2;
-  CEditMaxTextLength = 159;
+
+  {$IFDEF UseExternalEditStringLength}
+    {$IFDEF ExternalEditStringLengthAtProjectLevel}
+      {$I ExternalEditStringLength.inc}
+    {$ELSE}
+      {$I ..\ExternalEditStringLength.inc}
+    {$ENDIF}
+  {$ELSE}
+    CMaxEditStringLength = 159; //n * 4 - 1
+  {$ENDIF}
 
   CDynTFTEditDrawCaret_Color_Hide = 0;
   CDynTFTEditDrawCaret_Color_Show = 1;
@@ -55,7 +64,7 @@ const
   CDynTFTEditDrawCaret_Color_Error = 3;
 
 type
-  TEditTextString = string[CEditMaxTextLength];
+  TEditTextString = string[CMaxEditStringLength];
 
   TDynTFTEdit = record
     BaseProps: TDynTFTBaseProperties;  //inherited properties from TDynTFTBaseProperties - must be the first field of this structure !!!
@@ -572,7 +581,7 @@ begin
   if APDynTFTEdit^.Readonly then
     Exit;
     
-  if Length(APDynTFTEdit^.Text) + Length(NewText) > CEditMaxTextLength then
+  if Length(APDynTFTEdit^.Text) + Length(NewText) > CMaxEditStringLength then
   begin
     DynTFTDrawEditCaret(APDynTFTEdit, CDynTFTEditDrawCaret_Color_Error);
     Exit;
@@ -663,6 +672,10 @@ begin
     {$IFDEF MouseClickSupport}
       Result^.OnOwnerInternalClick := nil;
     {$ENDIF}
+  {$ENDIF}
+
+  {$IFDEF IsDesktop}
+    DynTFTDisplayErrorOnStringConstLength(CMaxEditStringLength, 'PDynTFTEdit');
   {$ENDIF}
 end;
 

@@ -147,6 +147,11 @@ procedure DynTFTChangeComponentPosition(AComp: PDynTFTBaseComponent; NewLeft, Ne
 
 procedure DynTFTDisplayErrorMessage({$IFDEF IsMCU}var{$ENDIF} AMessage: string; TextColor: DWord);
 
+
+{$IFDEF IsDesktop}
+  procedure DynTFTDisplayErrorOnStringConstLength(AStringConstLength: Integer; ComponentDataTypeName: string);
+{$ENDIF}
+
 const
   //Component state constants (defined here, not in DynTFTConsts.pas)
 
@@ -749,7 +754,10 @@ Header              |          5         |                           0          
     IsIndex: Boolean;
     TempBuffer: TPtr;  //pointer size (2, 4, or 8 bytes)
     IndexOfHandlerOrFont: Byte;
-    TempStr: string[23];
+
+    {$IFNDEF IsDesktop}
+      TempStr: string[23];
+    {$ENDIF}  
   begin
     FirstDWord := PropertyMetadata^[0]; //DWord(PropertyMetadata^);
 
@@ -1846,6 +1854,26 @@ begin
   //DynTFTRepaintScreenComponentsFromArea(AComp);
   OnDynTFTBaseInternalRepaint(AComp, True, CNORMALREPAINT, nil);
 end;
+
+
+
+{$IFDEF IsDesktop}
+  procedure DynTFTDisplayErrorOnStringConstLength(AStringConstLength: Integer; ComponentDataTypeName: string);
+  var
+    SizeOfPointer: Integer;
+    Example: string;
+  begin
+    SizeOfPointer := SizeOf(TPtr);
+    if (AStringConstLength + 1) mod 4 {SizeOfPointer} <> 0 then       // SizeOfPointer will be 8 on 64-bit, which will cause these warnings to appear. Missaligned 64-bit pointes on desktop might still work.
+    begin
+      Example := IntToStr(2 * SizeOfPointer - 1) + ', ' + IntToStr(3 * SizeOfPointer - 1) + ', ' + IntToStr(4 * SizeOfPointer - 1);
+      DynTFT_DebugConsole('The length of a string constant might cause misaligned pointers in ' + ComponentDataTypeName + ' structure. Currently, it is ' + IntToStr(AStringConstLength) + '.');
+      DynTFT_DebugConsole('This string length may need to be of "n * SizeOf(TPtr) - 1" format, e.g.: ' + Example + ' etc.');
+      DynTFT_DebugConsole('The structure members, defined after the string, will be allocated at missaligned addresses.');
+      DynTFT_DebugConsole('');
+    end;
+  end;
+{$ENDIF}
 
 
 {$IFDEF IsDesktop}

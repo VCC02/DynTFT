@@ -163,8 +163,8 @@ procedure btnShowMessageBox_OnMouseUpUser(Sender: PPtrRec); //CodegenSym:handler
 var
   AButton: PDynTFTButton;
   Res: Integer;                                
-  MBMsg: string {$IFNDEF IsDesktop}[CMessageBoxMaxTextLength] {$ENDIF};
-  MBTitle: string {$IFNDEF IsDesktop}[CMessageBoxMaxTitleLength] {$ENDIF};
+  MBMsg: string {$IFNDEF IsDesktop}[CMaxMessageBoxTextLength] {$ENDIF};
+  MBTitle: string {$IFNDEF IsDesktop}[CMaxMessageBoxTitleLength] {$ENDIF};
 begin //CodegenSym:handler:begin
   AButton := PDynTFTButton(TPtrRec(Sender));
   MBMsg := 'This is a very long messagebox.';

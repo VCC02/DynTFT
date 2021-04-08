@@ -45,7 +45,15 @@ uses
   ;
 
 const
-  CMaxPanelStringLength = 19; //n * 4 - 1
+  {$IFDEF UseExternalPanelStringLength}
+    {$IFDEF ExternalPanelStringLengthAtProjectLevel}
+      {$I ExternalPanelStringLength.inc}
+    {$ELSE}
+      {$I ..\ExternalPanelStringLength.inc}
+    {$ENDIF}
+  {$ELSE}
+    CMaxPanelStringLength = 19; //n * 4 - 1
+  {$ENDIF}
 
 type
   TDynTFTPanel = record
@@ -224,6 +232,10 @@ begin
     {$IFDEF MouseClickSupport}
       Result^.OnOwnerInternalClick := nil;
     {$ENDIF}
+  {$ENDIF}
+
+  {$IFDEF IsDesktop}
+    DynTFTDisplayErrorOnStringConstLength(CMaxPanelStringLength, 'PDynTFTPanel');
   {$ENDIF}
 end;
 

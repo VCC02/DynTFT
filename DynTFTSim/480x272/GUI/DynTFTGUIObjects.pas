@@ -111,6 +111,8 @@ var
   ProgressBar1: PDynTFTProgressBar;
   ProgressBar2: PDynTFTProgressBar;
   btnShowMessageBox: PDynTFTButton;
+  trbBacklight: PDynTFTTrackBar;
+  lblBacklight: PDynTFTLabel;
 
 //RadioGroup code
 type
@@ -220,6 +222,7 @@ const
   C_ListBox4_Items_Strings_Item_8 = 'nine';
   C_ListBox4_Items_Strings_Item_9 = 'ten';
   C_btnShowMessageBox_Caption = 'Message Box';
+  C_lblBacklight_Caption = 'Backlight';
 
   {$IFDEF RTTIREG}
       CAllCreatedBinComponents: array[0..0] of ^PDynTFTBaseComponent = (nil);  // No binary component with global variable.

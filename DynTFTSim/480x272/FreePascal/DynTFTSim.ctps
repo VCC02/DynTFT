@@ -62,10 +62,9 @@
         <ComponentName Value="frmDynTFTSimScreen"/>
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
-        <IsVisibleTab Value="True"/>
         <EditorIndex Value="2"/>
         <TopLine Value="132"/>
-        <CursorPos X="25" Y="152"/>
+        <CursorPos X="27" Y="142"/>
         <UsageCount Value="22"/>
         <Loaded Value="True"/>
         <LoadedDesigner Value="True"/>
@@ -135,11 +134,12 @@
       </Unit12>
       <Unit13>
         <Filename Value="D:\DynTFT\DynTFTConsts.pas"/>
-        <EditorIndex Value="-1"/>
-        <WindowIndex Value="-1"/>
-        <TopLine Value="-1"/>
-        <CursorPos X="-1" Y="-1"/>
+        <IsVisibleTab Value="True"/>
+        <EditorIndex Value="3"/>
+        <TopLine Value="100"/>
+        <CursorPos X="28" Y="116"/>
         <UsageCount Value="20"/>
+        <Loaded Value="True"/>
         <DefaultSyntaxHighlighter Value="Delphi"/>
       </Unit13>
       <Unit14>
@@ -313,7 +313,7 @@
         <DefaultSyntaxHighlighter Value="Delphi"/>
       </Unit32>
     </Units>
-    <JumpHistory Count="9" HistoryIndex="8">
+    <JumpHistory Count="10" HistoryIndex="9">
       <Position1>
         <Filename Value="DynTFTSimMainForm.pas"/>
         <Caret Line="8" Column="23"/>
@@ -350,6 +350,10 @@
         <Filename Value="DynTFTSimMainForm.pas"/>
         <Caret Line="12" Column="27" TopLine="6"/>
       </Position9>
+      <Position10>
+        <Filename Value="DynTFTSimScreenForm.pas"/>
+        <Caret Line="142" Column="27" TopLine="132"/>
+      </Position10>
     </JumpHistory>
     <RunParams>
       <FormatVersion Value="2"/>

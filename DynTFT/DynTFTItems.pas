@@ -48,7 +48,11 @@ uses
 const
   CMaxItemItemCount = 16;
   {$IFDEF UseExternalItemsStringLength}
-    {$I ExternalItemsStringLength.inc}
+    {$IFDEF ExternalItemsStringLengthAtProjectLevel}
+      {$I ExternalItemsStringLength.inc}
+    {$ELSE}
+      {$I ..\ExternalItemsStringLength.inc}
+    {$ENDIF}
   {$ELSE}
     CMaxItemsStringLength = 19; //n * 4 - 1
   {$ENDIF}
@@ -559,7 +563,11 @@ begin
 
   {$IFDEF DynTFTFontSupport}
     Result^.ActiveFont := @TFT_defaultFont;
-  {$ENDIF} 
+  {$ENDIF}
+
+  {$IFDEF IsDesktop}
+    DynTFTDisplayErrorOnStringConstLength(CMaxItemsStringLength, 'PDynTFTItems');
+  {$ENDIF}
 end;
 
 

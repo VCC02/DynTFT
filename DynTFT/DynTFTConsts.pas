@@ -111,14 +111,22 @@ const
   {$ENDIF}
 
 
-  //{$IFDEF IncludeUserColors}
-    {$I UserColors.inc}
-  //{$ENDIF}
+  {$IFDEF ColorThemeFromLib}          //If using ColorThemeFromLib.inc, please add the theme directory to project search paths, as D:\DynTFTThemes\<ThemeName>\
+    {$IFDEF ColorThemeAtProjectLevel}
+      {$I ColorThemeFromLib.inc}
+    {$ELSE}
+      {$I ..\ColorThemeFromLib.inc}     //Use this file, to point to the color theme from "D:\DynTFTThemes\<ThemeName>" or a similar path. The file should contain full paths to UserColors.inc and DynTFTColorTheme.inc from the <ThemeName> directory.
+    {$ENDIF}
+  {$ELSE}
+    //{$IFDEF IncludeUserColors}
+      {$I UserColors.inc}
+    //{$ENDIF}
 
-  {$IFNDEF ExcludeDynTFTSysColors}
-    //Replace the content of DynTFTColorTheme.inc file with your color theme.
-    {$I DynTFTColorTheme.inc}
-  {$ENDIF}
+    {$IFNDEF ExcludeDynTFTSysColors}
+      //Replace the content of DynTFTColorTheme.inc file with your color theme.
+      {$I DynTFTColorTheme.inc}
+    {$ENDIF}
+  {$ENDIF}  
 
 const                                             
   //constants from Windows unit (Delphi)

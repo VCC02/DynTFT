@@ -16,7 +16,7 @@ If other memory locations are overwritten, input pins may switch to output pins 
 - Users may also forget to rebuild a project after regenerating output files. In that case, DynTFTCodeGen reports that lst files are in sync, but it doesn't know that the binary (exe/hex) was not rebuilt.
 - Beware that if regenerating output files (DynTFTGUIObjects.pas, DynTFTHandlers.pas, *.dyntftui), when configured to read handler addresses from lst files, the current state of lst files is used.
 - Always rebuild, not simply compile projects.
-Although there are some safety measures to prevent running out of date RTTI instructions, you use this feature at you own risk.
+Although there are some safety measures to prevent running "out of date" RTTI instructions, you use this feature at you own risk.
 ------------------------
 
 For using dyntftui files:

@@ -45,7 +45,15 @@ uses
   ;
 
 const
-  CMaxButtonStringLength = 19; //n * 4 - 1
+  {$IFDEF UseExternalButtonStringLength}
+    {$IFDEF ExternalButtonStringLengthAtProjectLevel}
+      {$I ExternalButtonStringLength.inc}
+    {$ELSE}
+      {$I ..\ExternalButtonStringLength.inc}
+    {$ENDIF}
+  {$ELSE}
+    CMaxButtonStringLength = 19; //n * 4 - 1
+  {$ENDIF}
 
 type
   TDynTFTButton = record
@@ -57,7 +65,7 @@ type
     Font_Color: TColor;
     {$IFDEF DynTFTFontSupport}
       ActiveFont: PByte;
-    {$ENDIF}  
+    {$ENDIF}
   end;
   PDynTFTButton = ^TDynTFTButton;
 
@@ -206,7 +214,11 @@ begin
 
   {$IFDEF DynTFTFontSupport}
     Result^.ActiveFont := @TFT_defaultFont;
-  {$ENDIF} 
+  {$ENDIF}
+
+  {$IFDEF IsDesktop}
+    DynTFTDisplayErrorOnStringConstLength(CMaxButtonStringLength, 'PDynTFTButton');
+  {$ENDIF}
 end;
 
 

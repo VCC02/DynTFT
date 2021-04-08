@@ -56,8 +56,25 @@ uses
   ;
 
 const
-  CMessageBoxMaxTitleLength = 19; //n * 4 - 1
-  CMessageBoxMaxTextLength = 159;
+  {$IFDEF UseExternalMessageBoxTitleStringLength}
+    {$IFDEF ExternalMessageBoxTitleStringLengthAtProjectLevel}
+      {$I ExternalMessageBoxTitleStringLength.inc}
+    {$ELSE}
+      {$I ..\ExternalMessageBoxTitleStringLength.inc}
+    {$ENDIF}
+  {$ELSE}
+    CMaxMessageBoxTitleLength = 19; //n * 4 - 1
+  {$ENDIF}
+
+  {$IFDEF UseExternalMessageBoxTextStringLength}
+    {$IFDEF ExternalMessageBoxTextStringLengthAtProjectLevel}
+      {$I ExternalMessageBoxTextStringLength.inc}
+    {$ELSE}
+      {$I ..\ExternalMessageBoxTextStringLength.inc}
+    {$ENDIF}
+  {$ELSE}
+    CMaxMessageBoxTextLength = 159; //n * 4 - 1
+  {$ENDIF}
 
   //constants from Windows unit (Delphi)
   CDynTFT_MB_OK = $0000;
@@ -77,8 +94,8 @@ type
     BaseProps: TDynTFTBaseProperties;  //inherited properties from TDynTFTBaseProperties - must be the first field of this structure !!!
 
     //MessageBox properties
-    Title: string[CMessageBoxMaxTitleLength];
-    Text: string[CMessageBoxMaxTextLength];
+    Title: string[CMaxMessageBoxTitleLength];
+    Text: string[CMaxMessageBoxTextLength];
 
     BtnOK, BtnCancel: PDynTFTButton;   //Yes, No
     ExteriorLabel: PDynTFTLabel;
@@ -314,6 +331,11 @@ begin
   Result^.BtnOK^.Caption := 'OK';
   Result^.BtnCancel^.Caption := 'Cancel';
   Result^.ButtonsType := CDynTFT_MB_OKCANCEL;
+
+  {$IFDEF IsDesktop}
+    DynTFTDisplayErrorOnStringConstLength(CMaxMessageBoxTitleLength, 'PDynTFTMessageBox');
+    DynTFTDisplayErrorOnStringConstLength(CMaxMessageBoxTextLength, 'PDynTFTMessageBox');
+  {$ENDIF}
 end;
 
 
@@ -371,23 +393,23 @@ end;
 
 procedure DynTFTPrepareMessageBoxContent(AMessageBox: PDynTFTMessageBox; var MBMsg, MBTitle: string; ButtonsType: Integer);
 begin
-  if Length(MBTitle) > CMessageBoxMaxTitleLength then
+  if Length(MBTitle) > CMaxMessageBoxTitleLength then
   begin
     {$IFDEF IsDesktop}
-      AMessageBox^.Title := Copy(MBTitle, 1, CMessageBoxMaxTitleLength);
+      AMessageBox^.Title := Copy(MBTitle, 1, CMaxMessageBoxTitleLength);
     {$ELSE}
-      DynTFTCopyStr(MBTitle, 1, CMessageBoxMaxTitleLength, AMessageBox^.Title);
+      DynTFTCopyStr(MBTitle, 1, CMaxMessageBoxTitleLength, AMessageBox^.Title);
     {$ENDIF}
   end
   else
     AMessageBox^.Title := MBTitle;
 
-  if Length(MBMsg) > CMessageBoxMaxTextLength then
+  if Length(MBMsg) > CMaxMessageBoxTextLength then
   begin
     {$IFDEF IsDesktop}
-      AMessageBox^.Text := Copy(MBMsg, 1, CMessageBoxMaxTextLength);
+      AMessageBox^.Text := Copy(MBMsg, 1, CMaxMessageBoxTextLength);
     {$ELSE}
-      DynTFTCopyStr(MBMsg, 1, CMessageBoxMaxTextLength, AMessageBox^.Text);
+      DynTFTCopyStr(MBMsg, 1, CMaxMessageBoxTextLength, AMessageBox^.Text);
     {$ENDIF}
   end
   else

@@ -45,7 +45,15 @@ uses
   ;
 
 const
-  CMaxRadioButtonStringLength = 19; //n * 4 - 1  
+  {$IFDEF UseExternalRadioButtonStringLength}
+    {$IFDEF ExternalRadioButtonStringLengthAtProjectLevel}
+      {$I ExternalRadioButtonStringLength.inc}
+    {$ELSE}
+      {$I ..\ExternalRadioButtonStringLength.inc}
+    {$ENDIF}
+  {$ELSE}
+    CMaxRadioButtonStringLength = 19; //n * 4 - 1
+  {$ENDIF}
 
 type
   TDynTFTRadioButton = record
@@ -216,7 +224,11 @@ begin
 
   {$IFDEF DynTFTFontSupport}
     Result^.ActiveFont := @TFT_defaultFont;
-  {$ENDIF} 
+  {$ENDIF}
+
+  {$IFDEF IsDesktop}
+    DynTFTDisplayErrorOnStringConstLength(CMaxRadioButtonStringLength, 'PDynTFTRadioButton');
+  {$ENDIF}
 end;
 
 

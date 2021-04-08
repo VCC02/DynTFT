@@ -123,9 +123,9 @@
 			<Directories Name="UnitOutputDir"></Directories>
 			<Directories Name="PackageDLLOutputDir"></Directories>
 			<Directories Name="PackageDCPOutputDir"></Directories>
-			<Directories Name="SearchPath"></Directories>
+			<Directories Name="SearchPath">D:\DynTFTThemes\System;D:\DynTFTThemes\Copper;D:\DynTFTThemes\Charcoal;D:\DynTFTThemes\RedCharcoal;D:\DynTFTThemes\YellowCharcoal;D:\DynTFTThemes\LemonCharcoal;D:\DynTFTThemes\BlueCharcoal;D:\DynTFTThemes\GreenCharcoal;D:\DynTFTThemes\Vision;D:\DynTFTThemes\Grass;D:\DynTFTThemes\Matrix;D:\DynTFTThemes\Aurora;D:\DynTFTThemes\Sea;D:\DynTFTThemes\Space;D:\DynTFTThemes\Ocean;D:\DynTFTThemes\Dawn;D:\DynTFTThemes\Orchid;D:\DynTFTThemes\Sand;D:\DynTFTThemes\Lava;D:\DynTFTThemes\Industrial</Directories>
 			<Directories Name="Packages"></Directories>
-			<Directories Name="Conditionals">DynTFTFontSupport;MouseClickSupport</Directories>
+			<Directories Name="Conditionals">DynTFTFontSupport;MouseClickSupport;ColorThemeFromLib</Directories>
 			<Directories Name="DebugSourceDirs"></Directories>
 			<Directories Name="UsePackages">False</Directories>
 		</Directories>

@@ -45,7 +45,15 @@ uses
   ;
 
 const
-  CMaxCheckBoxStringLength = 19; //n * 4 - 1  
+  {$IFDEF UseExternalCheckBoxStringLength}
+    {$IFDEF ExternalCheckBoxStringLengthAtProjectLevel}
+      {$I ExternalCheckBoxStringLength.inc}
+    {$ELSE}
+      {$I ..\ExternalCheckBoxStringLength.inc}
+    {$ENDIF}
+  {$ELSE}
+    CMaxCheckBoxStringLength = 19; //n * 4 - 1
+  {$ENDIF}
 
 type
   TDynTFTCheckBox = record
@@ -77,7 +85,6 @@ implementation
 var
   ComponentType: TDynTFTComponentType;
 
-{$DEFINE CenterTextOnComponent}  //to draw centered text on a component
 
 function DynTFTGetCheckBoxComponentType: TDynTFTComponentType;
 begin
@@ -236,7 +243,11 @@ begin
 
   {$IFDEF DynTFTFontSupport}
     Result^.ActiveFont := @TFT_defaultFont;
-  {$ENDIF} 
+  {$ENDIF}
+
+  {$IFDEF IsDesktop}
+    DynTFTDisplayErrorOnStringConstLength(CMaxCheckBoxStringLength, 'PDynTFTCheckBox');
+  {$ENDIF}
 end;
 
 
