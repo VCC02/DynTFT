@@ -135,9 +135,9 @@ begin
   end;
 
   {$IFDEF IsDesktop}
-    Result := Round(LongInt(TotalPanelSpace) * ScrBar^.Position / TotalPositionSpace);
+    Result := Round(LongInt(TotalPanelSpace) * (ScrBar^.Position - ScrBar^.Min) / TotalPositionSpace);
   {$ELSE}
-    Result := Word(Real(Real(LongInt(TotalPanelSpace)) * Real(ScrBar^.Position) / Real(TotalPositionSpace)));
+    Result := Word(Real(Real(LongInt(TotalPanelSpace)) * Real(ScrBar^.Position - ScrBar^.Min) / Real(TotalPositionSpace)));
   {$ENDIF}
 
   Result := Result + 1;  
@@ -169,7 +169,9 @@ begin
     Result := Round(LongInt(PnlPos) * TotalPositionSpace / LongInt(TotalPanelSpace));
   {$ELSE}
     Result := LongInt(Real(Real(LongInt(PnlPos)) * Real(TotalPositionSpace) / Real(LongInt(TotalPanelSpace))));
-  {$ENDIF}   
+  {$ENDIF}
+
+  Result := Result + ScrBar^.Min;
 end;
 
 
