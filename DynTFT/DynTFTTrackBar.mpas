@@ -1,9 +1,18 @@
 {   DynTFT  - graphic components for microcontrollers
-    Copyright (C) 2017 VCC
-    release date: 29 Dec 2017
+    Copyright (C) 2017, 2022 VCC
+    initial release date: 29 Dec 2017
     author: VCC
 
     This file is part of DynTFT project.
+
+    This Source Code Form is subject to the terms of the Mozilla Public
+    License, v. 2.0. If a copy of the MPL was not distributed with this file,
+    You can obtain one at https://mozilla.org/MPL/2.0/.
+
+    Copyright (c) 2022, VCC  https://github.com/VCC02
+
+    Alternatively, the contents of this file may be used under the terms
+    of the GNU Lesser General Public License Version 3, as described below:
 
     DynTFT is free software: you can redistribute it and/or modify
     it under the terms of the GNU Lesser General Public License as published by

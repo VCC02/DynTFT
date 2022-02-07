@@ -2,15 +2,15 @@
 <CONFIG>
   <ProjectSession>
     <PathDelim Value="\"/>
-    <Version Value="12"/>
+    <Version Value="11"/>
     <BuildModes Active="Default"/>
-    <Units Count="35">
+    <Units Count="33">
       <Unit0>
         <Filename Value="DynTFTSim.ppr"/>
         <IsPartOfProject Value="True"/>
         <EditorIndex Value="-1"/>
         <CursorPos X="29" Y="15"/>
-        <UsageCount Value="28"/>
+        <UsageCount Value="22"/>
         <DefaultSyntaxHighlighter Value="Delphi"/>
       </Unit0>
       <Unit1>
@@ -19,9 +19,9 @@
         <ComponentName Value="frmDynTFTSimMain"/>
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
-        <TopLine Value="233"/>
-        <CursorPos Y="238"/>
-        <UsageCount Value="28"/>
+        <TopLine Value="6"/>
+        <CursorPos X="27" Y="12"/>
+        <UsageCount Value="22"/>
         <Loaded Value="True"/>
         <LoadedDesigner Value="True"/>
         <DefaultSyntaxHighlighter Value="Delphi"/>
@@ -29,11 +29,11 @@
       <Unit2>
         <Filename Value="D:\DynTFT\DynTFTBaseDrawing.pas"/>
         <IsPartOfProject Value="True"/>
-        <EditorIndex Value="4"/>
-        <TopLine Value="722"/>
-        <CursorPos Y="731"/>
-        <UsageCount Value="28"/>
-        <Loaded Value="True"/>
+        <EditorIndex Value="-1"/>
+        <WindowIndex Value="-1"/>
+        <TopLine Value="-1"/>
+        <CursorPos X="-1" Y="-1"/>
+        <UsageCount Value="22"/>
         <DefaultSyntaxHighlighter Value="Delphi"/>
       </Unit2>
       <Unit3>
@@ -43,7 +43,7 @@
         <WindowIndex Value="-1"/>
         <TopLine Value="-1"/>
         <CursorPos X="-1" Y="-1"/>
-        <UsageCount Value="28"/>
+        <UsageCount Value="22"/>
         <DefaultSyntaxHighlighter Value="Delphi"/>
       </Unit3>
       <Unit4>
@@ -53,7 +53,7 @@
         <WindowIndex Value="-1"/>
         <TopLine Value="-1"/>
         <CursorPos X="-1" Y="-1"/>
-        <UsageCount Value="28"/>
+        <UsageCount Value="22"/>
         <DefaultSyntaxHighlighter Value="Delphi"/>
       </Unit4>
       <Unit5>
@@ -62,10 +62,11 @@
         <ComponentName Value="frmDynTFTSimScreen"/>
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
-        <EditorIndex Value="9"/>
+        <IsVisibleTab Value="True"/>
+        <EditorIndex Value="2"/>
         <TopLine Value="132"/>
-        <CursorPos X="24" Y="142"/>
-        <UsageCount Value="28"/>
+        <CursorPos X="25" Y="152"/>
+        <UsageCount Value="22"/>
         <Loaded Value="True"/>
         <LoadedDesigner Value="True"/>
         <DefaultSyntaxHighlighter Value="Delphi"/>
@@ -73,54 +74,49 @@
       <Unit6>
         <Filename Value="..\GUI\DynTFTGUI.pas"/>
         <IsPartOfProject Value="True"/>
-        <EditorIndex Value="1"/>
-        <TopLine Value="409"/>
-        <CursorPos Y="434"/>
-        <UsageCount Value="28"/>
-        <Loaded Value="True"/>
+        <EditorIndex Value="-1"/>
+        <UsageCount Value="22"/>
         <DefaultSyntaxHighlighter Value="Delphi"/>
       </Unit6>
       <Unit7>
         <Filename Value="..\GUI\DynTFTGUIObjects.pas"/>
         <IsPartOfProject Value="True"/>
-        <EditorIndex Value="6"/>
-        <TopLine Value="121"/>
-        <CursorPos X="19" Y="127"/>
-        <UsageCount Value="28"/>
-        <Loaded Value="True"/>
+        <EditorIndex Value="-1"/>
+        <WindowIndex Value="-1"/>
+        <TopLine Value="-1"/>
+        <CursorPos X="-1" Y="-1"/>
+        <UsageCount Value="22"/>
         <DefaultSyntaxHighlighter Value="Delphi"/>
       </Unit7>
       <Unit8>
         <Filename Value="..\GUI\DynTFTHandlers.pas"/>
         <IsPartOfProject Value="True"/>
-        <IsVisibleTab Value="True"/>
-        <EditorIndex Value="2"/>
-        <TopLine Value="137"/>
-        <CursorPos X="40" Y="149"/>
-        <UsageCount Value="28"/>
-        <Loaded Value="True"/>
+        <EditorIndex Value="-1"/>
+        <WindowIndex Value="-1"/>
+        <TopLine Value="-1"/>
+        <CursorPos X="-1" Y="-1"/>
+        <UsageCount Value="22"/>
         <DefaultSyntaxHighlighter Value="Delphi"/>
       </Unit8>
       <Unit9>
-        <Filename Value="..\Common\RTTIDataProvider.pas"/>
-        <IsPartOfProject Value="True"/>
-        <EditorIndex Value="5"/>
-        <TopLine Value="124"/>
-        <CursorPos Y="139"/>
-        <UsageCount Value="26"/>
-        <Loaded Value="True"/>
-        <DefaultSyntaxHighlighter Value="Delphi"/>
-      </Unit9>
-      <Unit10>
         <Filename Value="D:\DynTFT\DynTFTArrowButton.pas"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="213"/>
         <CursorPos X="54" Y="230"/>
         <UsageCount Value="20"/>
         <DefaultSyntaxHighlighter Value="Delphi"/>
+      </Unit9>
+      <Unit10>
+        <Filename Value="D:\DynTFT\DynTFTButton.pas"/>
+        <EditorIndex Value="-1"/>
+        <WindowIndex Value="-1"/>
+        <TopLine Value="-1"/>
+        <CursorPos X="-1" Y="-1"/>
+        <UsageCount Value="20"/>
+        <DefaultSyntaxHighlighter Value="Delphi"/>
       </Unit10>
       <Unit11>
-        <Filename Value="D:\DynTFT\DynTFTButton.pas"/>
+        <Filename Value="D:\DynTFT\DynTFTCheckBox.pas"/>
         <EditorIndex Value="-1"/>
         <WindowIndex Value="-1"/>
         <TopLine Value="-1"/>
@@ -129,7 +125,7 @@
         <DefaultSyntaxHighlighter Value="Delphi"/>
       </Unit11>
       <Unit12>
-        <Filename Value="D:\DynTFT\DynTFTCheckBox.pas"/>
+        <Filename Value="D:\DynTFT\DynTFTComboBox.pas"/>
         <EditorIndex Value="-1"/>
         <WindowIndex Value="-1"/>
         <TopLine Value="-1"/>
@@ -138,7 +134,7 @@
         <DefaultSyntaxHighlighter Value="Delphi"/>
       </Unit12>
       <Unit13>
-        <Filename Value="D:\DynTFT\DynTFTComboBox.pas"/>
+        <Filename Value="D:\DynTFT\DynTFTConsts.pas"/>
         <EditorIndex Value="-1"/>
         <WindowIndex Value="-1"/>
         <TopLine Value="-1"/>
@@ -147,7 +143,7 @@
         <DefaultSyntaxHighlighter Value="Delphi"/>
       </Unit13>
       <Unit14>
-        <Filename Value="D:\DynTFT\DynTFTConsts.pas"/>
+        <Filename Value="D:\DynTFT\DynTFTEdit.pas"/>
         <EditorIndex Value="-1"/>
         <WindowIndex Value="-1"/>
         <TopLine Value="-1"/>
@@ -156,7 +152,7 @@
         <DefaultSyntaxHighlighter Value="Delphi"/>
       </Unit14>
       <Unit15>
-        <Filename Value="D:\DynTFT\DynTFTEdit.pas"/>
+        <Filename Value="D:\DynTFT\DynTFTItems.pas"/>
         <EditorIndex Value="-1"/>
         <WindowIndex Value="-1"/>
         <TopLine Value="-1"/>
@@ -165,7 +161,7 @@
         <DefaultSyntaxHighlighter Value="Delphi"/>
       </Unit15>
       <Unit16>
-        <Filename Value="D:\DynTFT\DynTFTItems.pas"/>
+        <Filename Value="D:\DynTFT\DynTFTKeyButton.pas"/>
         <EditorIndex Value="-1"/>
         <WindowIndex Value="-1"/>
         <TopLine Value="-1"/>
@@ -174,7 +170,7 @@
         <DefaultSyntaxHighlighter Value="Delphi"/>
       </Unit16>
       <Unit17>
-        <Filename Value="D:\DynTFT\DynTFTKeyButton.pas"/>
+        <Filename Value="D:\DynTFT\DynTFTLabel.pas"/>
         <EditorIndex Value="-1"/>
         <WindowIndex Value="-1"/>
         <TopLine Value="-1"/>
@@ -183,7 +179,7 @@
         <DefaultSyntaxHighlighter Value="Delphi"/>
       </Unit17>
       <Unit18>
-        <Filename Value="D:\DynTFT\DynTFTLabel.pas"/>
+        <Filename Value="D:\DynTFT\DynTFTListBox.pas"/>
         <EditorIndex Value="-1"/>
         <WindowIndex Value="-1"/>
         <TopLine Value="-1"/>
@@ -192,7 +188,7 @@
         <DefaultSyntaxHighlighter Value="Delphi"/>
       </Unit18>
       <Unit19>
-        <Filename Value="D:\DynTFT\DynTFTListBox.pas"/>
+        <Filename Value="D:\DynTFT\DynTFTPageControl.pas"/>
         <EditorIndex Value="-1"/>
         <WindowIndex Value="-1"/>
         <TopLine Value="-1"/>
@@ -201,16 +197,16 @@
         <DefaultSyntaxHighlighter Value="Delphi"/>
       </Unit19>
       <Unit20>
-        <Filename Value="D:\DynTFT\DynTFTPageControl.pas"/>
-        <EditorIndex Value="3"/>
-        <TopLine Value="227"/>
-        <CursorPos Y="247"/>
+        <Filename Value="D:\DynTFT\DynTFTPanel.pas"/>
+        <EditorIndex Value="-1"/>
+        <WindowIndex Value="-1"/>
+        <TopLine Value="-1"/>
+        <CursorPos X="-1" Y="-1"/>
         <UsageCount Value="20"/>
-        <Loaded Value="True"/>
         <DefaultSyntaxHighlighter Value="Delphi"/>
       </Unit20>
       <Unit21>
-        <Filename Value="D:\DynTFT\DynTFTPanel.pas"/>
+        <Filename Value="D:\DynTFT\DynTFTRadioButton.pas"/>
         <EditorIndex Value="-1"/>
         <WindowIndex Value="-1"/>
         <TopLine Value="-1"/>
@@ -219,7 +215,7 @@
         <DefaultSyntaxHighlighter Value="Delphi"/>
       </Unit21>
       <Unit22>
-        <Filename Value="D:\DynTFT\DynTFTRadioButton.pas"/>
+        <Filename Value="D:\DynTFT\DynTFTRadioGroup.pas"/>
         <EditorIndex Value="-1"/>
         <WindowIndex Value="-1"/>
         <TopLine Value="-1"/>
@@ -228,7 +224,7 @@
         <DefaultSyntaxHighlighter Value="Delphi"/>
       </Unit22>
       <Unit23>
-        <Filename Value="D:\DynTFT\DynTFTRadioGroup.pas"/>
+        <Filename Value="D:\DynTFT\DynTFTScrollBar.pas"/>
         <EditorIndex Value="-1"/>
         <WindowIndex Value="-1"/>
         <TopLine Value="-1"/>
@@ -237,7 +233,7 @@
         <DefaultSyntaxHighlighter Value="Delphi"/>
       </Unit23>
       <Unit24>
-        <Filename Value="D:\DynTFT\DynTFTScrollBar.pas"/>
+        <Filename Value="D:\DynTFT\DynTFTSmallMM.pas"/>
         <EditorIndex Value="-1"/>
         <WindowIndex Value="-1"/>
         <TopLine Value="-1"/>
@@ -246,7 +242,7 @@
         <DefaultSyntaxHighlighter Value="Delphi"/>
       </Unit24>
       <Unit25>
-        <Filename Value="D:\DynTFT\DynTFTSmallMM.pas"/>
+        <Filename Value="D:\DynTFT\DynTFTTabButton.pas"/>
         <EditorIndex Value="-1"/>
         <WindowIndex Value="-1"/>
         <TopLine Value="-1"/>
@@ -255,7 +251,7 @@
         <DefaultSyntaxHighlighter Value="Delphi"/>
       </Unit25>
       <Unit26>
-        <Filename Value="D:\DynTFT\DynTFTTabButton.pas"/>
+        <Filename Value="D:\DynTFT\DynTFTTypes.pas"/>
         <EditorIndex Value="-1"/>
         <WindowIndex Value="-1"/>
         <TopLine Value="-1"/>
@@ -264,15 +260,6 @@
         <DefaultSyntaxHighlighter Value="Delphi"/>
       </Unit26>
       <Unit27>
-        <Filename Value="D:\DynTFT\DynTFTTypes.pas"/>
-        <EditorIndex Value="7"/>
-        <TopLine Value="24"/>
-        <CursorPos X="3" Y="35"/>
-        <UsageCount Value="21"/>
-        <Loaded Value="True"/>
-        <DefaultSyntaxHighlighter Value="Delphi"/>
-      </Unit27>
-      <Unit28>
         <Filename Value="D:\DynTFT\DynTFTVirtualKeyboard.pas"/>
         <EditorIndex Value="-1"/>
         <WindowIndex Value="-1"/>
@@ -280,17 +267,17 @@
         <CursorPos X="-1" Y="-1"/>
         <UsageCount Value="20"/>
         <DefaultSyntaxHighlighter Value="Delphi"/>
-      </Unit28>
-      <Unit29>
+      </Unit27>
+      <Unit28>
         <Filename Value="D:\DynTFT\MemManager.pas"/>
-        <EditorIndex Value="8"/>
-        <TopLine Value="68"/>
-        <CursorPos X="67" Y="83"/>
-        <UsageCount Value="23"/>
+        <EditorIndex Value="1"/>
+        <TopLine Value="12"/>
+        <CursorPos X="34" Y="28"/>
+        <UsageCount Value="20"/>
         <Loaded Value="True"/>
         <DefaultSyntaxHighlighter Value="Delphi"/>
-      </Unit29>
-      <Unit30>
+      </Unit28>
+      <Unit29>
         <Filename Value="D:\DynTFT\TFT.pas"/>
         <EditorIndex Value="-1"/>
         <WindowIndex Value="-1"/>
@@ -298,16 +285,16 @@
         <CursorPos X="-1" Y="-1"/>
         <UsageCount Value="20"/>
         <DefaultSyntaxHighlighter Value="Delphi"/>
-      </Unit30>
-      <Unit31>
+      </Unit29>
+      <Unit30>
         <Filename Value="DynTFTGUI.pas"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="381"/>
         <CursorPos X="41" Y="397"/>
         <UsageCount Value="20"/>
         <DefaultSyntaxHighlighter Value="Delphi"/>
-      </Unit31>
-      <Unit32>
+      </Unit30>
+      <Unit31>
         <Filename Value="DynTFTGUIObjects.pas"/>
         <EditorIndex Value="-1"/>
         <WindowIndex Value="-1"/>
@@ -315,8 +302,8 @@
         <CursorPos X="-1" Y="-1"/>
         <UsageCount Value="20"/>
         <DefaultSyntaxHighlighter Value="Delphi"/>
-      </Unit32>
-      <Unit33>
+      </Unit31>
+      <Unit32>
         <Filename Value="DynTFTHandlers.pas"/>
         <EditorIndex Value="-1"/>
         <WindowIndex Value="-1"/>
@@ -324,163 +311,49 @@
         <CursorPos X="-1" Y="-1"/>
         <UsageCount Value="20"/>
         <DefaultSyntaxHighlighter Value="Delphi"/>
-      </Unit33>
-      <Unit34>
-        <Filename Value="..\GUI\DynTFTHandlersAdditionalUnits.inc"/>
-        <FRMtype Value="0"/>
-        <EditorIndex Value="10"/>
-        <CursorPos X="5" Y="6"/>
-        <UsageCount Value="13"/>
-        <Loaded Value="True"/>
-        <DefaultSyntaxHighlighter Value="Delphi"/>
-      </Unit34>
+      </Unit32>
     </Units>
-    <JumpHistory Count="29" HistoryIndex="28">
+    <JumpHistory Count="9" HistoryIndex="8">
       <Position1>
-        <Filename Value="..\GUI\DynTFTGUI.pas"/>
-        <Caret Line="434" TopLine="425"/>
+        <Filename Value="DynTFTSimMainForm.pas"/>
+        <Caret Line="8" Column="23"/>
       </Position1>
       <Position2>
-        <Filename Value="D:\DynTFT\DynTFTBaseDrawing.pas"/>
-        <Caret Line="936" TopLine="927"/>
+        <Filename Value="DynTFTSimMainForm.pas"/>
+        <Caret Line="48" Column="28" TopLine="34"/>
       </Position2>
       <Position3>
-        <Filename Value="D:\DynTFT\DynTFTBaseDrawing.pas"/>
-        <Caret Line="731" TopLine="722"/>
+        <Filename Value="DynTFTSimMainForm.pas"/>
+        <Caret Line="55" Column="32" TopLine="41"/>
       </Position3>
       <Position4>
-        <Filename Value="D:\DynTFT\DynTFTBaseDrawing.pas"/>
-        <Caret Line="733" TopLine="731"/>
+        <Filename Value="DynTFTSimScreenForm.pas"/>
+        <Caret Line="195" Column="31" TopLine="172"/>
       </Position4>
       <Position5>
-        <Filename Value="D:\DynTFT\DynTFTBaseDrawing.pas"/>
-        <Caret Line="753" TopLine="744"/>
+        <Filename Value="DynTFTSimMainForm.pas"/>
+        <Caret Line="110" Column="37" TopLine="98"/>
       </Position5>
       <Position6>
-        <Filename Value="D:\DynTFT\DynTFTBaseDrawing.pas"/>
-        <Caret Line="754" TopLine="744"/>
+        <Filename Value="DynTFTSimMainForm.pas"/>
+        <Caret Line="187" Column="30" TopLine="180"/>
       </Position6>
       <Position7>
-        <Filename Value="D:\DynTFT\DynTFTBaseDrawing.pas"/>
-        <Caret Line="949" TopLine="940"/>
+        <Filename Value="DynTFTSimScreenForm.pas"/>
+        <Caret Line="195" Column="31" TopLine="172"/>
       </Position7>
       <Position8>
-        <Filename Value="..\GUI\DynTFTGUI.pas"/>
-        <Caret Line="434" TopLine="425"/>
+        <Filename Value="DynTFTSimScreenForm.pas"/>
+        <Caret Line="140" Column="39" TopLine="124"/>
       </Position8>
       <Position9>
-        <Filename Value="D:\DynTFT\DynTFTBaseDrawing.pas"/>
-        <Caret Line="936" TopLine="928"/>
+        <Filename Value="DynTFTSimMainForm.pas"/>
+        <Caret Line="12" Column="27" TopLine="6"/>
       </Position9>
-      <Position10>
-        <Filename Value="D:\DynTFT\DynTFTBaseDrawing.pas"/>
-        <Caret Line="731" TopLine="728"/>
-      </Position10>
-      <Position11>
-        <Filename Value="D:\DynTFT\DynTFTBaseDrawing.pas"/>
-        <Caret Line="733" TopLine="728"/>
-      </Position11>
-      <Position12>
-        <Filename Value="D:\DynTFT\DynTFTBaseDrawing.pas"/>
-        <Caret Line="753" TopLine="744"/>
-      </Position12>
-      <Position13>
-        <Filename Value="D:\DynTFT\DynTFTBaseDrawing.pas"/>
-        <Caret Line="754" TopLine="744"/>
-      </Position13>
-      <Position14>
-        <Filename Value="D:\DynTFT\DynTFTBaseDrawing.pas"/>
-        <Caret Line="949" TopLine="940"/>
-      </Position14>
-      <Position15>
-        <Filename Value="D:\DynTFT\DynTFTBaseDrawing.pas"/>
-        <Caret Line="820" TopLine="814"/>
-      </Position15>
-      <Position16>
-        <Filename Value="D:\DynTFT\DynTFTBaseDrawing.pas"/>
-        <Caret Line="824" TopLine="814"/>
-      </Position16>
-      <Position17>
-        <Filename Value="D:\DynTFT\DynTFTBaseDrawing.pas"/>
-        <Caret Line="825" TopLine="814"/>
-      </Position17>
-      <Position18>
-        <Filename Value="D:\DynTFT\DynTFTBaseDrawing.pas"/>
-        <Caret Line="828" TopLine="814"/>
-      </Position18>
-      <Position19>
-        <Filename Value="D:\DynTFT\DynTFTBaseDrawing.pas"/>
-        <Caret Line="829" TopLine="820"/>
-      </Position19>
-      <Position20>
-        <Filename Value="D:\DynTFT\DynTFTBaseDrawing.pas"/>
-        <Caret Line="936" TopLine="927"/>
-      </Position20>
-      <Position21>
-        <Filename Value="D:\DynTFT\DynTFTBaseDrawing.pas"/>
-        <Caret Line="731" TopLine="722"/>
-      </Position21>
-      <Position22>
-        <Filename Value="D:\DynTFT\DynTFTBaseDrawing.pas"/>
-        <Caret Line="733" TopLine="725"/>
-      </Position22>
-      <Position23>
-        <Filename Value="D:\DynTFT\DynTFTBaseDrawing.pas"/>
-        <Caret Line="753" TopLine="744"/>
-      </Position23>
-      <Position24>
-        <Filename Value="D:\DynTFT\DynTFTBaseDrawing.pas"/>
-        <Caret Line="754" TopLine="744"/>
-      </Position24>
-      <Position25>
-        <Filename Value="D:\DynTFT\DynTFTBaseDrawing.pas"/>
-        <Caret Line="949" TopLine="943"/>
-      </Position25>
-      <Position26>
-        <Filename Value="D:\DynTFT\DynTFTBaseDrawing.pas"/>
-        <Caret Line="820" TopLine="811"/>
-      </Position26>
-      <Position27>
-        <Filename Value="D:\DynTFT\DynTFTBaseDrawing.pas"/>
-        <Caret Line="824" TopLine="811"/>
-      </Position27>
-      <Position28>
-        <Filename Value="D:\DynTFT\DynTFTBaseDrawing.pas"/>
-        <Caret Line="825" TopLine="811"/>
-      </Position28>
-      <Position29>
-        <Filename Value="D:\DynTFT\DynTFTBaseDrawing.pas"/>
-        <Caret Line="936" TopLine="927"/>
-      </Position29>
     </JumpHistory>
     <RunParams>
       <FormatVersion Value="2"/>
-      <Modes ActiveMode="default"/>
+      <Modes Count="0" ActiveMode="default"/>
     </RunParams>
   </ProjectSession>
-  <Debugging>
-    <BreakPoints>
-      <Item>
-        <Kind Value="bpkSource"/>
-        <WatchScope Value="wpsLocal"/>
-        <WatchKind Value="wpkWrite"/>
-        <Source Value="..\GUI\DynTFTGUI.pas"/>
-        <Line Value="434"/>
-      </Item>
-    </BreakPoints>
-    <Watches>
-      <Item>
-        <Expression Value="DynTFTAllComponentsContainer[i].ScreenContainer"/>
-      </Item>
-      <Item>
-        <Expression Value="DynTFTAllComponentsContainer[i].ScreenContainer^.BaseComponent"/>
-      </Item>
-      <Item>
-        <Expression Value="DynTFTAllComponentsContainer[i].ScreenContainer^"/>
-      </Item>
-      <Item>
-        <Expression Value="ABinaryComponentsData^"/>
-      </Item>
-    </Watches>
-  </Debugging>
 </CONFIG>

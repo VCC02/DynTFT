@@ -1,0 +1,31 @@
+[Files]
+ProjectIncSrcFolder=D:\DynTFTThemes\System\DynTFT_SysColors
+DynTFTColorThemeInc=D:\DynTFTThemes\System\DynTFTColorTheme.inc
+
+[Names]
+ComponentNamePrefix=DynTFT
+ComponentNameSuffix=_SysColors.inc
+SavingThemePrefix=DynTFT
+ThemeName=System
+
+[Options]
+ColorListStorage=0
+
+[Colors]
+UserColorCount=0
+
+[TargetPlugins]
+;These names have to match the result of GetPluginName function from plugins.
+;If the theme targets multiple plugins, add all of them here.
+Count=1
+Plugin_0=System Components
+
+[TargetComponents]
+;Inc files defined here will be used on mentioned plugins only. Multiple plugins can be defined as comma separated values of their index from TargetPlugins section.
+;Inc files, which are not added here, are applied to all plugins from TargetPlugins section.
+;Example: MyFirstComponent_TestColors.inc=0
+;Example: MySecondComponent_TestColors.inc=1
+;Example: MyThirdComponent_TestColors.inc=0,1,3
+;Example: MyFourthComponent_TestColors.inc=2
+;If multiple themes are merged into a single one, this section can define which component targets which plugin.
+;The following inc names are case sensitive.
