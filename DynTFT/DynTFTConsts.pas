@@ -84,6 +84,9 @@ const
 
     FO_HORIZONTAL = 0;
     FO_VERTICAL = 1;
+
+    TOP_TO_BOTTOM = 0;
+    LEFT_TO_RIGHT = 1;
   {$ELSE}
     {CL_WHITE = $FFFF;
     CL_BLACK = $0000;

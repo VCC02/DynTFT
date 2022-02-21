@@ -84,6 +84,7 @@ procedure TFT_Rectangle(x_upper_left, y_upper_left, x_bottom_right, y_bottom_rig
 procedure TFT_Circle(x_center, y_center, radius: Integer);
 
 function RGB(R, G, B: Byte): Integer;  //define a function for RGB, to avoid using compiler directives. Since Windows unit is not included, exposing this function will be useful.
+procedure TrueColorToRGB(AColor: TColor; var R, G, B: Byte);
 procedure TFT_Color16bitToRGB(color: Word; rgb_red, rgb_green, rgb_blue: PByte; IncreasedBrightness: Boolean = False);
 function TrueColorTo16bitColor(ATrueColor: TColor): Word;
 function U16bitColorToTrueColor(A16bitColor: Word; IncreasedBrightness: Boolean = False): TColor;
@@ -104,6 +105,12 @@ implementation
 
 uses
   DynTFTConsts;
+
+var
+  FCurrentPenColor: TColor; //used to restore the color
+  FGradientEnabled: Byte;
+  FGradientOrientation: Byte;
+  FGradientColorFrom, FGradientColorTo: TColor;
 
 
 procedure TFT_Init(display_width, display_height: Word);
@@ -161,6 +168,18 @@ begin
 end;
 
 
+procedure TrueColorToRGB(AColor: TColor; var R, G, B: Byte);
+begin
+  R := AColor and $FF;
+  AColor := AColor shr 8;
+
+  G := AColor and $FF;
+  AColor := AColor shr 8;
+
+  B := AColor and $FF;
+end;
+
+
 function U16bitColorToTrueColor(A16bitColor: Word; IncreasedBrightness: Boolean = False): TColor;
 var
   R, G, B: Byte;
@@ -176,6 +195,8 @@ begin
     GCanvas.Pen.Color := U16bitColorToTrueColor(pen_color, True)
   else
     GCanvas.Pen.Color := pen_color;
+
+  FCurrentPenColor := pen_color;
 
   GCanvas.Pen.Width := pen_width;
 end;
@@ -238,6 +259,11 @@ begin
 
     GCanvas.Brush.Color := brush_color;
   end;
+
+  FGradientEnabled := gradient_enabled;
+  FGradientOrientation := gradient_orientation;
+  FGradientColorFrom := gradient_color_from;
+  FGradientColorTo := gradient_color_to;
 
   if brush_enabled = 0 then
     GCanvas.Brush.Style := bsClear
@@ -340,9 +366,73 @@ end;
 
 
 procedure TFT_Rectangle(x_upper_left, y_upper_left, x_bottom_right, y_bottom_right: Integer);
+var
+  i: Integer;
+  R1, R2, G1, G2, B1, B2: Byte;
+  RDiff, GDiff, BDiff: Integer;
+  RColorScale, GColorScale, BColorScale: Double;
+  CurrentColor, RCurrentColor, GCurrentColor, BCurrentColor: TColor;
+  Distance: Integer;
 begin
   //if GCanvas.Brush.Style = bsSolid then
-    GCanvas.Rectangle(x_upper_left, y_upper_left, x_bottom_right + 1, y_bottom_right + 1)
+  begin
+    if FGradientEnabled = 0 then
+      GCanvas.Rectangle(x_upper_left, y_upper_left, x_bottom_right + 1, y_bottom_right + 1)
+    else
+    begin
+      try
+        TrueColorToRGB(FGradientColorFrom, R1, G1, B1);
+        TrueColorToRGB(FGradientColorTo, R2, G2, B2);
+        RDiff := R2 - R1;
+        GDiff := G2 - G1;
+        BDiff := B2 - B1;
+
+        if FGradientOrientation = TOP_TO_BOTTOM then
+        begin
+          Distance := y_bottom_right - y_upper_left;
+          if Distance = 0 then
+            Distance := 1;
+
+          RColorScale := RDiff / Distance;
+          GColorScale := GDiff / Distance;
+          BColorScale := BDiff / Distance;
+
+          for i := y_upper_left to y_bottom_right do
+          begin
+            RCurrentColor := Round(R1 + (i - y_upper_left) * RColorScale);
+            GCurrentColor := Round(G1 + (i - y_upper_left) * GColorScale);
+            BCurrentColor := Round(B1 + (i - y_upper_left) * BColorScale);
+            CurrentColor := RGB(RCurrentColor, GCurrentColor, BCurrentColor);
+            TFT_Set_Pen(CurrentColor, 1);
+            TFT_H_Line(x_upper_left, x_bottom_right, i);
+          end;
+        end
+        else
+          if FGradientOrientation = LEFT_TO_RIGHT then
+          begin
+            Distance := x_bottom_right - x_upper_left;
+            if Distance = 0 then
+              Distance := 1;
+
+            RColorScale := RDiff / Distance;
+            GColorScale := GDiff / Distance;
+            BColorScale := BDiff / Distance;
+
+            for i := x_upper_left to x_bottom_right do
+            begin
+              RCurrentColor := Round(R1 + (i - x_upper_left) * RColorScale);
+              GCurrentColor := Round(G1 + (i - x_upper_left) * GColorScale);
+              BCurrentColor := Round(B1 + (i - x_upper_left) * BColorScale);
+              CurrentColor := RGB(RCurrentColor, GCurrentColor, BCurrentColor);
+              TFT_Set_Pen(CurrentColor, 1);
+              TFT_V_Line(y_upper_left, y_bottom_right, i);
+            end;
+          end;
+      finally
+        TFT_Set_Pen(FCurrentPenColor, 1);
+      end;
+    end;
+  end;
   {else
   begin
     TFT_Line(x_upper_left, y_upper_left, x_bottom_right, y_upper_left);
@@ -376,6 +466,8 @@ end;
 
 initialization
   UseTFTTrueColor := False;
-
+  FGradientEnabled := 0;
+  FCurrentPenColor := clRed;
+  
 end.
 

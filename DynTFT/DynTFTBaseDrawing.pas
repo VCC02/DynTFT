@@ -118,6 +118,7 @@ procedure DynTFTFreeComponentTypeRegistration;
 function DynTFTSetComponentTypeInRegistry(ABaseEventReg: PDynTFTBaseEventReg; Index: Integer): Integer; //use this only if you can reuse elements of the RegisteredComponents array (component type registry) and want to keep its size limited. All component of the reused type (index) must be destroyed before registering a new component (at the same index).
 function DynTFTRegisterComponentType(ABaseEventReg: PDynTFTBaseEventReg): Integer;  //returns > -1 for success
 function DynTFTComponentsAreRegistered: Boolean;
+procedure DynTFTClearComponentRegistration;
 
 procedure DynTFTClearComponentArea(ComponentFromArea: PDynTFTBaseComponent; AColor: TColor);
 procedure DynTFTClearComponentAreaWithScreenColor(ComponentFromArea: PDynTFTBaseComponent);
@@ -1315,6 +1316,12 @@ end;
 function DynTFTComponentsAreRegistered: Boolean;
 begin
   Result := DynTFTRegisteredComponentCount > 0;
+end;
+
+
+procedure DynTFTClearComponentRegistration;
+begin
+  DynTFTRegisteredComponentCount := 0;
 end;
 
 
