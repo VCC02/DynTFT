@@ -36,7 +36,5 @@
     OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 }
 
-CL_DynTFTProgressBar_Progress = CL_HIGHLIGHT;
-CL_DynTFTProgressBar_Background = CL_SILVER;
-CL_DynTFTProgressBar_LightEdge = CL_WHITE;
-CL_DynTFTProgressBar_DarkEdge = CL_GRAY;
+{$DEFINE IsMCU}
+{$I DynTFTVirtualKeyboardX2.pas}

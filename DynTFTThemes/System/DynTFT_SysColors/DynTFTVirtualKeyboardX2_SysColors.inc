@@ -36,7 +36,7 @@
     OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 }
 
-CL_DynTFTProgressBar_Progress = CL_HIGHLIGHT;
-CL_DynTFTProgressBar_Background = CL_SILVER;
-CL_DynTFTProgressBar_LightEdge = CL_WHITE;
-CL_DynTFTProgressBar_DarkEdge = CL_GRAY;
+CL_DynTFTVirtualKeyboardX2_Border = CL_GRAY;
+CL_DynTFTVirtualKeyboardX2_Background = CL_LIGHTBLUE;
+CL_DynTFTVirtualKeyboardX2_EnabledKeyDrawing = CL_BLACK;
+CL_DynTFTVirtualKeyboardX2_DisabledKeyDrawing = CL_MEDGRAY;
