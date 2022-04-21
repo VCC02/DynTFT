@@ -1,0 +1,1 @@
+CMaxItemsStringLength = 199; //n * 4 - 1  //50 * 4 - 1

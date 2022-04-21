@@ -219,7 +219,10 @@ type
     {$IFDEF MouseClickSupport}
       OnClickUser: PDynTFTOnMouseEvent;
     {$ENDIF}
-    //Please update InitBaseHandlersAndProperties and FreeBaseHandlersAndProperties from DynTFTBaseDrawing, if adding pointers (like events)
+    {$IFDEF MouseDoubleClickSupport}
+      OnDoubleClickUser: PDynTFTOnMouseEvent;
+    {$ENDIF}
+    //Please update InitBaseHandlersAndProperties, FreeBaseHandlersAndProperties, DynTFTAllocateInternalHandlers and DynTFTInitBaseHandlersToNil from DynTFTBaseDrawing, if adding pointers (like events)
 
     {$IFDEF ComponentsHaveName}
       Name: TDynTFTCompDebugStr;
@@ -281,6 +284,10 @@ type
     MouseUpEvent: PDynTFTGenericEventHandler;
     {$IFDEF MouseClickSupport}
       ClickEvent: PDynTFTGenericEventHandler;
+    {$ENDIF}
+
+    {$IFDEF MouseDoubleClickSupport}
+      DoubleClickEvent: PDynTFTGenericEventHandler;
     {$ENDIF}
 
     Repaint: PDynTFTRepaintHandler;

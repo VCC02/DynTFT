@@ -305,6 +305,14 @@ end;
 {$ENDIF}
 
 
+{$IFDEF MouseDoubleClickSupport}
+  procedure TDynTFTButton_OnDynTFTBaseInternalDoubleClick(ABase: PDynTFTBaseComponent);
+  begin
+
+  end;
+{$ENDIF}
+
+
 procedure TDynTFTButton_OnDynTFTBaseInternalRepaint(ABase: PDynTFTBaseComponent; FullRepaint: Boolean; Options: TPtr; ComponentFromArea: PDynTFTBaseComponent);
 begin
   DynTFTDrawButton(PDynTFTButton(TPtrRec(ABase)), FullRepaint);
@@ -324,6 +332,9 @@ begin
     {$IFDEF MouseClickSupport}
       //ABaseEventReg.ClickEvent^ := TDynTFTButton_OnDynTFTBaseInternalClick;
     {$ENDIF}
+    {$IFDEF MouseDoubleClickSupport}
+      //ABaseEventReg.DoubleClickEvent^ := TDynTFTButton_OnDynTFTBaseInternalDoubleClick;
+    {$ENDIF}
     ABaseEventReg.Repaint^ := TDynTFTButton_OnDynTFTBaseInternalRepaint;
 
     {$IFDEF RTTIREG}
@@ -336,6 +347,9 @@ begin
     ABaseEventReg.MouseUpEvent := @TDynTFTButton_OnDynTFTBaseInternalMouseUp;
     {$IFDEF MouseClickSupport}
       //ABaseEventReg.ClickEvent := @TDynTFTButton_OnDynTFTBaseInternalClick;
+    {$ENDIF}
+    {$IFDEF MouseDoubleClickSupport}
+      //ABaseEventReg.DoubleClickEvent := @TDynTFTButton_OnDynTFTBaseInternalDoubleClick;
     {$ENDIF}
     ABaseEventReg.Repaint := @TDynTFTButton_OnDynTFTBaseInternalRepaint;
 

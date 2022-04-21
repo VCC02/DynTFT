@@ -256,6 +256,11 @@ var
   DynTFTRegisteredComponents: array[0..CDynTFTMaxRegisteredComponentTypes - 1] of TDynTFTBaseEventReg;
   DynTFTRegisteredComponentCount: Integer; //number of component types in an application
 
+  {$IFDEF MouseDoubleClickSupport}
+    DynTFTGetTickCount, DynTFTOldGetTickCount: DWord;     //DynTFTGetTickCount will have to be updated by a timer in user application
+                                                          //It can be the OS's GetTickCount function on Desktop.
+  {$ENDIF}
+
 implementation
 
 //uses DynTFTUtils; //added automatically by Delphi (probably a Delphi bug causes this, because the unit is already in the uses section from interface, mixed with compiler directives)
@@ -276,6 +281,9 @@ type
     New(ABase^.BaseProps.OnMouseUpUser);
     {$IFDEF MouseClickSupport}
       New(ABase^.BaseProps.OnClickUser);
+    {$ENDIF}
+    {$IFDEF MouseDoubleClickSupport}
+      New(ABase^.BaseProps.OnDoubleClickUser);
     {$ENDIF}
 
     {$IFDEF ComponentsHaveName}
@@ -313,6 +321,9 @@ type
       {$IFDEF MouseClickSupport}
         Dispose(ABase^.BaseProps.OnClickUser);
       {$ENDIF}
+      {$IFDEF MouseDoubleClickSupport}
+        Dispose(ABase^.BaseProps.OnDoubleClickUser);
+      {$ENDIF}
 
       {$IFDEF ComponentsHaveName}
         ABase^.BaseProps.Name := ''; //ABase^.BaseProps.Name := nil;
@@ -323,6 +334,9 @@ type
       ABase^.BaseProps.OnMouseUpUser := nil;
       {$IFDEF MouseClickSupport}
         ABase^.BaseProps.OnClickUser := nil;
+      {$ENDIF}
+      {$IFDEF MouseDoubleClickSupport}
+        ABase^.BaseProps.OnDoubleClickUser := nil;
       {$ENDIF}
     except
       on E: Exception do
@@ -349,12 +363,18 @@ begin
     {$IFDEF MouseClickSupport}
       ABase^.BaseProps.OnClickUser^ := nil;
     {$ENDIF}
+    {$IFDEF MouseDoubleClickSupport}
+      ABase^.BaseProps.OnDoubleClickUser^ := nil;
+    {$ENDIF}
   {$ELSE}
     ABase^.BaseProps.OnMouseDownUser := nil;
     ABase^.BaseProps.OnMouseMoveUser := nil;
     ABase^.BaseProps.OnMouseUpUser := nil;
     {$IFDEF MouseClickSupport}
       ABase^.BaseProps.OnClickUser := nil;
+    {$ENDIF}
+    {$IFDEF MouseDoubleClickSupport}
+      ABase^.BaseProps.OnDoubleClickUser := nil;
     {$ENDIF}
   {$ENDIF}
 end;
@@ -1071,6 +1091,9 @@ begin
     {$IFDEF MouseClickSupport}
       New(ABaseEventReg.ClickEvent);
     {$ENDIF}
+    {$IFDEF MouseDoubleClickSupport}
+      New(ABaseEventReg.DoubleClickEvent);
+    {$ENDIF}
     New(ABaseEventReg.Repaint);
     New(ABaseEventReg.BlinkCaretState);
 
@@ -1084,6 +1107,9 @@ begin
     ABaseEventReg.MouseUpEvent^ := nil;
     {$IFDEF MouseClickSupport}
       ABaseEventReg.ClickEvent^ := nil;
+    {$ENDIF}
+    {$IFDEF MouseDoubleClickSupport}
+      ABaseEventReg.DoubleClickEvent^ := nil;
     {$ENDIF}
     ABaseEventReg.Repaint^ := nil;
     ABaseEventReg.BlinkCaretState^ := nil;
@@ -1099,6 +1125,9 @@ begin
     ABaseEventReg.MouseUpEvent := nil;
     {$IFDEF MouseClickSupport}
       ABaseEventReg.ClickEvent := nil;
+    {$ENDIF}
+    {$IFDEF MouseDoubleClickSupport}
+      ABaseEventReg.DoubleClickEvent := nil;
     {$ENDIF}
     ABaseEventReg.Repaint := nil;
     ABaseEventReg.BlinkCaretState := nil;
@@ -1125,6 +1154,9 @@ end;
     {$IFDEF MouseClickSupport}
       Dispose(ABaseEventReg.ClickEvent);
     {$ENDIF}
+    {$IFDEF MouseDoubleClickSupport}
+      Dispose(ABaseEventReg.DoubleClickEvent);
+    {$ENDIF}
     Dispose(ABaseEventReg.Repaint);
     Dispose(ABaseEventReg.BlinkCaretState);
 
@@ -1138,6 +1170,9 @@ end;
     ABaseEventReg.MouseUpEvent := nil;
     {$IFDEF MouseClickSupport}
       ABaseEventReg.ClickEvent := nil;
+    {$ENDIF}
+    {$IFDEF MouseDoubleClickSupport}
+      ABaseEventReg.DoubleClickEvent := nil;
     {$ENDIF}
     ABaseEventReg.Repaint := nil;
     ABaseEventReg.BlinkCaretState := nil;
@@ -1265,6 +1300,9 @@ begin
     {$IFDEF MouseClickSupport}
       DynTFTRegisteredComponents[DynTFTRegisteredComponentCount].ClickEvent^ := ABaseEventReg^.ClickEvent^;
     {$ENDIF}
+    {$IFDEF MouseDoubleClickSupport}
+      DynTFTRegisteredComponents[DynTFTRegisteredComponentCount].DoubleClickEvent^ := ABaseEventReg^.DoubleClickEvent^;
+    {$ENDIF}
     DynTFTRegisteredComponents[DynTFTRegisteredComponentCount].Repaint^ := ABaseEventReg^.Repaint^;
     DynTFTRegisteredComponents[DynTFTRegisteredComponentCount].BlinkCaretState^ := ABaseEventReg^.BlinkCaretState^;
 
@@ -1278,6 +1316,9 @@ begin
     DynTFTRegisteredComponents[DynTFTRegisteredComponentCount].MouseUpEvent := ABaseEventReg^.MouseUpEvent;
     {$IFDEF MouseClickSupport}
       DynTFTRegisteredComponents[DynTFTRegisteredComponentCount].ClickEvent := ABaseEventReg^.ClickEvent;
+    {$ENDIF}
+    {$IFDEF MouseDoubleClickSupport}
+      DynTFTRegisteredComponents[DynTFTRegisteredComponentCount].DoubleClickEvent := ABaseEventReg^.DoubleClickEvent;
     {$ENDIF}
     DynTFTRegisteredComponents[DynTFTRegisteredComponentCount].Repaint := ABaseEventReg^.Repaint;
     DynTFTRegisteredComponents[DynTFTRegisteredComponentCount].BlinkCaretState := ABaseEventReg^.BlinkCaretState;
@@ -1387,6 +1428,9 @@ begin
     {$IFDEF MouseClickSupport}
       //ABaseEventReg.ClickEvent^ := nil;
     {$ENDIF}
+    {$IFDEF MouseDoubleClickSupport}
+      //ABaseEventReg.DoubleClickEvent^ := nil;
+    {$ENDIF}
     ABaseEventReg.Repaint^ := TDynTFTComponentContainer_OnDynTFTBaseInternalRepaint;
     //ABaseEventReg.BlinkCaretState^ := nil;
 
@@ -1400,6 +1444,9 @@ begin
     //ABaseEventReg.MouseUpEvent := nil;
     {$IFDEF MouseClickSupport}
       //ABaseEventReg.ClickEvent := nil;
+    {$ENDIF}
+    {$IFDEF MouseDoubleClickSupport}
+      //ABaseEventReg.DoubleClickEvent := nil;
     {$ENDIF}
     ABaseEventReg.Repaint := @TDynTFTComponentContainer_OnDynTFTBaseInternalRepaint;
     //ABaseEventReg.BlinkCaretState := nil;
@@ -1898,6 +1945,11 @@ end;
   begin
     for iii := 0 to CDynTFTMaxComponentsContainer - 1 do
       DynTFTAllComponentsContainer[iii].ScreenContainer := nil;
+
+    {$IFDEF MouseDoubleClickSupport}
+      DynTFTGetTickCount := 100;
+      DynTFTOldGetTickCount := 0;
+    {$ENDIF}
 {$ENDIF}
 
 end.

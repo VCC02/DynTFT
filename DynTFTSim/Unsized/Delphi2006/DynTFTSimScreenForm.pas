@@ -59,6 +59,7 @@ type
     procedure chkShowHeightLineClick(Sender: TObject);
     procedure trbScreenWidthChange(Sender: TObject);
     procedure trbScreenHeightChange(Sender: TObject);
+    procedure imgScreenMouseEnter(Sender: TObject);
   private
     { Private declarations }
     procedure LoadSettingsFromIni;
@@ -201,6 +202,12 @@ begin
   DynTFTMCU_XMouse := X;
   DynTFTMCU_YMouse := Y;
   DynTFTReceivedMouseDown := True;
+end;
+
+
+procedure TfrmDynTFTSimScreen.imgScreenMouseEnter(Sender: TObject);
+begin
+  ScrollBox1.SetFocus;
 end;
 
 

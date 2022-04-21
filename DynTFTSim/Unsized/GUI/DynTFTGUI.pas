@@ -333,10 +333,13 @@ begin
     ATestListBox^.Items^.Strings[13] := C_ATestListBox_Items_Strings_Item_13; //'13 thirteen'
     ATestListBox^.Items^.Strings[14] := C_ATestListBox_Items_Strings_Item_14; //'14 fourteen'
     ATestListBox^.Items^.Strings[15] := C_ATestListBox_Items_Strings_Item_15; //'15 fifteen - fpWgJj'
+    ATestListBox^.Items^.Strings[16] := C_ATestListBox_Items_Strings_Item_16; //'----'
+    ATestListBox^.Items^.Strings[17] := C_ATestListBox_Items_Strings_Item_17; //'abcdefghijklmnopqrstuvwxyz'
+    ATestListBox^.Items^.Strings[18] := C_ATestListBox_Items_Strings_Item_18; //'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLKMNOPQRSTUVWXYZ'
   {$ENDIF} 
-  ATestListBox^.Items^.Count := 16;
+  ATestListBox^.Items^.Count := 19;
   {$IFDEF ItemsVisibility} 
-    ATestListBox^.Items^.TotalVisibleCount := 16;
+    ATestListBox^.Items^.TotalVisibleCount := 19;
   {$ENDIF} 
   {$IFNDEF UseExternalItems} {$IFDEF ItemsEnabling} 
     ATestListBox^.Items^.ItemsEnabled[0] := False;
@@ -457,7 +460,7 @@ begin
     ATestButton7^.BaseProps.OnMouseUpUser := @DestroyRdGrp_OnMouseUpUser;
   {$ENDIF}
 
-  ATestButton8 := DynTFTButton_Create(0, 580, 110, 100, 20);
+  ATestButton8 := DynTFTButton_Create(0, 524, 110, 100, 20);
   ATestButton8^.Caption := C_ATestButton8_Caption; //'Self Destroy'
   {$IFDEF IsDesktop}
     ATestButton8^.BaseProps.OnMouseUpUser^ := SelfDestroy_OnMouseUpUser;
@@ -578,7 +581,7 @@ begin
   ALabelV^.BaseProps.CanHandleMessages := False;
   ALabelV^.Caption := '0';
 
-  btnMsgBox := DynTFTButton_Create(0, 580, 280, 80, 20);
+  btnMsgBox := DynTFTButton_Create(0, 580, 296, 80, 20);
   btnMsgBox^.Caption := C_btnMsgBox_Caption; //'MsgBox'
   {$IFDEF IsDesktop}
     btnMsgBox^.BaseProps.OnMouseUpUser^ := btnMsgBox_OnMouseUpUser;
@@ -586,7 +589,7 @@ begin
     btnMsgBox^.BaseProps.OnMouseUpUser := @btnMsgBox_OnMouseUpUser;
   {$ENDIF}
 
-  SelfDestroyButton := DynTFTButton_Create(0, 580, 140, 100, 20);
+  SelfDestroyButton := DynTFTButton_Create(0, 637, 110, 100, 20);
   SelfDestroyButton^.Caption := C_SelfDestroyButton_Caption; //'SelfDestroy'
   {$IFDEF IsDesktop}
     SelfDestroyButton^.BaseProps.OnMouseUpUser^ := SelfDestroy_OnMouseUpUser;
@@ -684,6 +687,60 @@ begin
 
   lblItemIndex := DynTFTLabel_Create(0, 320, 360, 114, 18);
   lblItemIndex^.Caption := C_lblItemIndex_Caption; //'ItemIndex: -1'
+
+  lstFileExplorer := DynTFTListBox_Create(0, 523, 162, 214, 124);
+  {$IFDEF ListIcons} 
+    lstFileExplorer^.Items^.VisibleIcons := True;
+  {$ENDIF} 
+  {$IFDEF MouseDoubleClickSupport} 
+    {$IFDEF IsDesktop}
+      lstFileExplorer^.BaseProps.OnDoubleClickUser^ := lstFileExplorer_OnDoubleClickUser;
+    {$ELSE}
+      lstFileExplorer^.BaseProps.OnDoubleClickUser := @lstFileExplorer_OnDoubleClickUser;
+    {$ENDIF}
+  {$ENDIF} 
+  {$IFDEF UseExternalItems} 
+    {$IFDEF IsDesktop}
+      lstFileExplorer^.Items^.OnGetItem^ := lstFileExplorer_Items_OnGetItem;
+    {$ELSE}
+      lstFileExplorer^.Items^.OnGetItem := @lstFileExplorer_Items_OnGetItem;
+    {$ENDIF}
+  {$ENDIF} 
+  {$IFDEF ListIcons} 
+    {$IFDEF IsDesktop}
+      lstFileExplorer^.Items^.OnDrawIcon^ := lstFileExplorer_Items_OnDrawIcon;
+    {$ELSE}
+      lstFileExplorer^.Items^.OnDrawIcon := @lstFileExplorer_Items_OnDrawIcon;
+    {$ENDIF}
+  {$ENDIF} 
+
+  cmbFileExplorerDrives := DynTFTComboBox_Create(0, 524, 139, 145, 20);
+  {$DEFINE cmbFileExplorerDrives_Enabled_1}
+  {$IFDEF cmbFileExplorerDrives_Enabled_0}
+    DynTFTDisableComboBox(cmbFileExplorerDrives);
+  {$ENDIF}
+  cmbFileExplorerDrives^.ListBox^.Items^.ItemIndex := 2;
+  cmbFileExplorerDrives^.Edit^.Text := C_cmbFileExplorerDrives_Edit_Text; //'C:'
+  cmbFileExplorerDrives^.Editable := False;
+  {$IFDEF UseExternalItems} 
+    {$IFDEF IsDesktop}
+      cmbFileExplorerDrives^.ListBox^.Items^.OnGetItem^ := cmbFileExplorerDrives_ListBox_Items_OnGetItem;
+    {$ELSE}
+      cmbFileExplorerDrives^.ListBox^.Items^.OnGetItem := @cmbFileExplorerDrives_ListBox_Items_OnGetItem;
+    {$ENDIF}
+  {$ENDIF} 
+  {$IFDEF UseExternalItems} 
+    {$IFDEF IsDesktop}
+      cmbFileExplorerDrives^.ListBox^.Items^.OnGetItemVisibility^ := cmbFileExplorerDrives_ListBox_Items_OnGetItemVisibility;
+    {$ELSE}
+      cmbFileExplorerDrives^.ListBox^.Items^.OnGetItemVisibility := @cmbFileExplorerDrives_ListBox_Items_OnGetItemVisibility;
+    {$ENDIF}
+  {$ENDIF} 
+  {$IFDEF IsDesktop}
+    cmbFileExplorerDrives^.OnComboBoxCloseUp^ := cmbFileExplorerDrives_OnComboBoxCloseUp;
+  {$ELSE}
+    cmbFileExplorerDrives^.OnComboBoxCloseUp := @cmbFileExplorerDrives_OnComboBoxCloseUp;
+  {$ENDIF}
 end;
 
 procedure DrawGUI;
@@ -693,10 +750,57 @@ begin
 end;
 
 
+{$IFDEF IsDesktop}
+  {$IFDEF RTTIREG}
+    procedure InitAllBinGUIObjectsToNil;
+    var
+      i: Integer;
+    begin
+      //No binary components
+    end;
+  {$ENDIF}
+{$ENDIF}
+
+  {$IFDEF RTTIREG}
+    function CheckIntegerAndPointerSize: Boolean;  // returs True for success
+    {$IFDEF IsMCU}
+      type
+        Pointer = ^Integer;
+    {$ENDIF}
+    begin
+      if SizeOf(Integer) <> C_ProfileIntegerSize then
+      begin
+        DynTFTDisplayErrorMessage(CRTTIBADINTEGERSIZE, CL_BLUE);
+        {$IFDEF IsDesktop} DynTFT_DebugConsole('.................................... ' + CRTTIBADINTEGERSIZE + ' ...  SizeOf(Integer) <> ' + IntToStr(C_ProfileIntegerSize) + '  See profile settings.'); {$ENDIF}
+        Result := False;
+        Exit;
+      end;
+
+      if SizeOf(Pointer) <> C_ProfilePointerSize then
+      begin
+        DynTFTDisplayErrorMessage(CRTTIBADIPOINTERSIZE, CL_BLUE);
+        {$IFDEF IsDesktop} DynTFT_DebugConsole('.................................... ' + CRTTIBADIPOINTERSIZE + ' ...  SizeOf(Pointer) <> ' + IntToStr(C_ProfilePointerSize) + '  See profile settings.'); {$ENDIF}
+        Result := False;
+        Exit;
+      end;
+
+      Result := True;
+    end;
+  {$ENDIF}
+
+
 procedure DynTFT_GUI_Start;
 begin
   {$IFDEF IsDesktop}
     DynTFT_DebugConsole('Entering DynTFT_GUI_Start');
+
+    {$IFDEF RTTIREG}
+      InitAllBinGUIObjectsToNil;
+    {$ENDIF}
+  {$ENDIF}
+
+  {$IFDEF RTTIREG}
+    LinkHandlers;
   {$ENDIF}
 
   DynTFTInitInputDevStateFlags;
@@ -706,6 +810,12 @@ begin
   RegisterAllComponentsEvents;
 
   SetScreenActivity;
+
+  {$IFDEF RTTIREG}
+    if not CheckIntegerAndPointerSize then
+      Exit;
+  {$ENDIF}
+
   DrawGUI;
 end;
 

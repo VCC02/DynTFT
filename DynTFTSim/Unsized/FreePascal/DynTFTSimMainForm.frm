@@ -1,7 +1,7 @@
 object frmDynTFTSimMain: TfrmDynTFTSimMain
-  Left = 449
+  Left = 444
   Height = 358
-  Top = 240
+  Top = 242
   Width = 927
   Caption = 'DynTFT Simulator'
   ClientHeight = 358
@@ -12,14 +12,13 @@ object frmDynTFTSimMain: TfrmDynTFTSimMain
   Font.Name = 'Tahoma'
   OnClose = FormClose
   OnCreate = FormCreate
-  LCLVersion = '6.5'
+  LCLVersion = '7.5'
   object lblAllocatedMemory: TLabel
     Left = 454
     Height = 13
     Top = 8
     Width = 89
     Caption = 'Allocated Memory:'
-    ParentColor = False
   end
   object lstLog: TListBox
     Left = 8

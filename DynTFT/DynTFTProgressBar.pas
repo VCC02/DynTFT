@@ -74,6 +74,9 @@ type
     {$IFDEF MouseClickSupport}
       //OnOwnerInternalClick: PDynTFTGenericEventHandler;
     {$ENDIF}
+    {$IFDEF MouseDoubleClickSupport}
+      //OnOwnerInternalDoubleClick: PDynTFTGenericEventHandler;
+    {$ENDIF}
   end;
   PDynTFTProgressBar = ^TDynTFTProgressBar;
 
@@ -224,6 +227,9 @@ begin
     {$IFDEF MouseClickSupport}
       New(Result^.OnOwnerInternalClick);
     {$ENDIF}
+    {$IFDEF MouseDoubleClickSupport}
+      New(Result^.OnOwnerInternalDoubleClick);
+    {$ENDIF}
 
     Result^.OnOwnerInternalMouseDown^ := nil;
     Result^.OnOwnerInternalMouseMove^ := nil;
@@ -231,12 +237,18 @@ begin
     {$IFDEF MouseClickSupport}
       Result^.OnOwnerInternalClick^ := nil;
     {$ENDIF}
+    {$IFDEF MouseDoubleClickSupport}
+      Result^.OnOwnerInternalDoubleClick^ := nil;
+    {$ENDIF}
   {$ELSE}
     Result^.OnOwnerInternalMouseDown := nil;
     Result^.OnOwnerInternalMouseMove := nil;
     Result^.OnOwnerInternalMouseUp := nil;
     {$IFDEF MouseClickSupport}
       Result^.OnOwnerInternalClick := nil;
+    {$ENDIF}
+    {$IFDEF MouseDoubleClickSupport}
+      Result^.OnOwnerInternalDoubleClick := nil;
     {$ENDIF}
   {$ENDIF}
   *)
@@ -269,12 +281,18 @@ begin
     {$IFDEF MouseClickSupport}
       Dispose(AProgressBar^.OnOwnerInternalClick);
     {$ENDIF}
+    {$IFDEF MouseDoubleClickSupport}
+      Dispose(AProgressBar^.OnOwnerInternalDoubleClick);
+    {$ENDIF}
 
     AProgressBar^.OnOwnerInternalMouseDown := nil;
     AProgressBar^.OnOwnerInternalMouseMove := nil;
     AProgressBar^.OnOwnerInternalMouseUp := nil;
     {$IFDEF MouseClickSupport}
       AProgressBar^.OnOwnerInternalClick := nil;
+    {$ENDIF}
+    {$IFDEF MouseDoubleClickSupport}
+      AProgressBar^.OnOwnerInternalDoubleClick := nil;
     {$ENDIF}
   {$ENDIF}
   *)
@@ -372,6 +390,22 @@ end;
 {$ENDIF}
 
 
+{$IFDEF MouseDoubleClickSupport}
+  procedure TDynTFTProgressBar_OnDynTFTBaseInternalDoubleClick(ABase: PDynTFTBaseComponent);
+  begin
+    (*implement these if ProgressBar can be part of a more complex component
+    {$IFDEF IsDesktop}
+      if Assigned(PDynTFTProgressBar(TPtrRec(ABase))^.OnOwnerInternalDoubleClick) then
+        if Assigned(PDynTFTProgressBar(TPtrRec(ABase))^.OnOwnerInternalDoubleClick^) then
+    {$ELSE}
+      if PDynTFTProgressBar(TPtrRec(ABase))^.OnOwnerInternalDoubleClick <> nil then
+    {$ENDIF}
+        PDynTFTProgressBar(TPtrRec(ABase))^.OnOwnerInternalDoubleClick^(ABase);
+    *)
+  end;
+{$ENDIF}
+
+
 procedure TDynTFTProgressBar_OnDynTFTBaseInternalRepaint(ABase: PDynTFTBaseComponent; FullRepaint: Boolean; Options: TPtr; ComponentFromArea: PDynTFTBaseComponent);
 begin
   if Options = CREPAINTONMOUSEUP then
@@ -393,6 +427,9 @@ begin
     {$IFDEF MouseClickSupport}
       //ABaseEventReg.ClickEvent^ := TDynTFTProgressBar_OnDynTFTBaseInternalClick;
     {$ENDIF}
+    {$IFDEF MouseDoubleClickSupport}
+      //ABaseEventReg.DoubleClickEvent^ := TDynTFTProgressBar_OnDynTFTBaseInternalDoubleClick;
+    {$ENDIF}
     ABaseEventReg.Repaint^ := TDynTFTProgressBar_OnDynTFTBaseInternalRepaint;
 
     {$IFDEF RTTIREG}
@@ -405,6 +442,9 @@ begin
     //ABaseEventReg.MouseUpEvent := @TDynTFTProgressBar_OnDynTFTBaseInternalMouseUp;
     {$IFDEF MouseClickSupport}
       //ABaseEventReg.ClickEvent := @TDynTFTProgressBar_OnDynTFTBaseInternalClick;
+    {$ENDIF}
+    {$IFDEF MouseDoubleClickSupport}
+      //ABaseEventReg.DoubleClickEvent := @TDynTFTProgressBar_OnDynTFTBaseInternalDoubleClick;
     {$ENDIF}
     ABaseEventReg.Repaint := @TDynTFTProgressBar_OnDynTFTBaseInternalRepaint;
 

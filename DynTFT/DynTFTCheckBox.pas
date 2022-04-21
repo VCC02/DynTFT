@@ -372,6 +372,22 @@ end;
 {$ENDIF}
 
 
+{$IFDEF MouseDoubleClickSupport}
+  procedure TDynTFTCheckBox_OnDynTFTBaseInternalDoubleClick(ABase: PDynTFTBaseComponent);
+  begin
+    (* implement these if checkbox can be part of another component
+    {$IFDEF IsDesktop}
+      if Assigned(PDynTFTCheckBox(TPtrRec(ABase))^.OnOwnerInternalDoubleClick) then
+        if Assigned(PDynTFTCheckBox(TPtrRec(ABase))^.OnOwnerInternalDoubleClick^) then
+    {$ELSE}
+      if PDynTFTCheckBox(TPtrRec(ABase))^.OnOwnerInternalDoubleClick <> nil then
+    {$ENDIF}
+        PDynTFTCheckBox(TPtrRec(ABase))^.OnOwnerInternalDoubleClick^(ABase);
+    *)
+  end;
+{$ENDIF}
+
+
 procedure TDynTFTCheckBox_OnDynTFTBaseInternalRepaint(ABase: PDynTFTBaseComponent; FullRepaint: Boolean; Options: TPtr; ComponentFromArea: PDynTFTBaseComponent);
 begin
   DynTFTDrawCheckBox(PDynTFTCheckBox(TPtrRec(ABase)), FullRepaint);
@@ -390,6 +406,9 @@ begin
     {$IFDEF MouseClickSupport}
       //ABaseEventReg.ClickEvent^ := TDynTFTCheckBox_OnDynTFTBaseInternalClick;
     {$ENDIF}
+    {$IFDEF MouseDoubleClickSupport}
+      //ABaseEventReg.DoubleClickEvent^ := TDynTFTCheckBox_OnDynTFTBaseInternalDoubleClick;
+    {$ENDIF}
     ABaseEventReg.Repaint^ := TDynTFTCheckBox_OnDynTFTBaseInternalRepaint;
 
     {$IFDEF RTTIREG}
@@ -402,6 +421,9 @@ begin
     ABaseEventReg.MouseUpEvent := @TDynTFTCheckBox_OnDynTFTBaseInternalMouseUp;
     {$IFDEF MouseClickSupport}
       //ABaseEventReg.ClickEvent := @TDynTFTCheckBox_OnDynTFTBaseInternalClick;
+    {$ENDIF}
+    {$IFDEF MouseDoubleClickSupport}
+      //ABaseEventReg.DoubleClickEvent := @TDynTFTCheckBox_OnDynTFTBaseInternalDoubleClick;
     {$ENDIF}
     ABaseEventReg.Repaint := @TDynTFTCheckBox_OnDynTFTBaseInternalRepaint;
 

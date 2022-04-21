@@ -172,12 +172,44 @@ end;
 {$ENDIF}
 
 
+{$IFDEF MouseDoubleClickSupport}
+  procedure OnDynTFTBaseInternalDoubleClick(ABase: PDynTFTBaseComponent);
+  var
+    ComponentTypeIndex: Integer;
+  begin
+    ComponentTypeIndex := ABase^.BaseProps.ComponentType;
+
+    //Internal handler
+    {$IFDEF IsDesktop}
+      if Assigned(DynTFTRegisteredComponents[ComponentTypeIndex].DoubleClickEvent) then    //If the compiler says something like "Undeclared identifier MouseDoubleClickEvent", then please rebuild the whole project.
+        if Assigned(DynTFTRegisteredComponents[ComponentTypeIndex].DoubleClickEvent^) then
+    {$ELSE}
+      if DynTFTRegisteredComponents[ComponentTypeIndex].DoubleClickEvent <> nil then
+    {$ENDIF}
+        DynTFTRegisteredComponents[ComponentTypeIndex].DoubleClickEvent^(ABase);
+
+    //user handler
+    {$IFDEF IsDesktop}
+      if Assigned(ABase^.BaseProps.OnDoubleClickUser) then
+        if Assigned(ABase^.BaseProps.OnDoubleClickUser^) then
+    {$ELSE}
+      if ABase^.BaseProps.OnDoubleClickUser <> nil then
+    {$ENDIF}
+        ABase^.BaseProps.OnDoubleClickUser^(PPtrRec(TPtrRec(ABase)));
+  end;
+{$ENDIF}
+
+
 procedure ExecuteComponentHandlers_FirstAction(ScreenIndex: Byte; MouseIsDown: Boolean);
 var
   ParentComponent: PDynTFTComponent;
   ABase: PDynTFTBaseComponent;
   ComponentPressed: Boolean;
   MouseMoved: Boolean;
+  {$IFDEF MouseDoubleClickSupport}
+    DoubleClickDiff: DWord;
+    WillCallDoubleClick: Boolean;
+  {$ENDIF}  
 begin
   ParentComponent := DynTFTAllComponentsContainer[ScreenIndex].ScreenContainer;
   ParentComponent := PDynTFTComponent(TPtrRec(ParentComponent^.NextSibling));
@@ -217,7 +249,24 @@ begin
                 DynTFTAllComponentsContainer[ScreenIndex].SomeButtonDownScr := True;
                 ABase^.BaseProps.CompState := ABase^.BaseProps.CompState or CPRESSED; //MouseIsDown
 
+                {$IFDEF MouseDoubleClickSupport}
+                  WillCallDoubleClick := False;
+                  DoubleClickDiff := DynTFTGetTickCount - DynTFTOldGetTickCount;
+                  if (Abs(DynTFTMCU_XMouse - DynTFTMCU_OldXMouse) <= 5) and
+                     (Abs(DynTFTMCU_YMouse - DynTFTMCU_OldYMouse) <= 5) then
+                    if (DoubleClickDiff > 100) and
+                       (DoubleClickDiff < 300) then
+                      WillCallDoubleClick := True;
+
+                  DynTFTOldGetTickCount := DynTFTGetTickCount;
+                {$ENDIF}
+
                 OnDynTFTBaseInternalMouseDown(ABase);
+
+                {$IFDEF MouseDoubleClickSupport}
+                  if WillCallDoubleClick then
+                    OnDynTFTBaseInternalDoubleClick(ABase); //call this after the OnDynTFTBaseInternalMouseDown handler, to avoid messing with ItemIndex by the parent ListBox
+                {$ENDIF}
               end;
 
               if MouseMoved then

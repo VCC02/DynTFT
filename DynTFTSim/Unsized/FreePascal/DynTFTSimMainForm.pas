@@ -85,7 +85,7 @@ uses
   {$ENDIF}
 
   TFT, DynTFTGUI, DynTFTControls, DynTFTBaseDrawing, DynTFTUtils, DynTFTMessageBox,
-  IniFiles, DynTFTSimScreenForm, ClipBrd;
+  IniFiles, DynTFTSimScreenForm, ClipBrd, DynTFTHandlers;
 
 
 {TfrmTestDynTFTMain}
@@ -150,6 +150,14 @@ var
   AllocatedMemSize: Integer;
 begin
   try
+    {$IFDEF MouseDoubleClickSupport}
+      {$IFDEF FPC}
+        DynTFTGetTickCount := GetTickCount64;
+      {$ELSE}
+        DynTFTGetTickCount := GetTickCount;
+      {$ENDIF}
+    {$ENDIF}
+
     DynTFT_GUI_LoopIteration;
 
     AllocatedMemSize := {$IFDEF UseSmallMM} MaxMM {$ELSE} HEAP_SIZE {$ENDIF} - MM_TotalFreeMemSize;
@@ -228,6 +236,11 @@ begin
 
     tmrBlinkCaret.Enabled := True;
     lstLog.Color := clWindow;
+
+    CurrentDir := 'C:';
+    GetDrives;
+    ScanDir;
+    RepaintListOfFiles(0);
   except
     on E: Exception do
     begin

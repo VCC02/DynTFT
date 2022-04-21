@@ -40,16 +40,18 @@ interface
 uses
   Graphics
   {$IFDEF mikroTFT} 
-    , TFT;
+    , TFT
   {$ELSE}
     , {$INCLUDE UserDrawingUnits.inc}
   {$ENDIF}
+  ;
 
 
 const
   CAllFontSettings: array[-1..-1] of TDynTFTFontSettings = (
     ( //TFT_fallbackFont  (Fallback font, used when the property mentions an undefined font.)
       FontName: 'Tahoma';
+      IdentifierName: 'TFT_defaultFont';
       FontSize: 8;
       Bold: False;
       Italic: False;

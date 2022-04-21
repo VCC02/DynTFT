@@ -318,6 +318,9 @@ begin
       Result^.BtnOK^.BaseProps.OnMouseUpUser^ := TDynTFTMessageBox_OnDynTFTChildOKButtonInternalMouseUp;
       Result^.BtnCancel^.BaseProps.OnMouseUpUser^ := TDynTFTMessageBox_OnDynTFTChildCancelButtonInternalMouseUp;
     {$ENDIF}
+    {$IFDEF MouseDoubleClickSupport}
+      //nothing here
+    {$ENDIF}
     Result^.ExteriorLabel^.BaseProps.OnMouseDownUser^ := TDynTFTMessageBox_OnDynTFTChildExtLabelInternalMouseDown;
   {$ELSE}
     {$IFDEF MouseClickSupport}
@@ -326,6 +329,9 @@ begin
     {$ELSE}
       Result^.BtnOK^.BaseProps.OnMouseUpUser := @TDynTFTMessageBox_OnDynTFTChildOKButtonInternalMouseUp;
       Result^.BtnCancel^.BaseProps.OnMouseUpUser := @TDynTFTMessageBox_OnDynTFTChildCancelButtonInternalMouseUp;
+    {$ENDIF}
+    {$IFDEF MouseDoubleClickSupport}
+      //nothing here
     {$ENDIF}
     Result^.ExteriorLabel^.BaseProps.OnMouseDownUser := @TDynTFTMessageBox_OnDynTFTChildExtLabelInternalMouseDown;
   {$ENDIF}

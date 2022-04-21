@@ -6,6 +6,11 @@ mP for PIC32
 
 
 ------------------------
+
+                 Please switch off word wraping in your text editor, in order to properly view this file.
+
+------------------------
+
        Warning: 
 - RTTI and binary components work by overwriting memory at predefined locations.
 - In case of reading handler addresses from lst files, always make sure they are in sync with generated code (and .dyntftui files). Otherwise, undesired memory locations will be overwritten.

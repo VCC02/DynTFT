@@ -94,6 +94,9 @@ type
     {$IFDEF MouseClickSupport}
       //OnOwnerInternalClick: PDynTFTGenericEventHandler;
     {$ENDIF}
+    {$IFDEF MouseDoubleClickSupport}
+      //OnOwnerInternalDoubleClick: PDynTFTGenericEventHandler;
+    {$ENDIF}
     OnOwnerInternalAdjustTrackBar: POnOwnerInternalAdjustTrackBar;
     OnOwnerInternalAfterAdjustTrackBar: POnOwnerInternalAdjustTrackBar;
     
@@ -464,12 +467,18 @@ begin
     {$IFDEF MouseClickSupport}
       ATrbBar^.BtnTrack^.BaseProps.OnClickUser^ := ATrbBar^.BaseProps.OnClickUser^;
     {$ENDIF}
+    {$IFDEF MouseDoubleClickSupport}
+      ATrbBar^.BtnTrack^.BaseProps.OnDoubleClickUser^ := ATrbBar^.BaseProps.OnDoubleClickUser^;
+    {$ENDIF}
   {$ELSE}
     ATrbBar^.BtnTrack^.BaseProps.OnMouseDownUser := ATrbBar^.BaseProps.OnMouseDownUser;       // pointer := pointer, not content !!!
     ATrbBar^.BtnTrack^.BaseProps.OnMouseMoveUser := ATrbBar^.BaseProps.OnMouseMoveUser;
     ATrbBar^.BtnTrack^.BaseProps.OnMouseUpUser := ATrbBar^.BaseProps.OnMouseUpUser;
     {$IFDEF MouseClickSupport}
       ATrbBar^.BtnTrack^.BaseProps.OnClickUser := ATrbBar^.BaseProps.OnClickUser;
+    {$ENDIF}
+    {$IFDEF MouseDoubleClickSupport}
+      ATrbBar^.BtnTrack^.BaseProps.OnDoubleClickUser := ATrbBar^.BaseProps.OnDoubleClickUser;
     {$ENDIF}
   {$ENDIF}
 end;
@@ -580,6 +589,22 @@ end;
 {$ENDIF}
 
 
+{$IFDEF MouseDoubleClickSupport}
+  (*
+  procedure TDynTFTTrackBar_OnDynTFTChildPanelInternalDoubleClick(ABase: PDynTFTBaseComponent);
+  var
+    ATrbBar: PDynTFTTrackBar;
+  begin
+    if PDynTFTBaseComponent(TPtrRec(PDynTFTArrowButton(TPtrRec(ABase))^.BaseProps.Parent))^.BaseProps.ComponentType = ComponentType then
+    begin
+      ATrbBar := PDynTFTTrackBar(TPtrRec(PDynTFTArrowButton(TPtrRec(ABase))^.BaseProps.Parent));
+
+    end;
+  end;
+  *)
+{$ENDIF}
+
+
 function DynTFTTrackBar_CreateWithDir(ScreenIndex: Byte; Left, Top, Width, Height: TSInt; TrbDir: Byte): PDynTFTTrackBar;
 begin
   Result := PDynTFTTrackBar(TPtrRec(DynTFTComponent_Create(ScreenIndex, SizeOf(Result^))));
@@ -613,6 +638,9 @@ begin
     {$IFDEF MouseClickSupport}
       //New(Result^.OnOwnerInternalClick);
     {$ENDIF}
+    {$IFDEF MouseDoubleClickSupport}
+      //New(Result^.OnOwnerInternalDoubleClick);
+    {$ENDIF}
     New(Result^.OnTrackBarChange);
     New(Result^.OnOwnerInternalAdjustTrackBar);
     New(Result^.OnOwnerInternalAfterAdjustTrackBar);
@@ -627,12 +655,18 @@ begin
     {$IFDEF MouseClickSupport}
       //Result^.BtnTrack^.OnOwnerInternalClick^ := TDynTFTTrackBar_OnDynTFTChildPanelInternalClick;
     {$ENDIF}
+    {$IFDEF MouseDoubleClickSupport}
+      //Result^.BtnTrack^.OnOwnerInternalDoubleClick^ := TDynTFTTrackBar_OnDynTFTChildPanelInternalDoubleClick;
+    {$ENDIF}
   {$ELSE}
     Result^.BtnTrack^.OnOwnerInternalMouseDown := @TDynTFTTrackBar_OnDynTFTChildPanelInternalMouseDown;
     Result^.BtnTrack^.OnOwnerInternalMouseMove := @TDynTFTTrackBar_OnDynTFTChildPanelInternalMouseMove;
     Result^.BtnTrack^.OnOwnerInternalMouseUp := @TDynTFTTrackBar_OnDynTFTChildPanelInternalMouseUp;
     {$IFDEF MouseClickSupport}
       //Result^.BtnTrack^.OnOwnerInternalClick := @TDynTFTTrackBar_OnDynTFTChildPanelInternalClick;
+    {$ENDIF}
+    {$IFDEF MouseDoubleClickSupport}
+      //Result^.BtnTrack^.OnOwnerInternalDoubleClick := @TDynTFTTrackBar_OnDynTFTChildPanelInternalDoubleClick;
     {$ENDIF}
   {$ENDIF}
 
@@ -650,6 +684,9 @@ begin
     {$IFDEF MouseClickSupport}
       //Result^.OnOwnerInternalClick^ := nil;
     {$ENDIF}
+    {$IFDEF MouseDoubleClickSupport}
+      //Result^.OnOwnerInternalDoubleClick^ := nil;
+    {$ENDIF}
     Result^.OnTrackBarChange^ := nil;
     Result^.OnOwnerInternalAdjustTrackBar^ := nil;
     Result^.OnOwnerInternalAfterAdjustTrackBar^ := nil;
@@ -659,6 +696,9 @@ begin
     Result^.OnOwnerInternalMouseUp := nil;
     {$IFDEF MouseClickSupport}
       //Result^.OnOwnerInternalClick := nil;
+    {$ENDIF}
+    {$IFDEF MouseDoubleClickSupport}
+      //Result^.OnOwnerInternalDoubleClick := nil;
     {$ENDIF}
     Result^.OnTrackBarChange := nil;
     Result^.OnOwnerInternalAdjustTrackBar := nil;
@@ -694,6 +734,9 @@ begin
     {$IFDEF MouseClickSupport}
       //Dispose(ATrackBar^.OnOwnerInternalClick);
     {$ENDIF}
+    {$IFDEF MouseDoubleClickSupport}
+      //Dispose(ATrackBar^.OnOwnerInternalDoubleClick);
+    {$ENDIF}
     Dispose(ATrackBar^.OnTrackBarChange);
     Dispose(ATrackBar^.OnOwnerInternalAdjustTrackBar);
     Dispose(ATrackBar^.OnOwnerInternalAfterAdjustTrackBar);
@@ -703,6 +746,9 @@ begin
     ATrackBar^.OnOwnerInternalMouseUp := nil;
     {$IFDEF MouseClickSupport}
       //ATrackBar^.OnOwnerInternalClick := nil;
+    {$ENDIF}
+    {$IFDEF MouseDoubleClickSupport}
+      //ATrackBar^.OnOwnerInternalDoubleClick := nil;
     {$ENDIF}
     ATrackBar^.OnTrackBarChange := nil;
     ATrackBar^.OnOwnerInternalAdjustTrackBar := nil;
@@ -798,6 +844,22 @@ end;
 {$ENDIF}
 
 
+{$IFDEF MouseDoubleClickSupport}
+  (*
+  procedure TDynTFTTrackBar_OnDynTFTBaseInternalDoubleClick(ABase: PDynTFTBaseComponent);
+  begin
+    {$IFDEF IsDesktop}
+      if Assigned(PDynTFTTrackBar(TPtrRec(ABase))^.OnOwnerInternalDoubleClick) then
+        if Assigned(PDynTFTTrackBar(TPtrRec(ABase))^.OnOwnerInternalDoubleClick^) then
+    {$ELSE}
+      if PDynTFTTrackBar(TPtrRec(ABase))^.OnOwnerInternalDoubleClick <> nil then
+    {$ENDIF}
+        PDynTFTTrackBar(TPtrRec(ABase))^.OnOwnerInternalDoubleClick^(ABase);
+  end;
+  *)
+{$ENDIF}
+
+
 procedure TDynTFTTrackBar_OnDynTFTBaseInternalRepaint(ABase: PDynTFTBaseComponent; FullRepaint: Boolean; Options: TPtr; ComponentFromArea: PDynTFTBaseComponent);
 begin
   if Options = CREPAINTONMOUSEUP then
@@ -841,7 +903,10 @@ begin
     ABaseEventReg.MouseMoveEvent^ := TDynTFTTrackBar_OnDynTFTBaseInternalMouseMove;
     ABaseEventReg.MouseUpEvent^ := TDynTFTTrackBar_OnDynTFTBaseInternalMouseUp;
     {$IFDEF MouseClickSupport}
-      //ABaseEventReg.MouseUpEvent^ := TDynTFTTrackBar_OnDynTFTBaseInternalClick;
+      //ABaseEventReg.MouseClickEvent^ := TDynTFTTrackBar_OnDynTFTBaseInternalClick;
+    {$ENDIF}
+    {$IFDEF MouseDoubleClickSupport}
+      //ABaseEventReg.MouseDoubleClickEvent^ := TDynTFTTrackBar_OnDynTFTBaseInternalDoubleClick;
     {$ENDIF}
     ABaseEventReg.Repaint^ := TDynTFTTrackBar_OnDynTFTBaseInternalRepaint;
 
@@ -854,7 +919,10 @@ begin
     ABaseEventReg.MouseMoveEvent := @TDynTFTTrackBar_OnDynTFTBaseInternalMouseMove;
     ABaseEventReg.MouseUpEvent := @TDynTFTTrackBar_OnDynTFTBaseInternalMouseUp;
     {$IFDEF MouseClickSupport}
-      //ABaseEventReg.MouseUpEvent := @TDynTFTTrackBar_OnDynTFTBaseInternalClick;
+      //ABaseEventReg.MouseClickEvent := @TDynTFTTrackBar_OnDynTFTBaseInternalClick;
+    {$ENDIF}
+    {$IFDEF MouseDoubleClickSupport}
+      //ABaseEventReg.MouseDoubleClickEvent := @TDynTFTTrackBar_OnDynTFTBaseInternalDoubleClick;
     {$ENDIF}
     ABaseEventReg.Repaint := @TDynTFTTrackBar_OnDynTFTBaseInternalRepaint;
 

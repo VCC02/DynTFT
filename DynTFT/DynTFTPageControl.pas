@@ -200,6 +200,14 @@ end;
 {$ENDIF}
 
 
+{$IFDEF MouseDoubleClickSupport}
+  procedure TDynTFTPageControl_OnDynTFTChildTabButtonInternalDoubleClick(ABase: PDynTFTBaseComponent);
+  begin
+
+  end;
+{$ENDIF}
+
+
 procedure TDynTFTPageControl_OnDynTFTChildTabButtonInternalBeforeDestroy(ABase: PDynTFTBaseComponent);
 var
   APageControl: PDynTFTPageControl;
@@ -353,6 +361,9 @@ begin
     {$IFDEF MouseClickSupport}
       //ATabButton^.OnOwnerInternalClick^ := TDynTFTPageControl_OnDynTFTChildTabButtonInternalClick;  //uncomment if needed
     {$ENDIF}
+    {$IFDEF MouseDoubleClickSupport}
+      //ATabButton^.OnOwnerInternalDoubleClick^ := TDynTFTPageControl_OnDynTFTChildTabButtonInternalDoubleClick;  //uncomment if needed
+    {$ENDIF}
     ATabButton^.OnOwnerInternalBeforeDestroy^ := TDynTFTPageControl_OnDynTFTChildTabButtonInternalBeforeDestroy;
   {$ELSE}
     ATabButton^.OnOwnerInternalMouseDown := @TDynTFTPageControl_OnDynTFTChildTabButtonInternalMouseDown;
@@ -360,6 +371,9 @@ begin
     ATabButton^.OnOwnerInternalMouseUp := @TDynTFTPageControl_OnDynTFTChildTabButtonInternalMouseUp;
     {$IFDEF MouseClickSupport}
       //ATabButton^.OnOwnerInternalClick := @TDynTFTPageControl_OnDynTFTChildTabButtonInternalClick;  //uncomment if needed
+    {$ENDIF}
+    {$IFDEF MouseDoubleClickSupport}
+      //ATabButton^.OnOwnerInternalDoubleClick := @TDynTFTPageControl_OnDynTFTChildTabButtonInternalDoubleClick;  //uncomment if needed
     {$ENDIF}
     ATabButton^.OnOwnerInternalBeforeDestroy := @TDynTFTPageControl_OnDynTFTChildTabButtonInternalBeforeDestroy;
   {$ENDIF}
@@ -424,6 +438,22 @@ end;
 {$ENDIF}
 
 
+{$IFDEF MouseDoubleClickSupport}
+  procedure TDynTFTPageControl_OnDynTFTBaseInternalDoubleClick(ABase: PDynTFTBaseComponent);
+  begin
+    (* implement these if PageControl can be part of a more complex component
+    {$IFDEF IsDesktop}
+      if Assigned(PDynTFTPageControl(TPtrRec(ABase))^.OnOwnerInternalDoubleClick) then
+        if Assigned(PDynTFTPageControl(TPtrRec(ABase))^.OnOwnerInternalDoubleClick^) then
+    {$ELSE}
+      if PDynTFTPageControl(TPtrRec(ABase))^.OnOwnerInternalDoubleClick <> nil then
+    {$ENDIF}
+        PDynTFTPageControl(TPtrRec(ABase))^.OnOwnerInternalDoubleClick^(ABase);
+    *)
+  end;
+{$ENDIF}
+
+
 procedure TDynTFPageControl_OnDynTFTBaseInternalRepaint(ABase: PDynTFTBaseComponent; FullRepaint: Boolean; Options: TPtr; ComponentFromArea: PDynTFTBaseComponent);
 var
   i, n: Integer;
@@ -480,6 +510,9 @@ begin
     {$IFDEF MouseClickSupport}
       //ABaseEventReg.ClickEvent^ := TDynTFTPageControl_OnDynTFTBaseInternalClick;
     {$ENDIF}
+    {$IFDEF MouseDoubleClickSupport}
+      //ABaseEventReg.DoubleClickEvent^ := TDynTFTPageControl_OnDynTFTBaseInternalDoubleClick;
+    {$ENDIF}
     ABaseEventReg.Repaint^ := TDynTFPageControl_OnDynTFTBaseInternalRepaint;
 
     {$IFDEF RTTIREG}
@@ -492,6 +525,9 @@ begin
     //ABaseEventReg.MouseUpEvent := @TDynTFTPageControl_OnDynTFTBaseInternalMouseUp;
     {$IFDEF MouseClickSupport}
       //ABaseEventReg.ClickEvent := @TDynTFTPageControl_OnDynTFTBaseInternalClick;
+    {$ENDIF}
+    {$IFDEF MouseDoubleClickSupport}
+      //ABaseEventReg.DoubleClickEvent := @TDynTFTPageControl_OnDynTFTBaseInternalDoubleClick;
     {$ENDIF}
     ABaseEventReg.Repaint := @TDynTFPageControl_OnDynTFTBaseInternalRepaint;
 

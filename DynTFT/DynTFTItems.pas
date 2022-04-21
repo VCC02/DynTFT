@@ -66,6 +66,18 @@ const
     CMaxItemsStringLength = 19; //n * 4 - 1
   {$ENDIF}
 
+  {$IFDEF ListIcons}
+    {$IFDEF UseExternalItemsIconIndent}
+      {$IFDEF ExternalItemsIconIndentAtProjectLevel}
+        {$I ExternalItemsIconIndent.inc}
+      {$ELSE}
+        {$I ..\ExternalItemsIconIndent.inc}
+      {$ENDIF}
+    {$ELSE}
+      CIconIndent = 3;   //If the compiler reports that this constant is not found, then please enable ListIcons at project level. 
+    {$ENDIF}  
+  {$ENDIF}
+
 type
   TItemsString = string[CMaxItemsStringLength];
 
@@ -78,6 +90,9 @@ type
 
   TOnGetItemVisibilityEvent = procedure(AItems: PPtrRec; Index: LongInt; var ItemText: string {$IFDEF ItemsVisibility}; IsVisible: PBoolean {$ENDIF} {$IFDEF ItemsEnabling}; IsEnabled: PBoolean {$ENDIF});
   POnGetItemVisibilityEvent = ^TOnGetItemVisibilityEvent;
+
+  TOnDrawIconEvent = procedure(AItems: PPtrRec; Index, ItemY: LongInt; var ItemText: string {$IFDEF ItemsEnabling}; IsEnabled: Boolean {$ENDIF});
+  POnDrawIconEvent = ^TOnDrawIconEvent;
 
   TDynTFTItems = record
     BaseProps: TDynTFTBaseProperties;  //inherited properties from TDynTFTBaseProperties - must be the first field of this structure !!!
@@ -98,6 +113,10 @@ type
     {$IFDEF ItemsVisibility}
       TotalVisibleCount: LongInt;
     {$ENDIF}
+
+    {$IFDEF ListIcons}
+      VisibleIcons: {$IFDEF IsDesktop} LongBool; {$ELSE} Boolean; {$ENDIF}
+    {$ENDIF}
     
     //these events are set by an owner component, e.g. a list box, and called by Items
     OnOwnerInternalMouseDown: PDynTFTGenericEventHandler;
@@ -105,6 +124,9 @@ type
     OnOwnerInternalMouseUp: PDynTFTGenericEventHandler;
     {$IFDEF MouseClickSupport}
       OnOwnerInternalClick: PDynTFTGenericEventHandler;
+    {$ENDIF}
+    {$IFDEF MouseDoubleClickSupport}
+      OnOwnerInternalDoubleClick: PDynTFTGenericEventHandler;
     {$ENDIF}
 
     {$IFDEF UseExternalItems}
@@ -118,6 +140,10 @@ type
       {$IFDEF ItemsEnabling}
         ItemsEnabled: array[0..CMaxItemItemCount - 1] of {$IFDEF IsDesktop} LongBool; {$ELSE} Boolean; {$ENDIF}
       {$ENDIF}
+    {$ENDIF}
+
+    {$IFDEF ListIcons}
+      OnDrawIcon: POnDrawIconEvent;
     {$ENDIF}
   end;
   PDynTFTItems = ^TDynTFTItems;  
@@ -190,7 +216,7 @@ end;
       {$IFDEF ItemsEnabling}
         IsEnabled := True;
       {$ENDIF}
-          
+
       {$IFDEF IsDesktop}
         if Assigned(AItems^.OnGetItemVisibility) then
           if Assigned(AItems^.OnGetItemVisibility^) then
@@ -221,7 +247,7 @@ end;
       {$IFDEF ItemsVisibility}
         IsVisible := True;
       {$ENDIF}
-          
+
       {$IFDEF IsDesktop}
         if Assigned(AItems^.OnGetItemVisibility) then
           if Assigned(AItems^.OnGetItemVisibility^) then
@@ -251,8 +277,8 @@ begin
     {$ENDIF}
     {$IFDEF ItemsEnabling}
       IsEnabled^ := DynTFTItemsGetItemEnabling(AItems, NewIndexOfDrawingItem, ItemText);
-    {$ENDIF}  
-     
+    {$ENDIF}
+
     Inc(NewIndexOfDrawingItem);
   until {$IFDEF ItemsVisibility}IsVisible^ or (NewIndexOfDrawingItem >= AItems^.Count) {$ELSE} True {$ENDIF};
 
@@ -282,7 +308,7 @@ end;
       if IndexOfDrawingItem >= AItems^.Count then
         Break;
 
-      Inc(i);  
+      Inc(i);
     end;
 
     Result := IndexOfDrawingItem;
@@ -335,14 +361,32 @@ begin
 end;
 
 
+{$IFDEF ListIcons}
+  procedure DynTFTItemsDrawIcon(AItems: PDynTFTItems; Index, ItemY: LongInt; var ItemText: string {$IFDEF ItemsEnabling}; IsEnabled: Boolean {$ENDIF});
+  begin
+    {$IFDEF IsDesktop}
+      if Assigned(AItems^.OnDrawIcon) then
+        if Assigned(AItems^.OnDrawIcon^) then
+    {$ELSE}
+      if AItems^.OnDrawIcon <> nil then
+    {$ENDIF}
+        AItems^.OnDrawIcon^(PPtrRec(TPtrRec(AItems)), Index, ItemY, ItemText {$IFDEF ItemsEnabling}, IsEnabled {$ENDIF})
+  end;
+{$ENDIF}
+
+
 procedure DynTFTDrawItems(AItems: PDynTFTItems; FullRedraw: Boolean);
 var
   x1, y1, x2, y2: TSInt;
   i: LongInt;
   MaxDrawingPosition: LongInt;
   IndexOfDrawingItem: LongInt;
-  VisibleCount: LongInt;
+  {$IFDEF ListIcons}
+    OldIndexOfDrawingItem: LongInt;
+  {$ENDIF}
   
+  VisibleCount: LongInt;
+
   FocusRectangleY, ItemY: LongInt;
   FontCol: TColor;
   ATempString: string {$IFDEF IsMCU}[CMaxItemsStringLength] {$ENDIF};
@@ -356,6 +400,11 @@ var
 
   {$IFDEF ItemsEnabling}
     EnabledFontCol: TColor;
+  {$ENDIF}
+
+  {$IFDEF ItemsTextCrop}
+    TextWidth, TextHeight: Word;
+    TextSpace: TSInt;
   {$ENDIF}
 begin
   if not DynTFTIsDrawableComponent(PDynTFTBaseComponent(TPtrRec(AItems))) then
@@ -385,7 +434,11 @@ begin
   else
     FontCol := CL_DynTFTItems_DisabledFont;
 
-  VisibleCount := 0; 
+  VisibleCount := 0;
+
+  {$IFDEF IsDesktop}
+    ATempString := 'OnGetItem is nil';
+  {$ENDIF}
 
   IndexOfDrawingItem := GetIndexOfFirstDrawingItem(AItems, VisibleCount, ATempString);
   MaxDrawingPosition := GetMaxDrawingPosition(AItems);
@@ -401,6 +454,10 @@ begin
   begin
     if IndexOfDrawingItem >= AItems^.Count then
       Break;
+
+    {$IFDEF ListIcons}
+      OldIndexOfDrawingItem := IndexOfDrawingItem;
+    {$ENDIF}
 
     IndexOfDrawingItem := GoToNextVisibleItemFromIndex(AItems, IndexOfDrawingItem, ATempString {$IFDEF ItemsVisibility}, @IsVisible {$ENDIF} {$IFDEF ItemsEnabling}, @IsEnabled {$ENDIF});
 
@@ -447,7 +504,41 @@ begin
           DynTFT_Set_Brush(1, AItems^.BackgroundColor, 0, 0, 0, 0);
         end;
 
-        DynTFT_Write_Text(ATempString, x1 + 3, ItemY);
+        {$IFDEF ItemsTextCrop}
+          TextSpace := AItems^.BaseProps.Width - 3 {$IFDEF ListIcons} - CIconIndent {$ENDIF};
+          {$IFDEF ListIcons}
+            if AItems^.VisibleIcons then
+              TextSpace := TextSpace - AItems^.ItemHeight;
+          {$ENDIF}
+
+          repeat
+            if Length(ATempString) = 0 then
+              Break;
+              
+            GetTextWidthAndHeight(ATempString, TextWidth, TextHeight);
+
+            if TSInt(TextWidth) > TextSpace then
+              {$IFDEF IsDesktop}
+                ATempString := Copy(ATempString, 1, Length(ATempString) - 1)   //A very inneficient way of making the string shorter.
+              {$ELSE}
+                ATempString[Length(ATempString) - 1] := #0
+              {$ENDIF}  
+            else
+              Break;  
+          until Length(ATempString) = 0;
+        {$ENDIF}
+
+        {$IFDEF ListIcons}
+          if AItems^.VisibleIcons then
+          begin
+            DynTFT_Write_Text(ATempString, x1 + 3 + CIconIndent + AItems^.ItemHeight, ItemY);
+            DynTFTItemsDrawIcon(AItems, OldIndexOfDrawingItem, ItemY + 2, ATempString {$IFDEF ItemsEnabling}, IsEnabled {$ENDIF});
+          end
+          else
+            DynTFT_Write_Text(ATempString, x1 + 3, ItemY);
+        {$ELSE}
+          DynTFT_Write_Text(ATempString, x1 + 3, ItemY);
+        {$ENDIF}  
 
         {$IFDEF IsDesktop}
           //DynTFT_TestConsole(ATempString);
@@ -516,10 +607,17 @@ begin
     {$IFDEF MouseClickSupport}
       New(Result^.OnOwnerInternalClick);
     {$ENDIF}
+    {$IFDEF MouseDoubleClickSupport}
+      New(Result^.OnOwnerInternalDoubleClick);
+    {$ENDIF}
 
     {$IFDEF UseExternalItems}
       New(Result^.OnGetItem);
       Result^.OnGetItem^ := nil;
+    {$ENDIF}
+    {$IFDEF ListIcons}
+      New(Result^.OnDrawIcon);
+      Result^.OnDrawIcon^ := nil;
     {$ENDIF}
 
     Result^.OnOwnerInternalMouseDown^ := nil;
@@ -528,9 +626,15 @@ begin
     {$IFDEF MouseClickSupport}
       Result^.OnOwnerInternalClick^ := nil;
     {$ENDIF}
+    {$IFDEF MouseDoubleClickSupport}
+      Result^.OnOwnerInternalDoubleClick^ := nil;
+    {$ENDIF}
   {$ELSE}
     {$IFDEF UseExternalItems}
       Result^.OnGetItem := nil;
+    {$ENDIF}
+    {$IFDEF ListIcons}
+      Result^.OnDrawIcon := nil;
     {$ENDIF}
 
     Result^.OnOwnerInternalMouseDown := nil;
@@ -538,6 +642,9 @@ begin
     Result^.OnOwnerInternalMouseUp := nil;
     {$IFDEF MouseClickSupport}
       Result^.OnOwnerInternalClick := nil;
+    {$ENDIF}
+    {$IFDEF MouseDoubleClickSupport}
+      Result^.OnOwnerInternalDoubleClick := nil;
     {$ENDIF}
   {$ENDIF}
 
@@ -569,6 +676,10 @@ begin
 
   {$IFDEF ItemsVisibility}
     Result^.TotalVisibleCount := 0;
+  {$ENDIF}
+
+  {$IFDEF ListIcons}
+    Result^.VisibleIcons := False;
   {$ENDIF}
 
   {$IFDEF UseExternalItemsStringLength}
@@ -606,6 +717,9 @@ begin
     {$IFDEF MouseClickSupport}
       Dispose(AItems^.OnOwnerInternalClick);
     {$ENDIF}
+    {$IFDEF MouseDoubleClickSupport}
+      Dispose(AItems^.OnOwnerInternalDoubleClick);
+    {$ENDIF}
 
     AItems^.OnOwnerInternalMouseDown := nil;
     AItems^.OnOwnerInternalMouseMove := nil;
@@ -613,12 +727,19 @@ begin
     {$IFDEF MouseClickSupport}
       AItems^.OnOwnerInternalClick := nil;
     {$ENDIF}
+    {$IFDEF MouseDoubleClickSupport}
+      AItems^.OnOwnerInternalDoubleClick := nil;
+    {$ENDIF}
   {$ENDIF}
   
   {$IFDEF UseExternalItems}
     {$IFDEF IsDesktop}
       Dispose(AItems^.OnGetItem);
       Dispose(AItems^.OnGetItemVisibility);
+
+      {$IFDEF ListIcons}
+        Dispose(AItems^.OnDrawIcon);
+      {$ENDIF}
     {$ENDIF}
   {$ENDIF}
 
@@ -707,6 +828,20 @@ end;
 {$ENDIF}
 
 
+{$IFDEF MouseDoubleClickSupport}
+  procedure TDynTFTItems_OnDynTFTBaseInternalDoubleClick(ABase: PDynTFTBaseComponent);
+  begin
+    {$IFDEF IsDesktop}
+      if Assigned(PDynTFTItems(TPtrRec(ABase))^.OnOwnerInternalDoubleClick) then
+        if Assigned(PDynTFTItems(TPtrRec(ABase))^.OnOwnerInternalDoubleClick^) then
+    {$ELSE}
+      if PDynTFTItems(TPtrRec(ABase))^.OnOwnerInternalDoubleClick <> nil then
+    {$ENDIF}
+        PDynTFTItems(TPtrRec(ABase))^.OnOwnerInternalDoubleClick^(ABase);
+  end;
+{$ENDIF}
+
+
 procedure TDynTFTItems_OnDynTFTBaseInternalRepaint(ABase: PDynTFTBaseComponent; FullRepaint: Boolean; Options: TPtr; ComponentFromArea: PDynTFTBaseComponent);
 begin                                     
   if Options = CSETSUBCOMPONENTSVISIBLEONSHOWREPAINT then
@@ -734,6 +869,9 @@ begin
     {$IFDEF MouseClickSupport}
       ABaseEventReg.ClickEvent^ := TDynTFTItems_OnDynTFTBaseInternalClick;
     {$ENDIF}
+    {$IFDEF MouseDoubleClickSupport}
+      ABaseEventReg.DoubleClickEvent^ := TDynTFTItems_OnDynTFTBaseInternalDoubleClick;
+    {$ENDIF}
     ABaseEventReg.Repaint^ := TDynTFTItems_OnDynTFTBaseInternalRepaint;
 
     {$IFDEF RTTIREG}
@@ -746,6 +884,9 @@ begin
     ABaseEventReg.MouseUpEvent := @TDynTFTItems_OnDynTFTBaseInternalMouseUp;
     {$IFDEF MouseClickSupport}
       ABaseEventReg.ClickEvent := @TDynTFTItems_OnDynTFTBaseInternalClick;
+    {$ENDIF}
+    {$IFDEF MouseDoubleClickSupport}
+      ABaseEventReg.DoubleClickEvent := @TDynTFTItems_OnDynTFTBaseInternalDoubleClick;
     {$ENDIF}
     ABaseEventReg.Repaint := @TDynTFTItems_OnDynTFTBaseInternalRepaint;
 

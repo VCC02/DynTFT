@@ -78,6 +78,10 @@ type
     {$IFDEF MouseClickSupport}
       OnOwnerInternalClick: PDynTFTGenericEventHandler;
     {$ENDIF}
+
+    {$IFDEF MouseDoubleClickSupport}
+      OnOwnerInternalDoubleClick: PDynTFTGenericEventHandler;
+    {$ENDIF}
   end;
   PDynTFTListBox = ^TDynTFTListBox;
 
@@ -181,6 +185,9 @@ begin
     {$IFDEF MouseClickSupport}
       AListBox^.Items^.BaseProps.OnClickUser^ := AListBox^.BaseProps.OnClickUser^;
     {$ENDIF}
+    {$IFDEF MouseDoubleClickSupport}
+      AListBox^.Items^.BaseProps.OnDoubleClickUser^ := AListBox^.BaseProps.OnDoubleClickUser^;
+    {$ENDIF}
 
     AListBox^.VertScrollBar^.BaseProps.OnMouseDownUser^ := AListBox^.BaseProps.OnMouseDownUser^;     // content := content, not pointer !!!
     AListBox^.VertScrollBar^.BaseProps.OnMouseMoveUser^ := AListBox^.BaseProps.OnMouseMoveUser^;
@@ -191,6 +198,9 @@ begin
     AListBox^.Items^.BaseProps.OnMouseUpUser := AListBox^.BaseProps.OnMouseUpUser;
     {$IFDEF MouseClickSupport}
       AListBox^.Items^.BaseProps.OnClickUser := AListBox^.BaseProps.OnClickUser;
+    {$ENDIF}
+    {$IFDEF MouseDoubleClickSupport}
+      AListBox^.Items^.BaseProps.OnDoubleClickUser := AListBox^.BaseProps.OnDoubleClickUser;
     {$ENDIF}
 
     AListBox^.VertScrollBar^.BaseProps.OnMouseDownUser := AListBox^.BaseProps.OnMouseDownUser;       // pointer := pointer, not content !!!
@@ -207,11 +217,31 @@ begin
 end;
 
 
+procedure SetFirstDisplayablePositionFromScrollBar(AListBox: PDynTFTListBox);
+var
+  MaxFirstDisplayableIndex, NewFirstDisplayableIndex: Longint;
+begin
+  MaxFirstDisplayableIndex := AListBox^.VertScrollBar^.Max;
+
+  NewFirstDisplayableIndex := AListBox^.Items^.FirstDisplayablePosition;
+  if NewFirstDisplayableIndex <> AListBox^.VertScrollBar^.Position then
+  begin
+    NewFirstDisplayableIndex := AListBox^.VertScrollBar^.Position;
+    if NewFirstDisplayableIndex > MaxFirstDisplayableIndex then
+      NewFirstDisplayableIndex := MaxFirstDisplayableIndex;
+    if NewFirstDisplayableIndex < 0 then
+      NewFirstDisplayableIndex := 0;
+
+    AListBox^.Items^.FirstDisplayablePosition := NewFirstDisplayableIndex;
+    DynTFTDrawItems(AListBox^.Items, True);
+  end;
+end;
+
+
 procedure TDynTFTListBox_OnDynTFTChildScrollBarInternalAfterAdjust(AScrollBar: PDynTFTBaseComponent);
 var
   AScrBar: PDynTFTScrollBar;
   AListBox: PDynTFTListBox;
-  NewFirstDisplayableIndex: Longint;
 begin
   if PDynTFTBaseComponent(TPtrRec(AScrollBar^.BaseProps.Parent))^.BaseProps.ComponentType = ComponentType then //scroll bar belongs to a listbox
   begin
@@ -224,18 +254,7 @@ begin
       DynTFTDrawScrollBar(AScrBar, True);
     end;
 
-    NewFirstDisplayableIndex := AListBox^.Items^.FirstDisplayablePosition;
-    if NewFirstDisplayableIndex <> AScrBar^.Position then
-    begin
-      NewFirstDisplayableIndex := AScrBar^.Position;
-      if NewFirstDisplayableIndex > AScrBar^.Max then
-        NewFirstDisplayableIndex := AScrBar^.Max;
-      if NewFirstDisplayableIndex < 0 then
-        NewFirstDisplayableIndex := 0;
-
-      AListBox^.Items^.FirstDisplayablePosition := NewFirstDisplayableIndex;
-      DynTFTDrawItems(AListBox^.Items, True);
-    end;
+    SetFirstDisplayablePositionFromScrollBar(AListBox);
   end;
 end;
 
@@ -250,7 +269,6 @@ procedure TDynTFTListBox_OnDynTFTChildScrollBarInternalMouseMove(ABase: PDynTFTB
 var
   AScrBar: PDynTFTScrollBar;
   AListBox: PDynTFTListBox;
-  MaxFirstDisplayableIndex, NewFirstDisplayableIndex: Longint;
 begin
   AScrBar := PDynTFTScrollBar(TPtrRec(ABase));
   if PDynTFTBaseComponent(TPtrRec(AScrBar^.BaseProps.Parent))^.BaseProps.ComponentType = ComponentType then //scroll bar belongs to a listbox
@@ -258,21 +276,7 @@ begin
     AListBox := PDynTFTListBox(TPtrRec(AScrBar^.BaseProps.Parent));
     SetScrollBarMaxBasedOnVisibility(AListBox);
 
-    MaxFirstDisplayableIndex := AScrBar^.Max;
-
-    NewFirstDisplayableIndex := AListBox^.Items^.FirstDisplayablePosition;
-    if NewFirstDisplayableIndex <> AScrBar^.Position then
-    begin
-      NewFirstDisplayableIndex := AScrBar^.Position;
-      if NewFirstDisplayableIndex > MaxFirstDisplayableIndex then
-        NewFirstDisplayableIndex := MaxFirstDisplayableIndex;
-      if NewFirstDisplayableIndex < 0 then
-        NewFirstDisplayableIndex := 0;
-
-      AListBox^.Items^.FirstDisplayablePosition := NewFirstDisplayableIndex;
-
-      DynTFTDrawItems(AListBox^.Items, True);
-    end;
+    SetFirstDisplayablePositionFromScrollBar(AListBox);
   end;
 end;
 
@@ -471,6 +475,37 @@ end;
 {$ENDIF}
 
 
+{$IFDEF MouseDoubleClickSupport}
+  procedure TDynTFTListBox_OnDynTFTChildItemsInternalDoubleClick(ABase: PDynTFTBaseComponent);
+  begin
+    {$IFDEF ItemsEnabling}
+      if ClickedItem_IsEnabled then  //requires TDynTFTListBox_OnDynTFTChildItemsInternalMouseDown to be used
+      begin
+    {$ENDIF}
+
+        {$IFDEF IsDesktop}
+          if Assigned(PDynTFTListBox(TPtrRec(ABase^.BaseProps.Parent))^.OnOwnerInternalDoubleClick) then
+            if Assigned(PDynTFTListBox(TPtrRec(ABase^.BaseProps.Parent))^.OnOwnerInternalDoubleClick^) then
+        {$ELSE}
+          if PDynTFTListBox(TPtrRec(ABase^.BaseProps.Parent))^.OnOwnerInternalDoubleClick <> nil then
+        {$ENDIF}
+            PDynTFTListBox(TPtrRec(ABase^.BaseProps.Parent))^.OnOwnerInternalDoubleClick^(PDynTFTBaseComponent(TPtrRec(ABase^.BaseProps.Parent)));
+
+    {$IFDEF ItemsEnabling}
+      end;
+    {$ENDIF}
+
+    {$IFDEF IsDesktop}
+      if Assigned(PDynTFTListBox(TPtrRec(ABase^.BaseProps.Parent))^.BaseProps.OnDoubleClickUser) then
+        if Assigned(PDynTFTListBox(TPtrRec(ABase^.BaseProps.Parent))^.BaseProps.OnDoubleClickUser^) then
+    {$ELSE}
+      if PDynTFTListBox(TPtrRec(ABase^.BaseProps.Parent))^.BaseProps.OnDoubleClickUser <> nil then
+    {$ENDIF}
+        PDynTFTListBox(TPtrRec(ABase^.BaseProps.Parent))^.BaseProps.OnDoubleClickUser^(PPtrRec(TPtrRec(ABase^.BaseProps.Parent)));
+  end;
+{$ENDIF}
+
+
 function DynTFTListBox_Create(ScreenIndex: Byte; Left, Top, Width, Height: TSInt): PDynTFTListBox;
 begin                         
   Result := PDynTFTListBox(TPtrRec(DynTFTComponent_Create(ScreenIndex, SizeOf(Result^))));
@@ -498,12 +533,18 @@ begin
     {$IFDEF MouseClickSupport}
       Result^.Items^.OnOwnerInternalClick^ := TDynTFTListBox_OnDynTFTChildItemsInternalClick;
     {$ENDIF}
+    {$IFDEF MouseDoubleClickSupport}
+      Result^.Items^.OnOwnerInternalDoubleClick^ := TDynTFTListBox_OnDynTFTChildItemsInternalDoubleClick;
+    {$ENDIF}
   {$ELSE}
     Result^.Items^.OnOwnerInternalMouseDown := @TDynTFTListBox_OnDynTFTChildItemsInternalMouseDown;
     Result^.Items^.OnOwnerInternalMouseMove := @TDynTFTListBox_OnDynTFTChildItemsInternalMouseMove;
     Result^.Items^.OnOwnerInternalMouseUp := @TDynTFTListBox_OnDynTFTChildItemsInternalMouseUp;
     {$IFDEF MouseClickSupport}
       Result^.Items^.OnOwnerInternalClick := @TDynTFTListBox_OnDynTFTChildItemsInternalClick;
+    {$ENDIF}
+    {$IFDEF MouseDoubleClickSupport}
+      Result^.Items^.OnOwnerInternalDoubleClick := @TDynTFTListBox_OnDynTFTChildItemsInternalDoubleClick;
     {$ENDIF}
   {$ENDIF}
 
@@ -544,6 +585,9 @@ begin
     {$IFDEF MouseClickSupport}
       New(Result^.OnOwnerInternalClick);
     {$ENDIF}
+    {$IFDEF MouseDoubleClickSupport}
+      New(Result^.OnOwnerInternalDoubleClick);
+    {$ENDIF}
 
     Result^.OnOwnerInternalMouseDown^ := nil;
     Result^.OnOwnerInternalMouseMove^ := nil;
@@ -551,12 +595,18 @@ begin
     {$IFDEF MouseClickSupport}
       Result^.OnOwnerInternalClick^ := nil;
     {$ENDIF}
+    {$IFDEF MouseDoubleClickSupport}
+      Result^.OnOwnerInternalDoubleClick^ := nil;
+    {$ENDIF}
   {$ELSE}
     Result^.OnOwnerInternalMouseDown := nil;
     Result^.OnOwnerInternalMouseMove := nil;
     Result^.OnOwnerInternalMouseUp := nil;
     {$IFDEF MouseClickSupport}
       Result^.OnOwnerInternalClick := nil;
+    {$ENDIF}
+    {$IFDEF MouseDoubleClickSupport}
+      Result^.OnOwnerInternalDoubleClick := nil;
     {$ENDIF}
   {$ENDIF}
 
@@ -617,12 +667,18 @@ begin
     {$IFDEF MouseClickSupport}
       Dispose(AListBox^.OnOwnerInternalClick);
     {$ENDIF}
+    {$IFDEF MouseDoubleClickSupport}
+      Dispose(AListBox^.OnOwnerInternalDoubleClick);
+    {$ENDIF}
 
     AListBox^.OnOwnerInternalMouseDown := nil;
     AListBox^.OnOwnerInternalMouseMove := nil;
     AListBox^.OnOwnerInternalMouseUp := nil;
     {$IFDEF MouseClickSupport}
       AListBox^.OnOwnerInternalClick := nil;
+    {$ENDIF}
+    {$IFDEF MouseDoubleClickSupport}
+      AListBox^.OnOwnerInternalDoubleClick := nil;
     {$ENDIF}
 
     DynTFTComponent_Destroy(PDynTFTBaseComponent(TPtrRec(AListBox)), SizeOf(AListBox^));
@@ -715,6 +771,20 @@ end;
 {$ENDIF}
 
 
+{$IFDEF MouseDoubleClickSupport}
+  procedure TDynTFTListBox_OnDynTFTBaseInternalDoubleClick(ABase: PDynTFTBaseComponent);
+  begin
+    {$IFDEF IsDesktop}
+      if Assigned(PDynTFTListBox(TPtrRec(ABase))^.OnOwnerInternalDoubleClick) then
+        if Assigned(PDynTFTListBox(TPtrRec(ABase))^.OnOwnerInternalDoubleClick^) then
+    {$ELSE}
+      if PDynTFTListBox(TPtrRec(ABase))^.OnOwnerInternalDoubleClick <> nil then
+    {$ENDIF}
+        PDynTFTListBox(TPtrRec(ABase))^.OnOwnerInternalDoubleClick^(ABase);
+  end;
+{$ENDIF}
+
+
 procedure TDynTFTListBox_OnDynTFTBaseInternalRepaint(ABase: PDynTFTBaseComponent; FullRepaint: Boolean; Options: TPtr; ComponentFromArea: PDynTFTBaseComponent);
 begin
   if Options = CREPAINTONMOUSEUP then
@@ -750,6 +820,9 @@ begin
     {$IFDEF MouseClickSupport}
       ABaseEventReg.ClickEvent^ := TDynTFTListBox_OnDynTFTBaseInternalClick;
     {$ENDIF}
+    {$IFDEF MouseDoubleClickSupport}
+      ABaseEventReg.DoubleClickEvent^ := TDynTFTListBox_OnDynTFTBaseInternalDoubleClick;
+    {$ENDIF}
     ABaseEventReg.Repaint^ := TDynTFTListBox_OnDynTFTBaseInternalRepaint;
 
     {$IFDEF RTTIREG}
@@ -762,7 +835,10 @@ begin
     //ABaseEventReg.MouseUpEvent := @TDynTFTListBox_OnDynTFTBaseInternalMouseUp;
     {$IFDEF MouseClickSupport}
       ABaseEventReg.ClickEvent := @TDynTFTListBox_OnDynTFTBaseInternalClick;
-    {$ENDIF}                     
+    {$ENDIF}
+    {$IFDEF MouseDoubleClickSupport}
+      ABaseEventReg.DoubleClickEvent := @TDynTFTListBox_OnDynTFTBaseInternalDoubleClick;
+    {$ENDIF}
     ABaseEventReg.Repaint := @TDynTFTListBox_OnDynTFTBaseInternalRepaint;
 
     {$IFDEF RTTIREG}

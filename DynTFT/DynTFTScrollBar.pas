@@ -90,6 +90,9 @@ type
     {$IFDEF MouseClickSupport}
       //OnOwnerInternalClick: PDynTFTGenericEventHandler; //Uncomment if really needed.   Also, see further in code, to uncomment.
     {$ENDIF}
+    {$IFDEF MouseDoubleClickSupport}
+      //OnOwnerInternalDoubleClick: PDynTFTGenericEventHandler; //Uncomment if really needed.   Also, see further in code, to uncomment.
+    {$ENDIF}
     OnOwnerInternalAdjustScrollBar: POnOwnerInternalAdjustScrollBar;
     OnOwnerInternalAfterAdjustScrollBar: POnOwnerInternalAdjustScrollBar;
     
@@ -320,12 +323,18 @@ begin
     {$IFDEF MouseClickSupport}
       AScrBar^.BtnInc^.BaseProps.OnClickUser^ := AScrBar^.BaseProps.OnClickUser^;
     {$ENDIF}
+    {$IFDEF MouseDoubleClickSupport}
+      AScrBar^.BtnInc^.BaseProps.OnDoubleClickUser^ := AScrBar^.BaseProps.OnDoubleClickUser^;
+    {$ENDIF}
 
     AScrBar^.BtnDec^.BaseProps.OnMouseDownUser^ := AScrBar^.BaseProps.OnMouseDownUser^;
     AScrBar^.BtnDec^.BaseProps.OnMouseMoveUser^ := AScrBar^.BaseProps.OnMouseMoveUser^;
     AScrBar^.BtnDec^.BaseProps.OnMouseUpUser^ := AScrBar^.BaseProps.OnMouseUpUser^;
     {$IFDEF MouseClickSupport}
       AScrBar^.BtnDec^.BaseProps.OnClickUser^ := AScrBar^.BaseProps.OnClickUser^;
+    {$ENDIF}
+    {$IFDEF MouseDoubleClickSupport}
+      AScrBar^.BtnDec^.BaseProps.OnDoubleClickUser^ := AScrBar^.BaseProps.OnDoubleClickUser^;
     {$ENDIF}
 
     AScrBar^.BtnScroll^.BaseProps.OnMouseDownUser^ := AScrBar^.BaseProps.OnMouseDownUser^;
@@ -338,12 +347,18 @@ begin
     {$IFDEF MouseClickSupport}
       AScrBar^.BtnInc^.BaseProps.OnClickUser := AScrBar^.BaseProps.OnClickUser;
     {$ENDIF}
+    {$IFDEF MouseDoubleClickSupport}
+      AScrBar^.BtnInc^.BaseProps.OnDoubleClickUser := AScrBar^.BaseProps.OnDoubleClickUser;
+    {$ENDIF}
 
     AScrBar^.BtnDec^.BaseProps.OnMouseDownUser := AScrBar^.BaseProps.OnMouseDownUser;
     AScrBar^.BtnDec^.BaseProps.OnMouseMoveUser := AScrBar^.BaseProps.OnMouseMoveUser;
     AScrBar^.BtnDec^.BaseProps.OnMouseUpUser := AScrBar^.BaseProps.OnMouseUpUser;
     {$IFDEF MouseClickSupport}
       AScrBar^.BtnDec^.BaseProps.OnClickUser := AScrBar^.BaseProps.OnClickUser;
+    {$ENDIF}
+    {$IFDEF MouseDoubleClickSupport}
+      AScrBar^.BtnDec^.BaseProps.OnDoubleClickUser := AScrBar^.BaseProps.OnDoubleClickUser;
     {$ENDIF}
 
     AScrBar^.BtnScroll^.BaseProps.OnMouseDownUser := AScrBar^.BaseProps.OnMouseDownUser;
@@ -594,6 +609,9 @@ begin
     {$IFDEF MouseClickSupport}
       //New(Result^.OnOwnerInternalClick);
     {$ENDIF}
+    {$IFDEF MouseDoubleClickSupport}
+      //New(Result^.OnOwnerInternalDoubleClick);
+    {$ENDIF}
     New(Result^.OnScrollBarChange);
     New(Result^.OnOwnerInternalAdjustScrollBar);
     New(Result^.OnOwnerInternalAfterAdjustScrollBar);
@@ -610,11 +628,17 @@ begin
     {$IFDEF MouseClickSupport}
       //user event is used
     {$ENDIF}
+    {$IFDEF MouseDoubleClickSupport}
+      //user event is used
+    {$ENDIF}
   {$ELSE}
     Result^.BtnInc^.OnOwnerInternalMouseDown := @TDynTFTScrollBar_OnDynTFTChildArrowButtonInternalMouseDown;
     Result^.BtnInc^.OnOwnerInternalMouseMove := nil; //@TDynTFTScrollBar_OnDynTFTChildArrowButtonInternalMouseMove;
     Result^.BtnInc^.OnOwnerInternalMouseUp := nil; //@TDynTFTScrollBar_OnDynTFTChildArrowButtonInternalMouseUp;
     {$IFDEF MouseClickSupport}
+      //user event is used
+    {$ENDIF}
+    {$IFDEF MouseDoubleClickSupport}
       //user event is used
     {$ENDIF}
   {$ENDIF}
@@ -626,11 +650,17 @@ begin
     {$IFDEF MouseClickSupport}
       //user event is used
     {$ENDIF}
+    {$IFDEF MouseDoubleClickSupport}
+      //user event is used
+    {$ENDIF}
   {$ELSE}
     Result^.BtnDec^.OnOwnerInternalMouseDown := @TDynTFTScrollBar_OnDynTFTChildArrowButtonInternalMouseDown;
     Result^.BtnDec^.OnOwnerInternalMouseMove := nil; //@TDynTFTScrollBar_OnDynTFTChildArrowButtonInternalMouseMove;
     Result^.BtnDec^.OnOwnerInternalMouseUp := nil; //@TDynTFTScrollBar_OnDynTFTChildArrowButtonInternalMouseUp;
     {$IFDEF MouseClickSupport}
+      //user event is used
+    {$ENDIF}
+    {$IFDEF MouseDoubleClickSupport}
       //user event is used
     {$ENDIF}
   {$ENDIF}
@@ -666,6 +696,9 @@ begin
     {$IFDEF MouseClickSupport}
       //Result^.OnOwnerInternalClick^ := nil;
     {$ENDIF}
+    {$IFDEF MouseDoubleClickSupport}
+      //Result^.OnOwnerInternalDoubleClick^ := nil;
+    {$ENDIF}
     Result^.OnScrollBarChange^ := nil;
     Result^.OnOwnerInternalAdjustScrollBar^ := nil;
     Result^.OnOwnerInternalAfterAdjustScrollBar^ := nil;
@@ -675,6 +708,9 @@ begin
     Result^.OnOwnerInternalMouseUp := nil;
     {$IFDEF MouseClickSupport}
       //Result^.OnOwnerInternalClick := nil;
+    {$ENDIF}
+    {$IFDEF MouseDoubleClickSupport}
+      //Result^.OnOwnerInternalDoubleClick := nil;
     {$ENDIF}
     Result^.OnScrollBarChange := nil;
     Result^.OnOwnerInternalAdjustScrollBar := nil;
@@ -744,6 +780,9 @@ begin
     {$IFDEF MouseClickSupport}
       //Dispose(AScrollBar^.OnOwnerInternalClick);
     {$ENDIF}
+    {$IFDEF MouseDoubleClickSupport}
+      //Dispose(AScrollBar^.OnOwnerInternalDoubleClick);
+    {$ENDIF}
     Dispose(AScrollBar^.OnScrollBarChange);
     Dispose(AScrollBar^.OnOwnerInternalAdjustScrollBar);
     Dispose(AScrollBar^.OnOwnerInternalAfterAdjustScrollBar);
@@ -753,6 +792,9 @@ begin
     AScrollBar^.OnOwnerInternalMouseUp := nil;
     {$IFDEF MouseClickSupport}
       //AScrollBar^.OnOwnerInternalClick := nil;
+    {$ENDIF}
+    {$IFDEF MouseDoubleClickSupport}
+      //AScrollBar^.OnOwnerInternalDoubleClick := nil;
     {$ENDIF}
     AScrollBar^.OnScrollBarChange := nil;
     AScrollBar^.OnOwnerInternalAdjustScrollBar := nil;
@@ -850,6 +892,22 @@ end;
 {$ENDIF}
 
 
+{$IFDEF MouseDoubleClickSupport}
+  (*
+  procedure TDynTFTScrollBar_OnDynTFTBaseInternalDoubleClick(ABase: PDynTFTBaseComponent);
+  begin
+    {$IFDEF IsDesktop}
+      if Assigned(PDynTFTScrollBar(TPtrRec(ABase))^.OnOwnerInternalDoubleClick) then
+        if Assigned(PDynTFTScrollBar(TPtrRec(ABase))^.OnOwnerInternalDoubleClick^) then
+    {$ELSE}
+      if PDynTFTScrollBar(TPtrRec(ABase))^.OnOwnerInternalDoubleClick <> nil then
+    {$ENDIF}
+        PDynTFTScrollBar(TPtrRec(ABase))^.OnOwnerInternalDoubleClick^(ABase);
+  end;
+  *)
+{$ENDIF}
+
+
 procedure TDynTFTScrollBar_OnDynTFTBaseInternalRepaint(ABase: PDynTFTBaseComponent; FullRepaint: Boolean; Options: TPtr; ComponentFromArea: PDynTFTBaseComponent);
 begin
   if Options = CREPAINTONMOUSEUP then
@@ -899,6 +957,9 @@ begin
     {$IFDEF MouseClickSupport}
       //ABaseEventReg.ClickEvent^ := TDynTFTScrollBar_OnDynTFTBaseInternalClick; //uncomment if needed
     {$ENDIF}
+    {$IFDEF MouseDoubleClickSupport}
+      //ABaseEventReg.DoubleClickEvent^ := TDynTFTScrollBar_OnDynTFTBaseInternalDoubleClick; //uncomment if needed
+    {$ENDIF}
     ABaseEventReg.Repaint^ := TDynTFTScrollBar_OnDynTFTBaseInternalRepaint;
 
     {$IFDEF RTTIREG}
@@ -911,6 +972,9 @@ begin
     ABaseEventReg.MouseUpEvent := @TDynTFTScrollBar_OnDynTFTBaseInternalMouseUp;
     {$IFDEF MouseClickSupport}
       //ABaseEventReg.ClickEvent := @TDynTFTScrollBar_OnDynTFTBaseInternalClick; //uncomment if needed
+    {$ENDIF}
+    {$IFDEF MouseDoubleClickSupport}
+      //ABaseEventReg.DoubleClickEvent := @TDynTFTScrollBar_OnDynTFTBaseInternalDoubleClick; //uncomment if needed
     {$ENDIF}
     ABaseEventReg.Repaint := @TDynTFTScrollBar_OnDynTFTBaseInternalRepaint;
 

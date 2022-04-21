@@ -1,6 +1,6 @@
 License information for DynTFT project:
 
-1. The DynTFT library is released under a dual license MPL v2.0 and LGPL v3. This includes files from DynTFT folder. See COPYING.LESSER file and MPL_2.0.txt.
+1. The DynTFT library is released under LGPL. This includes files from DynTFT folder. See COPYING.LESSER file.
 2. The examples for DynTFT library, are released under MIT license. They are provided as projects for Delphi, FreePascal and mikroPascal in DynTFTSim folder.
 3. The above mentioned examples contain source code, copyrighted by MikroElektronika.
      These include a modified version of __Lib_MemManager.mpas from mikroPascal installation folder, renamed to MemManager.pas, adapted to be compilable by Delphi and FreePascal and usable by DynTFT library.

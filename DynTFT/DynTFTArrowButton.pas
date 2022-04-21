@@ -90,6 +90,9 @@ type
     {$IFDEF MouseClickSupport}
       OnOwnerInternalClick: PDynTFTGenericEventHandler;
     {$ENDIF}
+    {$IFDEF MouseDoubleClickSupport}
+      OnOwnerInternalDoubleClick: PDynTFTGenericEventHandler;
+    {$ENDIF}
   end;
   PDynTFTArrowButton = ^TDynTFTArrowButton;  
 
@@ -340,6 +343,9 @@ begin
     {$IFDEF MouseClickSupport}
       New(Result^.OnOwnerInternalClick);
     {$ENDIF}
+    {$IFDEF MouseDoubleClickSupport}
+      New(Result^.OnOwnerInternalDoubleClick);
+    {$ENDIF}
 
     Result^.OnOwnerInternalMouseDown^ := nil;
     Result^.OnOwnerInternalMouseMove^ := nil;
@@ -347,12 +353,18 @@ begin
     {$IFDEF MouseClickSupport}
       Result^.OnOwnerInternalClick^ := nil;
     {$ENDIF}
+    {$IFDEF MouseDoubleClickSupport}
+      Result^.OnOwnerInternalDoubleClick^ := nil;
+    {$ENDIF}
   {$ELSE}
     Result^.OnOwnerInternalMouseDown := nil;
     Result^.OnOwnerInternalMouseMove := nil;
     Result^.OnOwnerInternalMouseUp := nil;
     {$IFDEF MouseClickSupport}
       Result^.OnOwnerInternalClick := nil;
+    {$ENDIF}
+    {$IFDEF MouseDoubleClickSupport}
+      Result^.OnOwnerInternalDoubleClick := nil;
     {$ENDIF}
   {$ENDIF}
 
@@ -403,12 +415,18 @@ begin
     {$IFDEF MouseClickSupport}
       Dispose(AArrowButton^.OnOwnerInternalClick);
     {$ENDIF}
+    {$IFDEF MouseDoubleClickSupport}
+      Dispose(AArrowButton^.OnOwnerInternalDoubleClick);
+    {$ENDIF}
 
     AArrowButton^.OnOwnerInternalMouseDown := nil;
     AArrowButton^.OnOwnerInternalMouseMove := nil;
     AArrowButton^.OnOwnerInternalMouseUp := nil;
     {$IFDEF MouseClickSupport}
       AArrowButton^.OnOwnerInternalClick := nil;
+    {$ENDIF}
+    {$IFDEF MouseDoubleClickSupport}
+      AArrowButton^.OnOwnerInternalDoubleClick := nil;
     {$ENDIF}
   {$ENDIF}
 
@@ -502,6 +520,20 @@ end;
 {$ENDIF}
 
 
+{$IFDEF MouseDoubleClickSupport}
+  procedure TDynTFTArrowButton_OnDynTFTBaseInternalDoubleClick(ABase: PDynTFTBaseComponent);
+  begin
+    {$IFDEF IsDesktop}
+      if Assigned(PDynTFTArrowButton(TPtrRec(ABase))^.OnOwnerInternalDoubleClick) then
+        if Assigned(PDynTFTArrowButton(TPtrRec(ABase))^.OnOwnerInternalDoubleClick^) then
+    {$ELSE}
+      if PDynTFTArrowButton(TPtrRec(ABase))^.OnOwnerInternalDoubleClick <> nil then
+    {$ENDIF}
+        PDynTFTArrowButton(TPtrRec(ABase))^.OnOwnerInternalDoubleClick^(ABase);
+  end;
+{$ENDIF}
+
+
 procedure TDynTFTArrowButton_OnDynTFTBaseInternalRepaint(ABase: PDynTFTBaseComponent; FullRepaint: Boolean; Options: TPtr; ComponentFromArea: PDynTFTBaseComponent);
 begin
   DynTFTDrawArrowButton(PDynTFTArrowButton(TPtrRec(ABase)), FullRepaint);
@@ -520,6 +552,9 @@ begin
     {$IFDEF MouseClickSupport}
       ABaseEventReg.ClickEvent^ := TDynTFTArrowButton_OnDynTFTBaseInternalClick;
     {$ENDIF}
+    {$IFDEF MouseDoubleClickSupport}
+      ABaseEventReg.DoubleClickEvent^ := TDynTFTArrowButton_OnDynTFTBaseInternalDoubleClick;
+    {$ENDIF}
     ABaseEventReg.Repaint^ := TDynTFTArrowButton_OnDynTFTBaseInternalRepaint;
 
     {$IFDEF RTTIREG}
@@ -532,6 +567,9 @@ begin
     ABaseEventReg.MouseUpEvent := @TDynTFTArrowButton_OnDynTFTBaseInternalMouseUp;
     {$IFDEF MouseClickSupport}
       ABaseEventReg.ClickEvent := @TDynTFTArrowButton_OnDynTFTBaseInternalClick;
+    {$ENDIF}
+    {$IFDEF MouseDoubleClickSupport}
+      ABaseEventReg.DoubleClickEvent := @TDynTFTArrowButton_OnDynTFTBaseInternalDoubleClick;
     {$ENDIF}
     ABaseEventReg.Repaint := @TDynTFTArrowButton_OnDynTFTBaseInternalRepaint;
 

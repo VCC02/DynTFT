@@ -96,6 +96,7 @@ object frmDynTFTSimScreen: TfrmDynTFTSimScreen
       Width = 782
       Height = 929
       OnMouseDown = imgScreenMouseDown
+      OnMouseEnter = imgScreenMouseEnter
       OnMouseMove = imgScreenMouseMove
       OnMouseUp = imgScreenMouseUp
     end

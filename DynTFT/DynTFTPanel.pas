@@ -83,6 +83,9 @@ type
     {$IFDEF MouseClickSupport}
       OnOwnerInternalClick: PDynTFTGenericEventHandler;
     {$ENDIF}
+    {$IFDEF MouseDoubleClickSupport}
+      OnOwnerInternalDoubleClick: PDynTFTGenericEventHandler;
+    {$ENDIF}
   end;
   PDynTFTPanel = ^TDynTFTPanel;
 
@@ -227,6 +230,9 @@ begin
     {$IFDEF MouseClickSupport}
       New(Result^.OnOwnerInternalClick);
     {$ENDIF}
+    {$IFDEF MouseDoubleClickSupport}
+      New(Result^.OnOwnerInternalDoubleClick);
+    {$ENDIF}
 
     Result^.OnOwnerInternalMouseDown^ := nil;
     Result^.OnOwnerInternalMouseMove^ := nil;
@@ -234,12 +240,18 @@ begin
     {$IFDEF MouseClickSupport}
       Result^.OnOwnerInternalClick^ := nil;
     {$ENDIF}
+    {$IFDEF MouseDoubleClickSupport}
+      Result^.OnOwnerInternalDoubleClick^ := nil;
+    {$ENDIF}
   {$ELSE}
     Result^.OnOwnerInternalMouseDown := nil;
     Result^.OnOwnerInternalMouseMove := nil;
     Result^.OnOwnerInternalMouseUp := nil;
     {$IFDEF MouseClickSupport}
       Result^.OnOwnerInternalClick := nil;
+    {$ENDIF}
+    {$IFDEF MouseDoubleClickSupport}
+      Result^.OnOwnerInternalDoubleClick := nil;
     {$ENDIF}
   {$ENDIF}
 
@@ -268,12 +280,18 @@ begin
     {$IFDEF MouseClickSupport}
       Dispose(APanel^.OnOwnerInternalClick);
     {$ENDIF}
+    {$IFDEF MouseDoubleClickSupport}
+      Dispose(APanel^.OnOwnerInternalDoubleClick);
+    {$ENDIF}
 
     APanel^.OnOwnerInternalMouseDown := nil;
     APanel^.OnOwnerInternalMouseMove := nil;
     APanel^.OnOwnerInternalMouseUp := nil;
     {$IFDEF MouseClickSupport}
       APanel^.OnOwnerInternalClick := nil;
+    {$ENDIF}
+    {$IFDEF MouseDoubleClickSupport}
+      APanel^.OnOwnerInternalDoubleClick := nil;
     {$ENDIF}
   {$ENDIF}
 
@@ -366,6 +384,22 @@ end;
 {$ENDIF}
 
 
+{$IFDEF MouseDoubleClickSupport}
+  procedure TDynTFTPanel_OnDynTFTBaseInternalDoubleClick(ABase: PDynTFTBaseComponent);
+  begin
+    DynTFTDrawPanel(PDynTFTPanel(TPtrRec(ABase)), False);
+
+    {$IFDEF IsDesktop}
+      if Assigned(PDynTFTPanel(TPtrRec(ABase))^.OnOwnerInternalDoubleClick) then
+        if Assigned(PDynTFTPanel(TPtrRec(ABase))^.OnOwnerInternalDoubleClick^) then
+    {$ELSE}
+      if PDynTFTPanel(TPtrRec(ABase))^.OnOwnerInternalDoubleClick <> nil then
+    {$ENDIF}
+        PDynTFTPanel(TPtrRec(ABase))^.OnOwnerInternalDoubleClick^(ABase);
+  end;
+{$ENDIF}
+
+
 procedure TDynTFTPanel_OnDynTFTBaseInternalRepaint(ABase: PDynTFTBaseComponent; FullRepaint: Boolean; Options: TPtr; ComponentFromArea: PDynTFTBaseComponent);
 begin
   DynTFTDrawPanel(PDynTFTPanel(TPtrRec(ABase)), FullRepaint);
@@ -384,6 +418,9 @@ begin
     {$IFDEF MouseClickSupport}
       ABaseEventReg.ClickEvent^ := TDynTFTPanel_OnDynTFTBaseInternalClick;
     {$ENDIF}
+    {$IFDEF MouseDoubleClickSupport}
+      ABaseEventReg.DoubleClickEvent^ := TDynTFTPanel_OnDynTFTBaseInternalDoubleClick;
+    {$ENDIF}
     ABaseEventReg.Repaint^ := TDynTFTPanel_OnDynTFTBaseInternalRepaint;
 
     {$IFDEF RTTIREG}
@@ -396,6 +433,9 @@ begin
     ABaseEventReg.MouseUpEvent := @TDynTFTPanel_OnDynTFTBaseInternalMouseUp;
     {$IFDEF MouseClickSupport}
       ABaseEventReg.ClickEvent := @TDynTFTPanel_OnDynTFTBaseInternalClick;
+    {$ENDIF}
+    {$IFDEF MouseDoubleClickSupport}
+      ABaseEventReg.DoubleClickEvent := @TDynTFTPanel_OnDynTFTBaseInternalDoubleClick;
     {$ENDIF}
     ABaseEventReg.Repaint := @TDynTFTPanel_OnDynTFTBaseInternalRepaint;
 

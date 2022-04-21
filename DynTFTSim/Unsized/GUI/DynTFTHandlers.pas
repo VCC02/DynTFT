@@ -45,7 +45,7 @@ uses
   
   DynTFTTypes, DynTFTConsts, DynTFTUtils, DynTFTBaseDrawing, DynTFTControls,
   DynTFTGUIObjects,
-  
+
 //<DynTFTComponents>
   DynTFTButton,
   DynTFTArrowButton,
@@ -71,9 +71,21 @@ uses
 
   {$IFDEF IsDesktop}
     ,SysUtils, Forms
+    {$IFDEF DynTFTFontSupport}, DynTFTFonts {$ENDIF}
   {$ENDIF}
+
+  {$IFNDEF UserTFTCommands}
+    {$IFDEF IsDesktop} , TFT {$ENDIF}
+  {$ELSE}
+    , {$I UserDrawingUnits.inc}
+  {$ENDIF}
+
   {$I DynTFTHandlersAdditionalUnits.inc}
   ;
+  
+  {$IFDEF UseHandlersAdditionalCodeInInterface}
+    {$I DynTFTHandlersAdditionalCodeInInterface.inc} //Can be used to specify external functions, vars, consts
+  {$ENDIF}
 
 procedure Default_OnMouseDownUser(Sender: PPtrRec);
 procedure Default_OnMouseMoveUser(Sender: PPtrRec);
@@ -123,15 +135,47 @@ procedure arrbtnIncItemIndex_OnMouseUpUser(Sender: PPtrRec); //CodegenSym:header
 procedure ATestListBox_OnMouseDownUser(Sender: PPtrRec); //CodegenSym:header
 procedure ATestListBox_Items_OnGetItemVisibility(AItems: PPtrRec; Index: LongInt; var ItemText: string {$IFDEF ItemsVisibility}; IsVisible: PBoolean {$ENDIF} {$IFDEF ItemsEnabling}; IsEnabled: PBoolean {$ENDIF}); //CodegenSym:header
 procedure AComboBox1_ListBox_Items_OnGetItemVisibility(AItems: PPtrRec; Index: LongInt; var ItemText: string {$IFDEF ItemsVisibility}; IsVisible: PBoolean {$ENDIF} {$IFDEF ItemsEnabling}; IsEnabled: PBoolean {$ENDIF}); //CodegenSym:header
+procedure lstFileExplorer_OnDoubleClickUser(Sender: PPtrRec); //CodegenSym:header
+procedure lstFileExplorer_Items_OnGetItem(AItems: PPtrRec; Index: LongInt; var ItemText: string); //CodegenSym:header
+procedure lstFileExplorer_Items_OnDrawIcon(AItems: PPtrRec; Index, ItemY: LongInt; var ItemText: string {$IFDEF ItemsEnabling}; IsEnabled: Boolean {$ENDIF}); //CodegenSym:header
+procedure cmbFileExplorerDrives_OnComboBoxCloseUp(Sender: PPtrRec); //CodegenSym:header
+procedure cmbFileExplorerDrives_ListBox_Items_OnGetItem(AItems: PPtrRec; Index: LongInt; var ItemText: string); //CodegenSym:header
+procedure cmbFileExplorerDrives_ListBox_Items_OnGetItemVisibility(AItems: PPtrRec; Index: LongInt; var ItemText: string {$IFDEF ItemsVisibility}; IsVisible: PBoolean {$ENDIF} {$IFDEF ItemsEnabling}; IsEnabled: PBoolean {$ENDIF}); //CodegenSym:header
+
+//CodegenSym:AllBinHandlersBegin
+
+{$IFDEF RTTIREG}
+
+      var
+        AllBinHandlersStr: array[0..0] of string;  // No handlers found. Using a dummy entry.
+        AllBinHandlersAddresses: array[0..0] of TPtr;  // No handlers found. Using a dummy entry.
+
+        AllBinIdentifiersStr: array[0..0] of string;  // No identifiers found. Using a dummy entry.
+        AllBinIdentifiersAddresses: array[0..0] of TPtr;  // No identifiers found. Using a dummy entry.
+
+      procedure UpdateAllBinHandlerStrArray;
+{$ENDIF} // RTTIREG
+
+//CodegenSym:AllBinHandlersEnd
 
 implementation
 
 {$I DynTFTHandlersAdditionalCode.inc}
 
+//CodegenSym:UpdateBinHandlersProcBegin
+{$IFDEF RTTIREG}
+
+      procedure UpdateAllBinHandlerStrArray;
+      begin
+        // Desktop profile not found. No handler names are available.
+      end;
+{$ENDIF} // RTTIREG
+
+//CodegenSym:UpdateBinHandlersProcEnd
+
 //CodegenSym:CreationGroups
 
 //CodegenSym:HandlersImplementation
-
 
 procedure ATestRadioGroup1_OnSelectionChanged(Sender: PPtrRec); //CodegenSym:handler
 begin //CodegenSym:handler:begin
@@ -651,6 +695,85 @@ begin //CodegenSym:handler:begin
     IsEnabled^ := (Index <> 0) and (Index <> 2);
   {$ENDIF}
 end; //CodegenSym:handler:end
+
+
+procedure lstFileExplorer_OnDoubleClickUser(Sender: PPtrRec); //CodegenSym:handler
+var
+  Items: PDynTFTItems;
+begin //CodegenSym:handler:begin
+  //DynTFT_DebugConsole('double click...');
+
+  Items := PDynTFTListBox(TPtrRec(Sender))^.Items;
+  if ListOfFiles[Items^.ItemIndex].FileType = ftDir then
+    if ListOfFiles[Items^.ItemIndex].Name = '..' then
+    begin
+      CurrentDir := ExtractFileDir(CurrentDir);
+      ScanDir;
+      Items^.ItemIndex := PopItemIndexFromStack;
+      RepaintListOfFiles(Items^.ItemIndex);
+    end
+    else
+    begin
+      PushItemIndexToStack(Items^.ItemIndex);
+      CurrentDir := CurrentDir + '\' + ListOfFiles[Items^.ItemIndex].Name;
+      ScanDir;
+      Items^.ItemIndex := 0;
+      RepaintListOfFiles(0);
+    end;
+end; //CodegenSym:handler:end
+
+
+procedure lstFileExplorer_Items_OnGetItem(AItems: PPtrRec; Index: LongInt; var ItemText: string); //CodegenSym:handler
+begin //CodegenSym:handler:begin
+  ItemText := ListOfFiles[Index].Name;
+end; //CodegenSym:handler:end
+
+
+procedure lstFileExplorer_Items_OnDrawIcon(AItems: PPtrRec; Index, ItemY: LongInt; var ItemText: string {$IFDEF ItemsEnabling}; IsEnabled: Boolean {$ENDIF}); //CodegenSym:handler
+var
+  IconLeft: TSInt;
+begin //CodegenSym:handler:begin
+  IconLeft := PDynTFTItems(TPtrRec(AItems))^.BaseProps.Left + CIconIndent;   //If the compiler reports that CIconIndent is not found, then please enable ListIcons at project level.
+  
+  if ListOfFiles[Index].FileType = ftDir then
+  begin
+    DynTFT_Set_Pen($00A0A0, 1);
+    DynTFT_Set_Brush(1, CL_YELLOW, 0, 0, 0, 0);
+    DynTFT_Rectangle(IconLeft, ItemY, IconLeft + 16, ItemY + 16);
+
+    DynTFT_Set_Pen(CL_OLIVE, 1);
+    DynTFT_Line(IconLeft, ItemY, IconLeft + 11, ItemY + 3);
+    DynTFT_V_Line(ItemY + 3, ItemY + 16, IconLeft + 11);
+  end
+  else
+    DrawFileIcon(CurrentDir + '\' + ItemText, GCanvas, IconLeft + 1, ItemY + 1, 16, 16);
+end; //CodegenSym:handler:end
+
+
+procedure cmbFileExplorerDrives_OnComboBoxCloseUp(Sender: PPtrRec); //CodegenSym:handler
+begin //CodegenSym:handler:begin
+  ClearItemIndexStack;
+  CurrentDir := Chr(PDynTFTComboBox(TPtrRec(Sender))^.ListBox^.Items^.ItemIndex + 65) + ':';
+  ScanDir;
+  RepaintListOfFiles(0);
+end; //CodegenSym:handler:end
+
+
+procedure cmbFileExplorerDrives_ListBox_Items_OnGetItem(AItems: PPtrRec; Index: LongInt; var ItemText: string); //CodegenSym:handler
+begin //CodegenSym:handler:begin
+  //GetDriveType() can be used to dirsplay an icon
+  ItemText := Chr(Index + 65) + ':';
+end; //CodegenSym:handler:end
+
+
+procedure cmbFileExplorerDrives_ListBox_Items_OnGetItemVisibility(AItems: PPtrRec; Index: LongInt; var ItemText: string {$IFDEF ItemsVisibility}; IsVisible: PBoolean {$ENDIF} {$IFDEF ItemsEnabling}; IsEnabled: PBoolean {$ENDIF}); //CodegenSym:handler
+begin //CodegenSym:handler:begin
+  {$IFDEF ItemsVisibility}
+    IsVisible^ := DirectoryExists(ItemText);
+  {$ENDIF}
+end; //CodegenSym:handler:end
+
+
 
 
 

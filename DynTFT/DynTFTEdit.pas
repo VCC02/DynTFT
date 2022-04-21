@@ -105,6 +105,9 @@ type
     {$IFDEF MouseClickSupport}
       OnOwnerInternalClick: PDynTFTGenericEventHandler;
     {$ENDIF}
+    {$IFDEF MouseDoubleClickSupport}
+      OnOwnerInternalDoubleClick: PDynTFTGenericEventHandler;
+    {$ENDIF}
 
     Text: TEditTextString;
   end;
@@ -667,6 +670,9 @@ begin
     {$IFDEF MouseClickSupport}
       New(Result^.OnOwnerInternalClick);
     {$ENDIF}
+    {$IFDEF MouseDoubleClickSupport}
+      New(Result^.OnOwnerInternalDoubleClick);
+    {$ENDIF}
 
     Result^.OnOwnerInternalMouseDown^ := nil;
     Result^.OnOwnerInternalMouseMove^ := nil;
@@ -674,12 +680,18 @@ begin
     {$IFDEF MouseClickSupport}
       Result^.OnOwnerInternalClick^ := nil;
     {$ENDIF}
+    {$IFDEF MouseDoubleClickSupport}
+      Result^.OnOwnerInternalDoubleClick^ := nil;
+    {$ENDIF}
   {$ELSE}
     Result^.OnOwnerInternalMouseDown := nil;
     Result^.OnOwnerInternalMouseMove := nil;
     Result^.OnOwnerInternalMouseUp := nil;
     {$IFDEF MouseClickSupport}
       Result^.OnOwnerInternalClick := nil;
+    {$ENDIF}
+    {$IFDEF MouseDoubleClickSupport}
+      Result^.OnOwnerInternalDoubleClick := nil;
     {$ENDIF}
   {$ENDIF}
 
@@ -708,12 +720,18 @@ begin
     {$IFDEF MouseClickSupport}
       Dispose(AEdit^.OnOwnerInternalClick);
     {$ENDIF}
+    {$IFDEF MouseDoubleClickSupport}
+      Dispose(AEdit^.OnOwnerInternalDoubleClick);
+    {$ENDIF}
     
     AEdit^.OnOwnerInternalMouseDown := nil;
     AEdit^.OnOwnerInternalMouseMove := nil;
     AEdit^.OnOwnerInternalMouseUp := nil;
     {$IFDEF MouseClickSupport}
       AEdit^.OnOwnerInternalClick := nil;
+    {$ENDIF}
+    {$IFDEF MouseDoubleClickSupport}
+      AEdit^.OnOwnerInternalDoubleClick := nil;
     {$ENDIF}
 
     DynTFTComponent_Destroy(PDynTFTBaseComponent(TPtrRec(AEdit)), SizeOf(AEdit^));
@@ -805,6 +823,20 @@ end;
 {$ENDIF}
 
 
+{$IFDEF MouseDoubleClickSupport}
+  procedure TDynTFTEdit_OnDynTFTBaseInternalDoubleClick(ABase: PDynTFTBaseComponent);
+  begin
+    {$IFDEF IsDesktop}
+      if Assigned(PDynTFTEdit(TPtrRec(ABase))^.OnOwnerInternalDoubleClick) then
+        if Assigned(PDynTFTEdit(TPtrRec(ABase))^.OnOwnerInternalDoubleClick^) then
+    {$ELSE}
+      if PDynTFTEdit(TPtrRec(ABase))^.OnOwnerInternalDoubleClick <> nil then
+    {$ENDIF}
+        PDynTFTEdit(TPtrRec(ABase))^.OnOwnerInternalDoubleClick^(ABase);
+  end;
+{$ENDIF}
+
+
 procedure TDynTFTEdit_OnDynTFTBaseInternalRepaint(ABase: PDynTFTBaseComponent; FullRepaint: Boolean; Options: TPtr; ComponentFromArea: PDynTFTBaseComponent);
 begin
   DynTFTDrawEdit(PDynTFTEdit(TPtrRec(ABase)), FullRepaint);
@@ -829,6 +861,9 @@ begin
     {$IFDEF MouseClickSupport}
       ABaseEventReg.ClickEvent^ := TDynTFTEdit_OnDynTFTBaseInternalClick;
     {$ENDIF}
+    {$IFDEF MouseDoubleClickSupport}
+      ABaseEventReg.DoubleClickEvent^ := TDynTFTEdit_OnDynTFTBaseInternalDoubleClick;
+    {$ENDIF}
     ABaseEventReg.Repaint^ := TDynTFTEdit_OnDynTFTBaseInternalRepaint;
     ABaseEventReg.BlinkCaretState^ := TDynTFTEdit_OnDynTFTBaseInternalBlinkCaretState;
 
@@ -842,6 +877,9 @@ begin
     ABaseEventReg.MouseUpEvent := @TDynTFTEdit_OnDynTFTBaseInternalMouseUp;
     {$IFDEF MouseClickSupport}
       ABaseEventReg.ClickEvent := @TDynTFTEdit_OnDynTFTBaseInternalClick;
+    {$ENDIF}
+    {$IFDEF MouseDoubleClickSupport}
+      ABaseEventReg.DoubleClickEvent := @TDynTFTEdit_OnDynTFTBaseInternalDoubleClick;
     {$ENDIF}
     ABaseEventReg.Repaint := @TDynTFTEdit_OnDynTFTBaseInternalRepaint;
     ABaseEventReg.BlinkCaretState := @TDynTFTEdit_OnDynTFTBaseInternalBlinkCaretState;

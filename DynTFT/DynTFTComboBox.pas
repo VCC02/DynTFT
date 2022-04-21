@@ -271,6 +271,27 @@ end;
   end;
 {$ENDIF}
 
+
+{$IFDEF MouseDoubleClickSupport}
+  procedure TDynTFTComboBox_OnDynTFTChildListBoxInternalDoubleClick(ABase: PDynTFTBaseComponent);
+  var
+    AComboBox: PDynTFTComboBox;
+  begin
+    if PDynTFTBaseComponent(TPtrRec(PDynTFTListBox(TPtrRec(ABase))^.BaseProps.Parent))^.BaseProps.ComponentType = ComponentType then
+    begin
+      AComboBox := PDynTFTComboBox(TPtrRec(PDynTFTListBox(TPtrRec(ABase))^.BaseProps.Parent));
+
+      {$IFDEF IsDesktop}
+        if Assigned(AComboBox^.BaseProps.OnDoubleClickUser) then
+          if Assigned(AComboBox^.BaseProps.OnDoubleClickUser^) then
+      {$ELSE}
+        if AComboBox^.BaseProps.OnDoubleClickUser <> nil then
+      {$ENDIF}
+          AComboBox^.BaseProps.OnDoubleClickUser^(PPtrRec(TPtrRec(AComboBox)));
+    end;
+  end;
+{$ENDIF}
+
 ///
 
 procedure TDynTFTComboBox_OnDynTFTChildArrowButtonInternalMouseDown(ABase: PDynTFTBaseComponent);
@@ -396,12 +417,18 @@ begin
     {$IFDEF MouseClickSupport}
       Result^.ListBox^.OnOwnerInternalClick^ := TDynTFTComboBox_OnDynTFTChildListBoxInternalClick;
     {$ENDIF}
+    {$IFDEF MouseDoubleClickSupport}
+      Result^.ListBox^.OnOwnerInternalDoubleClick^ := TDynTFTComboBox_OnDynTFTChildListBoxInternalDoubleClick;
+    {$ENDIF}
   {$ELSE}
     //Result^.ListBox^.OnOwnerInternalMouseDown := nil; //@TDynTFTComboBox_OnDynTFTChildListBoxInternalMouseDown;
     //Result^.ListBox^.OnOwnerInternalMouseMove := nil; //@TDynTFTComboBox_OnDynTFTChildListBoxInternalMouseMove;
     Result^.ListBox^.OnOwnerInternalMouseUp := @TDynTFTComboBox_OnDynTFTChildListBoxInternalMouseUp;
     {$IFDEF MouseClickSupport}
       Result^.ListBox^.OnOwnerInternalClick := @TDynTFTComboBox_OnDynTFTChildListBoxInternalClick;
+    {$ENDIF}
+    {$IFDEF MouseDoubleClickSupport}
+      Result^.ListBox^.OnOwnerInternalDoubleClick := @TDynTFTComboBox_OnDynTFTChildListBoxInternalDoubleClick;
     {$ENDIF}
   {$ENDIF}
 
@@ -569,6 +596,22 @@ end;
 {$ENDIF}
 
 
+{$IFDEF MouseDoubleClickSupport}
+  procedure TDynTFTComboBox_OnDynTFTBaseInternalDoubleClick(ABase: PDynTFTBaseComponent);
+  begin
+    (*  implement these if ComboBox can be part of a more complex component
+    {$IFDEF IsDesktop}
+      if Assigned(PDynTFTComboBox(TPtrRec(ABase))^.OnOwnerInternalDoubleClick) then
+        if Assigned(PDynTFTComboBox(TPtrRec(ABase))^.OnOwnerInternalDoubleClick^) then
+    {$ELSE}
+      if PDynTFTComboBox(TPtrRec(ABase))^.OnOwnerInternalDoubleClick <> nil then
+    {$ENDIF}
+        PDynTFTComboBox(TPtrRec(ABase))^.OnOwnerInternalDoubleClick^(ABase);
+    *)
+  end;
+{$ENDIF}
+
+
 procedure TDynTFTComboBox_OnDynTFTBaseInternalRepaint(ABase: PDynTFTBaseComponent; FullRepaint: Boolean; Options: TPtr; ComponentFromArea: PDynTFTBaseComponent);
 {var
   AComboBox: PDynTFTComboBox;}
@@ -619,6 +662,9 @@ begin
     {$IFDEF MouseClickSupport}
       //ABaseEventReg.ClickEvent^ := TDynTFTComboBox_OnDynTFTBaseInternalClick;
     {$ENDIF}
+    {$IFDEF MouseDoubleClickSupport}
+      //ABaseEventReg.DoubleClickEvent^ := TDynTFTComboBox_OnDynTFTBaseInternalDoubleClick;
+    {$ENDIF}
     ABaseEventReg.Repaint^ := TDynTFTComboBox_OnDynTFTBaseInternalRepaint;
 
     {$IFDEF RTTIREG}
@@ -631,6 +677,9 @@ begin
     //ABaseEventReg.MouseUpEvent := @TDynTFTComboBox_OnDynTFTBaseInternalMouseUp;
     {$IFDEF MouseClickSupport}
       //ABaseEventReg.ClickEvent := @TDynTFTComboBox_OnDynTFTBaseInternalClick;
+    {$ENDIF}
+    {$IFDEF MouseDoubleClickSupport}
+      //ABaseEventReg.DoubleClickEvent := @TDynTFTComboBox_OnDynTFTBaseInternalDoubleClick;
     {$ENDIF}
     ABaseEventReg.Repaint := @TDynTFTComboBox_OnDynTFTBaseInternalRepaint;
     

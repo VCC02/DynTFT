@@ -38,6 +38,7 @@ interface
 {$ENDIF}
 
 uses
+  DynTFTTypes, DynTFTConsts,
 
 //<DynTFTComponents>
   DynTFTButton,
@@ -139,6 +140,8 @@ var
   arrbtnDecItemIndex: PDynTFTArrowButton;
   arrbtnIncItemIndex: PDynTFTArrowButton;
   lblItemIndex: PDynTFTLabel;
+  lstFileExplorer: PDynTFTListBox;
+  cmbFileExplorerDrives: PDynTFTComboBox;
 
 //RadioGroup code
 type
@@ -205,6 +208,9 @@ const
   C_ATestListBox_Items_Strings_Item_13 = '13 thirteen';
   C_ATestListBox_Items_Strings_Item_14 = '14 fourteen';
   C_ATestListBox_Items_Strings_Item_15 = '15 fifteen - fpWgJj';
+  C_ATestListBox_Items_Strings_Item_16 = '----';
+  C_ATestListBox_Items_Strings_Item_17 = 'abcdefghijklmnopqrstuvwxyz';
+  C_ATestListBox_Items_Strings_Item_18 = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLKMNOPQRSTUVWXYZ';
   C_ATestLabel1_Caption = 'lblDisabled';
   C_ATestLabel2_Caption = 'My label';
   C_ATestLabel3_Caption = 'Repainted area';
@@ -247,7 +253,11 @@ const
   C_DynTFTComboBox0_ListBox_Items_Strings_Item_11 = 'twelve';
   C_DynTFTLabel0_Caption = 'SearchBox';
   C_lblItemIndex_Caption = 'ItemIndex: -1';
+  C_cmbFileExplorerDrives_Edit_Text = 'C:';
 
+  {$IFDEF RTTIREG}
+      CAllCreatedBinComponents: array[0..0] of ^PDynTFTBaseComponent = (nil);  // No binary component with global variable.
+  {$ENDIF} // RTTIREG
 
 implementation
 
