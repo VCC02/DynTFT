@@ -7,7 +7,7 @@ mP for PIC32
 
 ------------------------
 
-                 Please switch off word wraping in your text editor, in order to properly view this file.
+                 Please switch off word wrapping in your text editor, in order to properly view this file.
 
 ------------------------
 
