@@ -59,14 +59,18 @@ function MM_LargestFreeMemBlock(): dword;
 function MM_TotalFreeMemSize(): dword;
 // Returns the size (in bytes) of the total free memory on the heap.
 
-//sfunction MM_error: boolean;
+function MM_error: boolean;
 // Returns true if the memory manager can not cope with the free list fragmentation (too many fragments).
 // Either make constant "NR_FREE_BLOCKS" larger or pay attention to the memory release policy in your program.
 // This is a fatal error, the memmanager is not operational anymore. To leave the error state call "MM_Init".
 
 implementation
 
-const NR_FREE_BLOCKS = 20;
+{$IFDEF MMFreeBlocks}
+  const NR_FREE_BLOCKS = {$I MMFreeBlocks.inc};
+{$ELSE}
+  const NR_FREE_BLOCKS = 20;
+{$ENDIF}
 
 Type TBytePtr = ^byte;
 
@@ -171,7 +175,8 @@ end;
 procedure GetMemAlign(var P: TPtrRec; Size: dword; alignment: byte);
 var i: byte;
     j: Shortint;
-    addr, lsize: dword;
+    addr: TPtrRec;
+    lsize: dword;
     tryIt: boolean;
 begin
   P := TPtrRec(TBytePtr(0)); // nil in case no large enough memory is available
@@ -184,7 +189,7 @@ begin
     begin
       tryIt := TRUE;
       if alignment > 1 then
-        if dword(MM_FreeMemTable[i].Pointer) mod alignment <> 0 then
+        if TPtrRec(MM_FreeMemTable[i].Pointer) mod alignment <> 0 then
 	  tryIt := FALSE;
 	  
       if tryIt then
