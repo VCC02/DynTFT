@@ -87,7 +87,7 @@ uses
       {$IFDEF CustomFonts}
         {$I CustomFonts.inc}   //the comma has to be added inside the inc file, before any unit name
       {$ELSE}
-        , DynTFTFonts //this should exist in near the 'DynTFTGUI.pas' file when using fonts
+        , DynTFTFonts //this should exist near the 'DynTFTGUI.pas' file when using fonts
       {$ENDIF}  
     {$ENDIF}
   {$ENDIF}

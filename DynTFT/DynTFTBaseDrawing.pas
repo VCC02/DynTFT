@@ -1470,11 +1470,12 @@ end;
 
 procedure DynTFTInitComponentContainers;
 var
-  i: Integer;
+  i, n: Integer;
 begin
   RegisterComponentContainerEvents;  {$IFDEF IsDesktop}DynTFT_DebugConsole('ComponentContainer type: ' + IntToStr(DynTFTGetComponentContainerComponentType));{$ENDIF}
 
-  for i := 0 to CDynTFTMaxComponentsContainer - 1 do
+  n := Integer(CDynTFTMaxComponentsContainer) - 1;
+  for i := 0 to n do
   begin
     DynTFTAllComponentsContainer[i].PressedComponent := nil;
     DynTFTAllComponentsContainer[i].SomeButtonDownScr := False;
@@ -1483,7 +1484,10 @@ begin
     {$IFDEF IsMCU}
       GetMem(DynTFTAllComponentsContainer[i].ScreenContainer, SizeOf(TDynTFTComponent));
       if DynTFTAllComponentsContainer[i].ScreenContainer = nil then
+      begin
         DisplayOutOfMemory(CL_BLUE);
+        Exit;
+      end;  
     {$ELSE}
       GetMem(TPtr(DynTFTAllComponentsContainer[i].ScreenContainer), SizeOf(TDynTFTComponent));
 
