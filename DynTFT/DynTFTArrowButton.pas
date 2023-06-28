@@ -75,9 +75,9 @@ type
     BaseProps: TDynTFTBaseProperties;  //inherited properties from TDynTFTBaseProperties - must be the first field of this structure !!!
 
     //ArrowButton properties
-    Color: TColor;
+    Color: TColor;      //this field might be repurposed by parent components, if the button is not visible
     ArrowDir: Byte;
-    DummyByte: Byte;
+    DummyByte: Byte;    //since this field is mostly used for alignment, it might be repurposed by parent components
 
     {$IFNDEF AppArch16}
       Dummy: Word; //keep alignment to 4 bytes   (<ArrowDir> + <DummyByte> + <Dummy>)

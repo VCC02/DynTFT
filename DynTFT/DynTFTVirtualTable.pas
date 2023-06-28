@@ -70,6 +70,12 @@ type
 //    List: PDynTFTListBox;
 //  end;
 
+  TOnGetItemEvent = procedure(AItems: PPtrRec; Index, Column: LongInt; var ItemText: string);
+  POnGetItemEvent = ^TOnGetItemEvent;
+
+  TOnDrawIconEvent = procedure(AItems: PPtrRec; Index, Column, ItemY: LongInt; var ItemText: string {$IFDEF ItemsEnabling}; IsEnabled: Boolean {$ENDIF});
+  POnDrawIconEvent = ^TOnDrawIconEvent;
+
   TDynTFTVirtualTable = record
     BaseProps: TDynTFTBaseProperties;  //inherited properties from TDynTFTBaseProperties - must be the first field of this structure !!!
 
@@ -89,6 +95,15 @@ type
 
     {$IFDEF MouseDoubleClickSupport}
       OnOwnerInternalDoubleClick: PDynTFTGenericEventHandler;
+    {$ENDIF}
+
+    {$IFDEF UseExternalItems}
+      OnGetItem: POnGetItemEvent;
+      OnGetItemVisibility: POnGetItemVisibilityEvent;
+    {$ENDIF}
+
+    {$IFDEF ListIcons}
+      OnDrawIcon: POnDrawIconEvent;
     {$ENDIF}
   end;
   PDynTFTVirtualTable = ^TDynTFTVirtualTable;
@@ -163,13 +178,16 @@ begin
 
     TempPanel.BaseProps.Top := AVirtualTable^.BaseProps.Top + 1;  // + 1, to leave room for a rectangle
     TempPanel.BaseProps.Left := ComponentPos;
+
+    TempListBox.BaseProps.Left := ComponentPos;
     TempListBox.BaseProps.Top := TempPanel.BaseProps.Top + TempPanel.BaseProps.Height;
     TempListBox.BaseProps.Height := AVirtualTable^.BaseProps.Height - TempPanel.BaseProps.Height - AVirtualTable^.HorizScrollBar.BaseProps.Height - 3;
+    TempListBox.BaseProps.Width := TempPanel.BaseProps.Width;
 
     if FullRedraw then
     begin
       TempListBox^.Items.BaseProps.Height := TempListBox.BaseProps.Height {- 1};
-      TempListBox^.Items.BaseProps.Left := ComponentPos + 0;
+      TempListBox^.Items.BaseProps.Left := ComponentPos;
       TempListBox^.Items.BaseProps.Top := TempListBox.BaseProps.Top;
       TempListBox^.Items.BaseProps.Width := TempPanel.BaseProps.Width;
 
@@ -181,8 +199,7 @@ begin
     TempListBox^.BaseProps.Left := ComponentPos;
 
     DynTFTDrawPanel(TempPanel, FullRedraw);
-    //DynTFTDrawListBox(TempListBox, i = 0);  //set to False, on all, but first ListBox, to avoid drawing the ScrollBar
-    DynTFTDrawListBox(TempListBox, False);  //set to False, on all to avoid drawing ListBox border
+    DynTFTDrawListBox(TempListBox, False);  //set to False on all columns, to avoid drawing ListBox border
     DynTFTDrawItems(TempListBox^.Items, FullRedraw);
 
     if i > 0 then
@@ -306,6 +323,94 @@ begin
 end;
 
 
+{$IFDEF MouseClickSupport}
+  procedure TDynTFTVirtualTable_OnDynTFTChildItemsInternalClick(ABase: PDynTFTBaseComponent);
+  begin
+
+  end;
+{$ENDIF}
+
+
+{$IFDEF MouseDoubleClickSupport}
+  procedure TDynTFTVirtualTable_OnDynTFTChildItemsInternalDoubleClick(ABase: PDynTFTBaseComponent);
+  begin
+
+  end;
+{$ENDIF}
+
+
+function GetVirtualTableColumnIndexFromItems(AItems: PPtrRec; var AVirtualTable: PDynTFTVirtualTable): LongInt;
+var
+  TempListBox: PDynTFTListBox;
+  TempItems: PDynTFTItems;
+begin
+  TempItems := PDynTFTItems(TPtrRec(AItems));
+  TempListBox := PDynTFTListBox(TPtrRec(TempItems^.BaseProps.Parent));
+  AVirtualTable := PDynTFTVirtualTable(TPtrRec(TempListBox^.BaseProps.Parent));
+
+  if TempListBox^.VertScrollBar^.BtnScroll^.DummyByte = 0 then //using 0 for the first column
+    Result := 0
+  else
+    Result := TempListBox^.VertScrollBar^.BtnScroll^.Color; //this is set to "AVirtualTable^.Columns.Len - 1" when adding columns
+end;
+
+
+procedure TDynTFTVirtualTable_OnDynTFTChildItemsGetItemEvent(AItems: PPtrRec; Index: LongInt; var ItemText: string);
+var
+  TempVirtualTable: PDynTFTVirtualTable;
+  ColumnIndex: LongInt;
+begin
+  ColumnIndex := GetVirtualTableColumnIndexFromItems(AItems, TempVirtualTable);
+
+  {$IFDEF IsDesktop}
+    if Assigned(TempVirtualTable^.OnGetItem) then
+      if Assigned(TempVirtualTable^.OnGetItem^) then
+  {$ELSE}
+    if TempVirtualTable^.OnGetItem <> nil then
+  {$ENDIF}
+      TempVirtualTable^.OnGetItem^(AItems, Index, ColumnIndex, ItemText);
+end;
+
+
+procedure TDynTFTVirtualTable_OnDynTFTChildItemsDrawIcon(AItems: PPtrRec; Index, ItemY: LongInt; var ItemText: string {$IFDEF ItemsEnabling}; IsEnabled: Boolean {$ENDIF});
+var
+  TempVirtualTable: PDynTFTVirtualTable;
+  ColumnIndex: LongInt;
+begin
+  ColumnIndex := GetVirtualTableColumnIndexFromItems(AItems, TempVirtualTable);
+
+  {$IFDEF IsDesktop}
+    if Assigned(TempVirtualTable^.OnDrawIcon) then
+      if Assigned(TempVirtualTable^.OnDrawIcon^) then
+  {$ELSE}
+    if TempVirtualTable^.OnDrawIcon <> nil then
+  {$ENDIF}
+      TempVirtualTable^.OnDrawIcon^(AItems, Index, ColumnIndex, ItemY, ItemText {$IFDEF ItemsEnabling}, IsEnabled {$ENDIF});
+end;
+
+
+procedure TDynTFTVirtualTable_OnDynTFTChildListBoxMouseDownEvent(Sender: PPtrRec);
+var
+  i, n: Integer;
+  TempVirtualTable: PDynTFTVirtualTable;
+  TempListBox, CurrentListBox: PDynTFTListBox;
+begin
+  CurrentListBox := PDynTFTListBox(TPtrRec(Sender));
+  TempVirtualTable := PDynTFTVirtualTable(TPtrRec(CurrentListBox^.BaseProps.Parent));
+
+  n := TempVirtualTable^.Columns.Len - 1;
+  for i := 0 to n do
+  begin
+    TempListBox := PDynTFTListBox(TPtrRec(TempVirtualTable^.Columns.Content^[i]));
+    if TempListBox <> CurrentListBox then
+    begin
+      TempListBox^.Items.ItemIndex := CurrentListBox^.Items.ItemIndex;
+      DynTFTDrawItems(TempListBox^.Items, True);
+    end;
+  end;
+end;
+
+
 procedure SetInternalHandlersToPanel(APanel: PDynTFTPanel);
 begin
   {$IFDEF IsDesktop}
@@ -354,6 +459,16 @@ begin
     {$IFDEF MouseDoubleClickSupport}
       AListBox^.OnOwnerInternalDoubleClick := @TDynTFTVirtualTable_OnDynTFTChildItemsInternalDoubleClick;
     {$ENDIF}
+  {$ENDIF}
+
+  {$IFDEF IsDesktop}
+    AListBox^.Items^.OnGetItem^ := TDynTFTVirtualTable_OnDynTFTChildItemsGetItemEvent;
+    AListBox^.Items^.OnDrawIcon^ := TDynTFTVirtualTable_OnDynTFTChildItemsDrawIcon;
+    AListBox^.BaseProps.OnMouseDownUser^ := TDynTFTVirtualTable_OnDynTFTChildListBoxMouseDownEvent;  //a bit different, by using the User event, but this should also be fine
+  {$ELSE}
+    AListBox^.Items^.OnGetItem := @TDynTFTVirtualTable_OnDynTFTChildItemsGetItemEvent;
+    AListBox^.Items^.OnDrawIcon := @TDynTFTVirtualTable_OnDynTFTChildItemsDrawIcon;
+    AListBox^.BaseProps.OnMouseDownUser := @TDynTFTVirtualTable_OnDynTFTChildListBoxMouseDownEvent;  //a bit different, by using the User event, but this should also be fine
   {$ENDIF}
 end;
 
@@ -408,10 +523,18 @@ begin
 
   if not AIsFirstColumn then
   begin
-    //DynTFTScrollBar_Destroy(TempListBox^.VertScrollBar); ////////////////////////// Can't destroy yet. The listbox requires a valid ScrollBar on drawing.
+    //DynTFTScrollBar_Destroy(TempListBox^.VertScrollBar); ////////////////////////// Do not destroy it. Not only that listbox requires a valid ScrollBar on drawing, but the VirtualTable uses the scrollbar for indexing.
     DynTFTHideComponent(PDynTFTBaseComponent(TPtrRec(TempListBox^.VertScrollBar)));  //at least it can be hidden  (not for long, see DynTFTDrawListBox ).
 
     TempListBox^.Items.BaseProps.Width := TempListBox^.BaseProps.Width - 2;
+  end;
+
+  if AVirtualTable^.Columns.Len = 1 then //this is the first column
+    TempListBox^.VertScrollBar^.BtnScroll^.DummyByte := 0 //Using DummyByte, to indicate that the Color field should not be modified. It's the first column.
+  else
+  begin
+    TempListBox^.VertScrollBar^.BtnScroll^.Color := AVirtualTable^.Columns.Len - 1;    //this would have to be adjusted when deleting columns
+    TempListBox^.VertScrollBar^.BtnScroll^.DummyByte := 1;
   end;
 end;
 
@@ -494,17 +617,17 @@ begin
   Result^.HorizScrollBar^.Direction := CScrollBarHorizDir;
 
   {$IFDEF IsDesktop}
-    Result^.HorizScrollBar^.OnOwnerInternalMouseDown^ := TDynTFTVirtualTable_OnDynTFTChildScrollBarInternalMouseDown;
-    Result^.HorizScrollBar^.OnOwnerInternalMouseMove^ := TDynTFTVirtualTable_OnDynTFTChildScrollBarInternalMouseMove;
-    Result^.HorizScrollBar^.OnOwnerInternalMouseUp^ := TDynTFTVirtualTable_OnDynTFTChildScrollBarInternalMouseUp;
-    Result^.HorizScrollBar^.OnOwnerInternalAdjustScrollBar^ := TDynTFTVirtualTable_OnDynTFTChildScrollBarInternalAdjust;
-    Result^.HorizScrollBar^.OnOwnerInternalAfterAdjustScrollBar^ := TDynTFTVirtualTable_OnDynTFTChildScrollBarInternalAfterAdjust;
+//    Result^.HorizScrollBar^.OnOwnerInternalMouseDown^ := TDynTFTVirtualTable_OnDynTFTChildScrollBarInternalMouseDown;
+//    Result^.HorizScrollBar^.OnOwnerInternalMouseMove^ := TDynTFTVirtualTable_OnDynTFTChildScrollBarInternalMouseMove;
+//    Result^.HorizScrollBar^.OnOwnerInternalMouseUp^ := TDynTFTVirtualTable_OnDynTFTChildScrollBarInternalMouseUp;
+//    Result^.HorizScrollBar^.OnOwnerInternalAdjustScrollBar^ := TDynTFTVirtualTable_OnDynTFTChildScrollBarInternalAdjust;
+//    Result^.HorizScrollBar^.OnOwnerInternalAfterAdjustScrollBar^ := TDynTFTVirtualTable_OnDynTFTChildScrollBarInternalAfterAdjust;
   {$ELSE}
-    Result^.HorizScrollBar^.OnOwnerInternalMouseDown := @TDynTFTListBox_OnDynTFTChildScrollBarInternalMouseDown;
-    Result^.HorizScrollBar^.OnOwnerInternalMouseMove := @TDynTFTListBox_OnDynTFTChildScrollBarInternalMouseMove;
-    Result^.HorizScrollBar^.OnOwnerInternalMouseUp := @TDynTFTListBox_OnDynTFTChildScrollBarInternalMouseUp;
-    Result^.HorizScrollBar^.OnOwnerInternalAdjustScrollBar := @TDynTFTListBox_OnDynTFTChildScrollBarInternalAdjust;
-    Result^.HorizScrollBar^.OnOwnerInternalAfterAdjustScrollBar := @TDynTFTListBox_OnDynTFTChildScrollBarInternalAfterAdjust;
+//    Result^.HorizScrollBar^.OnOwnerInternalMouseDown := @TDynTFTListBox_OnDynTFTChildScrollBarInternalMouseDown;
+//    Result^.HorizScrollBar^.OnOwnerInternalMouseMove := @TDynTFTListBox_OnDynTFTChildScrollBarInternalMouseMove;
+//    Result^.HorizScrollBar^.OnOwnerInternalMouseUp := @TDynTFTListBox_OnDynTFTChildScrollBarInternalMouseUp;
+//    Result^.HorizScrollBar^.OnOwnerInternalAdjustScrollBar := @TDynTFTListBox_OnDynTFTChildScrollBarInternalAdjust;
+//    Result^.HorizScrollBar^.OnOwnerInternalAfterAdjustScrollBar := @TDynTFTListBox_OnDynTFTChildScrollBarInternalAfterAdjust;
   {$ENDIF}
 
   Result^.HorizScrollBar^.BaseProps.Parent := PPtrRec(TPtrRec(Result));
@@ -526,6 +649,13 @@ begin
     {$IFDEF MouseDoubleClickSupport}
       New(Result^.OnOwnerInternalDoubleClick);
     {$ENDIF}
+    {$IFDEF UseExternalItems}
+      New(Result^.OnGetItem);
+      New(Result^.OnGetItemVisibility);
+    {$ENDIF}
+    {$IFDEF ListIcons}
+      New(Result^.OnDrawIcon);
+    {$ENDIF}
 
     Result^.OnOwnerInternalMouseDown^ := nil;
     Result^.OnOwnerInternalMouseMove^ := nil;
@@ -536,6 +666,13 @@ begin
     {$IFDEF MouseDoubleClickSupport}
       Result^.OnOwnerInternalDoubleClick^ := nil;
     {$ENDIF}
+    {$IFDEF UseExternalItems}
+      Result^.OnGetItem^ := nil;
+      Result^.OnGetItemVisibility^ := nil;
+    {$ENDIF}
+    {$IFDEF ListIcons}
+      Result^.OnDrawIcon^ := nil;
+    {$ENDIF}
   {$ELSE}
     Result^.OnOwnerInternalMouseDown := nil;
     Result^.OnOwnerInternalMouseMove := nil;
@@ -545,6 +682,13 @@ begin
     {$ENDIF}
     {$IFDEF MouseDoubleClickSupport}
       Result^.OnOwnerInternalDoubleClick := nil;
+    {$ENDIF}
+    {$IFDEF UseExternalItems}
+      Result^.OnGetItem := nil;
+      Result^.OnGetItemVisibility := nil;
+    {$ENDIF}
+    {$IFDEF ListIcons}
+      Result^.OnDrawIcon := nil;
     {$ENDIF}
   {$ENDIF}
 
