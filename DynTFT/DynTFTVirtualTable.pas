@@ -362,13 +362,17 @@ var
 begin
   ColumnIndex := GetVirtualTableColumnIndexFromItems(AItems, TempVirtualTable);
 
-  {$IFDEF IsDesktop}
-    if Assigned(TempVirtualTable^.OnGetItem) then
-      if Assigned(TempVirtualTable^.OnGetItem^) then
+  {$IFDEF UseExternalItems}
+    {$IFDEF IsDesktop}
+      if Assigned(TempVirtualTable^.OnGetItem) then
+        if Assigned(TempVirtualTable^.OnGetItem^) then
+    {$ELSE}
+      if TempVirtualTable^.OnGetItem <> nil then
+    {$ENDIF}
+        TempVirtualTable^.OnGetItem^(AItems, Index, ColumnIndex, ItemText);
   {$ELSE}
-    if TempVirtualTable^.OnGetItem <> nil then
+    ItemText := PDynTFTItems(TPtrRec(AItems))^.Strings[Index];
   {$ENDIF}
-      TempVirtualTable^.OnGetItem^(AItems, Index, ColumnIndex, ItemText);
 end;
 
 
@@ -462,11 +466,15 @@ begin
   {$ENDIF}
 
   {$IFDEF IsDesktop}
-    AListBox^.Items^.OnGetItem^ := TDynTFTVirtualTable_OnDynTFTChildItemsGetItemEvent;
+    {$IFDEF UseExternalItems}
+      AListBox^.Items^.OnGetItem^ := TDynTFTVirtualTable_OnDynTFTChildItemsGetItemEvent;
+    {$ENDIF}
     AListBox^.Items^.OnDrawIcon^ := TDynTFTVirtualTable_OnDynTFTChildItemsDrawIcon;
     AListBox^.BaseProps.OnMouseDownUser^ := TDynTFTVirtualTable_OnDynTFTChildListBoxMouseDownEvent;  //a bit different, by using the User event, but this should also be fine
   {$ELSE}
-    AListBox^.Items^.OnGetItem := @TDynTFTVirtualTable_OnDynTFTChildItemsGetItemEvent;
+    {$IFDEF UseExternalItems}
+      AListBox^.Items^.OnGetItem := @TDynTFTVirtualTable_OnDynTFTChildItemsGetItemEvent;
+    {$ENDIF}
     AListBox^.Items^.OnDrawIcon := @TDynTFTVirtualTable_OnDynTFTChildItemsDrawIcon;
     AListBox^.BaseProps.OnMouseDownUser := @TDynTFTVirtualTable_OnDynTFTChildListBoxMouseDownEvent;  //a bit different, by using the User event, but this should also be fine
   {$ENDIF}
