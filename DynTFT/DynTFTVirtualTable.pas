@@ -128,11 +128,10 @@ function DynTFTCreateFirstVirtualTableColumn(AVirtualTable: PDynTFTVirtualTable;
 
 [in work] - implement internal handlers
  - create an event for AfterDrawingItem  -requires implementation in DynTTFItems and DynTFTListBox (under compiler directive)
- - the horizontal scrollbar should set column visibility
  - the last column should fill the space
  - procedure for deleting columns (should not be able to delete the first one)
- - (nice to have task) - hide horizontal scrollbar if all columns fit the total table width
- - (nice to have task) - the total scroll amount of the horizontal scrollbar should be computed based on total column width vs. table width
+ - ("nice to have" task) - hide horizontal scrollbar if all columns fit the total table width
+ - ("nice to have" task) - the total scroll amount of the horizontal scrollbar should be computed based on total column width vs. table width
  - verify if there is an AV, if the "Initialized" field from the dyn array, is changed to a static string and the HeaderItems and Columns are allocated in DynTFT's mm. Eventually, that should be the case, to accurately measure memory usage from the simulator. However, a static string is still not automatically initialized by compiler (it may actually have a random length).
  - misc
 }
@@ -154,22 +153,24 @@ procedure DynTFTDrawVirtualTable(AVirtualTable: PDynTFTVirtualTable; FullRedraw:
 var
   i, n: Integer;
   TempPanel: PDynTFTPanel;
-  TempListBox: PDynTFTListBox;
+  TempListBox, LastVisibleListBox: PDynTFTListBox;
   ComponentPos: Integer;
   LastColumnRight, VirtualTableRight, VirtualTableBottom, VertScrollBarLeft: Integer;
   ColumnIsVisible: Boolean;
+  DrawingWidth: Integer;
 begin
   n := AVirtualTable^.Columns.Len - 1;
   ComponentPos := AVirtualTable^.BaseProps.Left + 1;
   VirtualTableBottom := AVirtualTable^.BaseProps.Top + AVirtualTable^.BaseProps.Height;
   VirtualTableRight := AVirtualTable^.BaseProps.Left + AVirtualTable^.BaseProps.Width;
-  VertScrollBarLeft := VirtualTableRight - AVirtualTable^.VertScrollBar^.BaseProps.Width;
+  VertScrollBarLeft := VirtualTableRight - AVirtualTable^.VertScrollBar^.BaseProps.Width;   //AVirtualTable^.VertScrollBar^.BaseProps.Left is not always available
 
   DynTFT_Set_Pen(CL_LIGHTGRAY, 1);
   DynTFT_Line(ComponentPos - 1, AVirtualTable^.BaseProps.Top, ComponentPos + AVirtualTable^.BaseProps.Width - 2, AVirtualTable^.BaseProps.Top);  //to be replaced
   DynTFT_Line(ComponentPos - 1, AVirtualTable^.BaseProps.Top, ComponentPos - 1, VirtualTableBottom);
 
   TempListBox := nil;
+  LastVisibleListBox := nil;
 
   for i := 0 to n do
   begin
@@ -177,15 +178,29 @@ begin
     TempListBox := PDynTFTListBox(TPtrRec(AVirtualTable^.Columns.Content^[i]));
 
     TempPanel.BaseProps.Left := ComponentPos;
-    ColumnIsVisible := TempPanel.BaseProps.Left + TempPanel.BaseProps.Width < VertScrollBarLeft;
+    DrawingWidth := VertScrollBarLeft - (TempPanel.BaseProps.Left + TempPanel.BaseProps.Width);
+    ColumnIsVisible := DrawingWidth > 0;
+
+    if not ColumnIsVisible and (VertScrollBarLeft - TempPanel.BaseProps.Left > TempListBox^.Items^.ItemHeight + 4) then   //20 = 16 + 4.  16 is the usual icon width.   4 is the spacing
+    begin
+      ColumnIsVisible := True;
+      DrawingWidth := TempPanel.BaseProps.Width;
+      TempPanel.BaseProps.Width := VertScrollBarLeft - TempPanel.BaseProps.Left;
+
+      if TempPanel.BaseProps.Left + TempPanel.BaseProps.Width > VertScrollBarLeft then
+        TempPanel.BaseProps.Width := VertScrollBarLeft - TempPanel.BaseProps.Left;
+    end
+    else
+      DrawingWidth := -1; //set to -1, to know if the panel width should be restored
+
     TempPanel^.BaseProps.Visible := Ord((i >= AVirtualTable^.HorizScrollBar^.Position) and ColumnIsVisible);
     TempListBox^.Items^.BaseProps.Visible := TempPanel^.BaseProps.Visible;
     TempListBox^.VertScrollBar^.BaseProps.Visible := TempPanel^.BaseProps.Visible;
 
     if TempPanel^.BaseProps.Visible = 1 then
     begin
+      LastVisibleListBox := TempListBox;
       TempPanel.BaseProps.Top := AVirtualTable^.BaseProps.Top + 1;  // + 1, to leave room for a rectangle
-      //TempPanel.BaseProps.Left := ComponentPos;
 
       TempListBox.BaseProps.Left := ComponentPos;
       TempListBox.BaseProps.Top := TempPanel.BaseProps.Top + TempPanel.BaseProps.Height;
@@ -208,7 +223,7 @@ begin
       if ColumnIsVisible then
       begin
         DynTFTDrawPanel(TempPanel, FullRedraw);
-        DynTFTDrawListBox(TempListBox, False);  //set to False on all columns, to avoid drawing ListBox border
+        //DynTFTDrawListBox(TempListBox, False); // - not required //set to False on all columns, to avoid drawing ListBox border
         DynTFTDrawItems(TempListBox^.Items, FullRedraw);
       end;
 
@@ -226,20 +241,28 @@ begin
       end;
 
       if ColumnIsVisible then
+      begin
+//        if DrawingWidth <> -1 then
+//          ComponentPos := ComponentPos + DrawingWidth
+//        else
         ComponentPos := ComponentPos + TempPanel.BaseProps.Width;
+      end;
       //end;
     end
     else
-    begin
+    begin  //the column is not visible
       //TempListBox points to a column which will not be displayed. However, that area has to be cleared.
 
-      //TempListBox := nil;  // prevent further section of the code, to run, if the column is hidden
-
-//      if i > 0 then
-//        TempListBox := PDynTFTListBox(TPtrRec(AVirtualTable^.Columns.Content^[i - 1]))  //////////////////////// this is required, but, but the condition has to take something more into account
-//      else
-        TempListBox := nil;
+      if i > 0 then
+        TempListBox := LastVisibleListBox //PDynTFTListBox(TPtrRec(AVirtualTable^.Columns.Content^[i - 1]))
+      else
+        TempListBox := nil;// prevent further section of the code, to run, if the column is hidden
     end;
+
+    if DrawingWidth <> -1 then
+      TempPanel.BaseProps.Width := DrawingWidth;
+
+    TempPanel^.BaseProps.Visible := 0; //prevent auto drawing from DynTFTRepaintScreenComponents
   end;
 
   if FullRedraw then
@@ -258,7 +281,7 @@ begin
       if VirtualTableRight - LastColumnRight > 2 then
       begin
         DynTFT_Set_Pen(CL_DynTFTItems_Background, 1);
-        DynTFT_Set_Brush(1, {CL_DynTFTItems_Background} CL_RED, 0, 0, 0, 0);
+        DynTFT_Set_Brush(1, CL_DynTFTItems_Background, 0, 0, 0, 0);
         DynTFT_Rectangle(LastColumnRight + 1, AVirtualTable^.BaseProps.Top + 1, VertScrollBarLeft, AVirtualTable^.HorizScrollBar.BaseProps.Top - 1);
       end;
     end;
@@ -581,11 +604,10 @@ function AddColumn(AVirtualTable: PDynTFTVirtualTable; AIsFirstColumn: Boolean; 
 var
   TempPanel: PDynTFTPanel;
   TempListBox: PDynTFTListBox;
-  Left, Top, Width, Height: TSInt;
+  Left, Top, Height: TSInt;
 begin
   Left := AVirtualTable^.BaseProps.Left;
   Top := AVirtualTable^.BaseProps.Top;
-  Width := AVirtualTable^.BaseProps.Width;
   Height := AVirtualTable^.BaseProps.Height;
 
   TempPanel := DynTFTPanel_Create(AVirtualTable^.BaseProps.ScreenIndex, Left + 1, Top + 1, 70, 20);
@@ -642,6 +664,10 @@ begin
   end;
 
   AVirtualTable^.HorizScrollBar^.Max := LongInt(AVirtualTable^.Columns^.Len) - 1;
+
+  //Hide the listbox here, so it is not automatically displayed. It will be set to visibile when needed.
+  TempListBox^.BaseProps.Visible := 0;
+  TempListBox^.Items^.BaseProps.Visible := 0;
 end;
 
 
