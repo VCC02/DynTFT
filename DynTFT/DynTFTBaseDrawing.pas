@@ -216,7 +216,7 @@ const
     CRTTIDATAOUTOFDATE = 'Binary data out of date';                     //requires regeneration or dyntftui files from SDCard/USBDrive were not updated
     CRTTIBADINTEGERSIZE = 'Bad Int Size';                               //the profile setting for integer size does not match compiler / architecture integer size
     CRTTIBADIPOINTERSIZE = 'Bad Pointer Size';                          //the profile setting for pointer size does not match compiler / architecture pointer size
-    CRTTIDATAPROVIDERREADERR = 'DataProv Read Err';                     //maybe FAT32 is not initialized, or file not found, or SDCard/USBDrive not found, or other read error  (used in data provider callbacks)
+    CRTTIDATAPROVIDERREADERR = 'DataProv Read Err';                     //maybe FAT32 is not initialized, or file not found, or SDCard/USBDrive not found, or other read error  (used in data provider callbacks). It is also possible that, in DynTFTCodeGen (in Project settings), "Data provider callback" editboxes are set to some callback names and no external files are used (*.dyntftui).
   {$ENDIF}
 
   CDynTFTUnrecognizedInstructionError = $FFFFFFFF;
@@ -412,12 +412,12 @@ end;}
 procedure DynTFTDisplayErrorMessage({$IFDEF IsMCU}var{$ENDIF} AMessage: string; TextColor: DWord);
 begin
   DynTFT_Set_Pen(CL_RED, 1);
-  DynTFT_Set_Brush(1, $FFFFFF, 0, 0, 0, 0);
-  DynTFT_Rectangle(10, 2, 300, 30);
+  DynTFT_Set_Brush(1, $88FF88, 0, 0, 0, 0);
+  DynTFT_Rectangle(10, 42, 300, 70);
 
   DynTFT_Set_Font(@TFT_defaultFont, TextColor, 0);
 
-  DynTFT_Write_Text(AMessage, 12, 4);
+  DynTFT_Write_Text(AMessage, 12, 44);
 end;
 
 
