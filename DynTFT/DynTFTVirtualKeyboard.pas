@@ -85,11 +85,18 @@ type
     Color: TColor;
     
     ShiftState: TPtr;
+    
+    {$IFDEF DynTFTFontSupport}
+      ActiveFont: PByte;
+    {$ENDIF}
 
     OnCharKey: POnVirtualKeyboardCharKeyPressedEvent;
     OnSpecialKey: POnVirtualKeyboardSpecialKeyPressedEvent;
   end;
   PDynTFTVirtualKeyboard = ^TDynTFTVirtualKeyboard;
+
+  TVKIteratorCallback = procedure(AVirtualKeyboard: PDynTFTVirtualKeyboard; ABase: PDynTFTBaseComponent);
+  PVKIteratorCallback = ^TVKIteratorCallback;
 
 procedure DynTFTDrawVirtualKeyboard(AVirtualKeyboard: PDynTFTVirtualKeyboard; FullRedraw: Boolean);
 function DynTFTVirtualKeyboard_Create(ScreenIndex: Byte; Left, Top, Width, Height: TSInt): PDynTFTVirtualKeyboard;
@@ -98,6 +105,12 @@ procedure DynTFTVirtualKeyboard_DestroyAndPaint(var AVirtualKeyboard: PDynTFTVir
 
 procedure DynTFTRegisterVirtualKeyboardEvents;
 function DynTFTGetVirtualKeyboardComponentType: TDynTFTComponentType;
+
+procedure DynTFTIterateThroughKeys(AVirtualKeyboard: PDynTFTVirtualKeyboard; ACallback: {$IFDEF IsDesktop} TVKIteratorCallback {$ELSE} PVKIteratorCallback {$ENDIF});
+
+{$IFDEF DynTFTFontSupport}
+  procedure DynTFTSetVirtualKeyboardActiveFont(AVirtualKeyboard: PDynTFTVirtualKeyboard);
+{$ENDIF}
 
 
 implementation
@@ -112,7 +125,7 @@ begin
 end;
 
 
-procedure DrawAllKeys(AVirtualKeyboard: PDynTFTVirtualKeyboard);
+procedure DynTFTIterateThroughKeys(AVirtualKeyboard: PDynTFTVirtualKeyboard; ACallback: {$IFDEF IsDesktop} TVKIteratorCallback {$ELSE} PVKIteratorCallback {$ENDIF});
 var
   ParentComponent: PDynTFTComponent;
   ABase: PDynTFTBaseComponent;
@@ -134,7 +147,7 @@ begin
 
     if FirstFound then
     begin
-      DynTFTShowComponent(ABase);
+      ACallback {$IFnDEF IsDesktop}^{$ENDIF}(AVirtualKeyboard, ABase);
       //ABase^.BaseProps.Enabled := CDISABLED;  //for debugging only - to verify if the proper components are disabled
     end;
 
@@ -145,6 +158,31 @@ begin
   until ParentComponent = nil;
 end;
 
+
+procedure DrawKeyButtonCallback(AVirtualKeyboard: PDynTFTVirtualKeyboard; ABase: PDynTFTBaseComponent);
+begin
+  DynTFTShowComponent(ABase);
+end;
+
+
+procedure DrawAllKeys(AVirtualKeyboard: PDynTFTVirtualKeyboard);
+begin
+  DynTFTIterateThroughKeys(AVirtualKeyboard, {$IFnDEF IsDesktop}@{$ENDIF}DrawKeyButtonCallback);
+end;
+
+        
+{$IFDEF DynTFTFontSupport}
+  procedure SetKeyButtonActiveFontCallback(AVirtualKeyboard: PDynTFTVirtualKeyboard; ABase: PDynTFTBaseComponent);
+  begin
+    PDynTFTKeyButton(TPtrRec(ABase))^.ActiveFont := AVirtualKeyboard^.ActiveFont;
+  end;
+
+
+  procedure DynTFTSetVirtualKeyboardActiveFont(AVirtualKeyboard: PDynTFTVirtualKeyboard);
+  begin
+    DynTFTIterateThroughKeys(AVirtualKeyboard, {$IFnDEF IsDesktop}@{$ENDIF}SetKeyButtonActiveFontCallback);
+  end;
+{$ENDIF}
 
 
 procedure DynTFTDrawVirtualKeyboard(AVirtualKeyboard: PDynTFTVirtualKeyboard; FullRedraw: Boolean);
