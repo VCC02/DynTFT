@@ -57,11 +57,11 @@ uses
   ;
 
 type
-  TOnGetItemEvent = procedure(AItems: PPtrRec; Index, Column: LongInt; var ItemText: string);
-  POnGetItemEvent = ^TOnGetItemEvent;
+  TOnGetVTItemEvent = procedure(AItems: PPtrRec; Index, Column: LongInt; var ItemText: string);
+  POnGetVTItemEvent = ^TOnGetVTItemEvent;
 
-  TOnDrawIconEvent = procedure(AItems: PPtrRec; Index, Column, ItemY: LongInt; var ItemText: string {$IFDEF ItemsEnabling}; IsEnabled: Boolean {$ENDIF});
-  POnDrawIconEvent = ^TOnDrawIconEvent;
+  TOnDrawVTIconEvent = procedure(AItems: PPtrRec; Index, Column, ItemY: LongInt; var ItemText: string {$IFDEF ItemsEnabling}; IsEnabled: Boolean {$ENDIF});
+  POnDrawVTIconEvent = ^TOnDrawVTIconEvent;
 
   TDynTFTVirtualTable = record
     BaseProps: TDynTFTBaseProperties;  //inherited properties from TDynTFTBaseProperties - must be the first field of this structure !!!
@@ -91,12 +91,12 @@ type
     {$ENDIF}
 
     {$IFDEF UseExternalItems}
-      OnGetItem: POnGetItemEvent;
+      OnGetItem: POnGetVTItemEvent;
       OnGetItemVisibility: POnGetItemVisibilityEvent;
     {$ENDIF}
 
     {$IFDEF ListIcons}
-      OnDrawIcon: POnDrawIconEvent;
+      OnDrawIcon: POnDrawVTIconEvent;
     {$ENDIF}
 
     //The main ScrollBar will not call its ListBox handlers anymore. They are redirected to these ones, then the events are sent to all handlers.
@@ -159,7 +159,7 @@ var
   ColumnIsVisible: Boolean;
   DrawingWidth: Integer;
 begin
-  n := AVirtualTable^.Columns.Len - 1;
+  n := AVirtualTable^.Columns^.Len - 1;
   ComponentPos := AVirtualTable^.BaseProps.Left + 1;
   VirtualTableBottom := AVirtualTable^.BaseProps.Top + AVirtualTable^.BaseProps.Height;
   VirtualTableRight := AVirtualTable^.BaseProps.Left + AVirtualTable^.BaseProps.Width;
@@ -174,48 +174,48 @@ begin
 
   for i := 0 to n do
   begin
-    TempPanel := PDynTFTPanel(TPtrRec(AVirtualTable^.HeaderItems.Content^[i]));
-    TempListBox := PDynTFTListBox(TPtrRec(AVirtualTable^.Columns.Content^[i]));
+    TempPanel := PDynTFTPanel(TPtrRec(AVirtualTable^.HeaderItems^.Content^[i]));
+    TempListBox := PDynTFTListBox(TPtrRec(AVirtualTable^.Columns^.Content^[i]));
 
-    TempPanel.BaseProps.Left := ComponentPos;
-    DrawingWidth := VertScrollBarLeft - (TempPanel.BaseProps.Left + TempPanel.BaseProps.Width);
+    TempPanel^.BaseProps.Left := ComponentPos;
+    DrawingWidth := VertScrollBarLeft - (TempPanel^.BaseProps.Left + TempPanel^.BaseProps.Width);
     ColumnIsVisible := DrawingWidth > 0;
 
-    if not ColumnIsVisible and (VertScrollBarLeft - TempPanel.BaseProps.Left > TempListBox^.Items^.ItemHeight + 4) then   //20 = 16 + 4.  16 is the usual icon width.   4 is the spacing
+    if not ColumnIsVisible and (VertScrollBarLeft - TempPanel^.BaseProps.Left > TempListBox^.Items^.ItemHeight + 4) then   //20 = 16 + 4.  16 is the usual icon width.   4 is the spacing
     begin
       ColumnIsVisible := True;
-      DrawingWidth := TempPanel.BaseProps.Width;
-      TempPanel.BaseProps.Width := VertScrollBarLeft - TempPanel.BaseProps.Left;
+      DrawingWidth := TempPanel^.BaseProps.Width;
+      TempPanel^.BaseProps.Width := VertScrollBarLeft - TempPanel^.BaseProps.Left;
 
-      if TempPanel.BaseProps.Left + TempPanel.BaseProps.Width > VertScrollBarLeft then
-        TempPanel.BaseProps.Width := VertScrollBarLeft - TempPanel.BaseProps.Left;
+      if TempPanel^.BaseProps.Left + TempPanel^.BaseProps.Width > VertScrollBarLeft then
+        TempPanel^.BaseProps.Width := VertScrollBarLeft - TempPanel^.BaseProps.Left;
     end
     else
       DrawingWidth := -1; //set to -1, to know if the panel width should be restored
 
-    TempPanel^.BaseProps.Visible := Ord((i >= AVirtualTable^.HorizScrollBar^.Position) and ColumnIsVisible);
+    TempPanel^.BaseProps.Visible := Ord(Char((i >= AVirtualTable^.HorizScrollBar^.Position) and ColumnIsVisible));   //The Char typecasting is required by mP.
     TempListBox^.Items^.BaseProps.Visible := TempPanel^.BaseProps.Visible;
     TempListBox^.VertScrollBar^.BaseProps.Visible := TempPanel^.BaseProps.Visible;
 
     if TempPanel^.BaseProps.Visible = 1 then
     begin
       LastVisibleListBox := TempListBox;
-      TempPanel.BaseProps.Top := AVirtualTable^.BaseProps.Top + 1;  // + 1, to leave room for a rectangle
+      TempPanel^.BaseProps.Top := AVirtualTable^.BaseProps.Top + 1;  // + 1, to leave room for a rectangle
 
-      TempListBox.BaseProps.Left := ComponentPos;
-      TempListBox.BaseProps.Top := TempPanel.BaseProps.Top + TempPanel.BaseProps.Height;
-      TempListBox.BaseProps.Height := AVirtualTable^.BaseProps.Height - TempPanel.BaseProps.Height - AVirtualTable^.HorizScrollBar.BaseProps.Height - 3;
-      TempListBox.BaseProps.Width := TempPanel.BaseProps.Width;
+      TempListBox^.BaseProps.Left := ComponentPos;
+      TempListBox^.BaseProps.Top := TempPanel^.BaseProps.Top + TempPanel^.BaseProps.Height;
+      TempListBox^.BaseProps.Height := AVirtualTable^.BaseProps.Height - TempPanel^.BaseProps.Height - AVirtualTable^.HorizScrollBar^.BaseProps.Height - 3;
+      TempListBox^.BaseProps.Width := TempPanel^.BaseProps.Width;
 
       if FullRedraw then
       begin
-        TempListBox^.Items.BaseProps.Height := TempListBox.BaseProps.Height {- 1};
-        TempListBox^.Items.BaseProps.Left := ComponentPos;
-        TempListBox^.Items.BaseProps.Top := TempListBox.BaseProps.Top;
-        TempListBox^.Items.BaseProps.Width := TempPanel.BaseProps.Width;
+        TempListBox^.Items^.BaseProps.Height := TempListBox^.BaseProps.Height {- 1};
+        TempListBox^.Items^.BaseProps.Left := ComponentPos;
+        TempListBox^.Items^.BaseProps.Top := TempListBox^.BaseProps.Top;
+        TempListBox^.Items^.BaseProps.Width := TempPanel^.BaseProps.Width;
 
         if i = 0 then //the VertScrollBar should exist for the first column only
-          TempListBox^.VertScrollBar.BaseProps.Height := TempListBox.BaseProps.Height - 2;
+          TempListBox^.VertScrollBar^.BaseProps.Height := TempListBox^.BaseProps.Height - 2;
       end;
 
       TempListBox^.BaseProps.Left := ComponentPos;
@@ -229,15 +229,15 @@ begin
 
       if i > 0 then
       begin
-        TempListBox^.VertScrollBar^.BtnInc.BaseProps.Visible := 0;
-        TempListBox^.VertScrollBar^.BtnDec.BaseProps.Visible := 0;
-        TempListBox^.VertScrollBar^.BtnScroll.BaseProps.Visible := 0;
+        TempListBox^.VertScrollBar^.BtnInc^.BaseProps.Visible := 0;
+        TempListBox^.VertScrollBar^.BtnDec^.BaseProps.Visible := 0;
+        TempListBox^.VertScrollBar^.BtnScroll^.BaseProps.Visible := 0;
         TempListBox^.VertScrollBar^.BaseProps.Visible := 0;
         //Hiding the scrollbar with DynTFTHideComponent, leaves an "erased" rectangle. That's why the following line has to stay commented.
         //DynTFTHideComponent(PDynTFTBaseComponent(TPtrRec(TempListBox^.VertScrollBar)));  //the ScrollBar is displayed in DynTFTDrawListBox, based on the number of visible items
 
         DynTFT_Set_Pen(CL_DynTFTItems_Border, 1);
-        DynTFT_Line(ComponentPos, AVirtualTable^.BaseProps.Top, ComponentPos, VirtualTableBottom - AVirtualTable^.HorizScrollBar.BaseProps.Height - 1);
+        DynTFT_Line(ComponentPos, AVirtualTable^.BaseProps.Top, ComponentPos, VirtualTableBottom - AVirtualTable^.HorizScrollBar^.BaseProps.Height - 1);
       end;
 
       if ColumnIsVisible then
@@ -245,7 +245,7 @@ begin
 //        if DrawingWidth <> -1 then
 //          ComponentPos := ComponentPos + DrawingWidth
 //        else
-        ComponentPos := ComponentPos + TempPanel.BaseProps.Width;
+        ComponentPos := ComponentPos + TempPanel^.BaseProps.Width;
       end;
       //end;
     end
@@ -260,16 +260,16 @@ begin
     end;
 
     if DrawingWidth <> -1 then
-      TempPanel.BaseProps.Width := DrawingWidth;
+      TempPanel^.BaseProps.Width := DrawingWidth;
 
     TempPanel^.BaseProps.Visible := 0; //prevent auto drawing from DynTFTRepaintScreenComponents
   end;
 
   if FullRedraw then
   begin
-    AVirtualTable^.HorizScrollBar.BaseProps.Left := AVirtualTable^.BaseProps.Left + 1;
-    AVirtualTable^.HorizScrollBar.BaseProps.Top := VirtualTableBottom - AVirtualTable^.HorizScrollBar.BaseProps.Height - 1;
-    AVirtualTable^.HorizScrollBar.BaseProps.Width := AVirtualTable^.BaseProps.Width - AVirtualTable^.VertScrollBar^.BaseProps.Width - 3;
+    AVirtualTable^.HorizScrollBar^.BaseProps.Left := AVirtualTable^.BaseProps.Left + 1;
+    AVirtualTable^.HorizScrollBar^.BaseProps.Top := VirtualTableBottom - AVirtualTable^.HorizScrollBar^.BaseProps.Height - 1;
+    AVirtualTable^.HorizScrollBar^.BaseProps.Width := AVirtualTable^.BaseProps.Width - AVirtualTable^.VertScrollBar^.BaseProps.Width - 3;
     DynTFTDrawScrollBar(AVirtualTable^.HorizScrollBar, FullRedraw);
 
     if TempListBox <> nil then     //this section should be replaced by something which extends the last listbox to the visible area and aligns its scrollbar to the right
@@ -282,22 +282,22 @@ begin
       begin
         DynTFT_Set_Pen(CL_DynTFTItems_Background, 1);
         DynTFT_Set_Brush(1, CL_DynTFTItems_Background, 0, 0, 0, 0);
-        DynTFT_Rectangle(LastColumnRight + 1, AVirtualTable^.BaseProps.Top + 1, VertScrollBarLeft, AVirtualTable^.HorizScrollBar.BaseProps.Top - 1);
+        DynTFT_Rectangle(LastColumnRight + 1, AVirtualTable^.BaseProps.Top + 1, VertScrollBarLeft, AVirtualTable^.HorizScrollBar^.BaseProps.Top - 1);
       end;
     end;
 
-    TempListBox := PDynTFTListBox(TPtrRec(AVirtualTable^.Columns.Content^[0]));  //First
+    TempListBox := PDynTFTListBox(TPtrRec(AVirtualTable^.Columns^.Content^[0]));  //First
     if TempListBox <> nil then //this should always be the case
     begin               //align the vertical scrollbar to the right
-      TempListBox^.VertScrollBar.BaseProps.Left := VertScrollBarLeft;
+      TempListBox^.VertScrollBar^.BaseProps.Left := VertScrollBarLeft;
       DynTFTDrawScrollBar(TempListBox^.VertScrollBar, True);
     end;
 
     DynTFT_Set_Pen(CL_DynTFTItems_Background, 1);
     DynTFT_Set_Brush(1, CL_DynTFTItems_Background, 0, 0, 0, 0);
 
-    DynTFT_Rectangle(VirtualTableRight - AVirtualTable^.HorizScrollBar.BaseProps.Height + 1,
-                     VirtualTableBottom - AVirtualTable^.HorizScrollBar.BaseProps.Height - 1,
+    DynTFT_Rectangle(VirtualTableRight - AVirtualTable^.HorizScrollBar^.BaseProps.Height + 1,
+                     VirtualTableBottom - AVirtualTable^.HorizScrollBar^.BaseProps.Height - 1,
                      VirtualTableRight,
                      VirtualTableBottom);
   end;
@@ -331,10 +331,10 @@ begin
       AVirtualTable^.OnRedirectScrollBarInternalMouseMove(ABase);
     {$ENDIF}
 
-    n := AVirtualTable^.Columns.Len - 1;
+    n := AVirtualTable^.Columns^.Len - 1;
     for i := 1 to n do
     begin
-      TempListBox := PDynTFTListBox(TPtrRec(AVirtualTable^.Columns.Content^[i]));
+      TempListBox := PDynTFTListBox(TPtrRec(AVirtualTable^.Columns^.Content^[i]));
       TempListBox^.VertScrollBar^.Position := AScrBar^.Position;
       {$IFDEF IsDesktop}
         TempListBox^.VertScrollBar^.OnOwnerInternalMouseMove^(PDynTFTBaseComponent(TPtrRec(TempListBox^.VertScrollBar)));
@@ -369,10 +369,10 @@ begin
       AVirtualTable^.OnRedirectScrollBarInternalAdjustScrollBar(AScrollBar);
     {$ENDIF}
 
-    n := AVirtualTable^.Columns.Len - 1;
+    n := AVirtualTable^.Columns^.Len - 1;
     for i := 1 to n do
     begin
-      TempListBox := PDynTFTListBox(TPtrRec(AVirtualTable^.Columns.Content^[i]));
+      TempListBox := PDynTFTListBox(TPtrRec(AVirtualTable^.Columns^.Content^[i]));
       {$IFDEF IsDesktop}
         TempListBox^.VertScrollBar^.OnOwnerInternalAdjustScrollBar^(PDynTFTBaseComponent(TPtrRec(TempListBox^.VertScrollBar)));
       {$ELSE}
@@ -400,10 +400,10 @@ begin
       AVirtualTable^.OnRedirectScrollBarInternalAfterAdjustScrollBar(AScrollBar);
     {$ENDIF}
 
-    n := AVirtualTable^.Columns.Len - 1;
+    n := AVirtualTable^.Columns^.Len - 1;
     for i := 1 to n do
     begin
-      TempListBox := PDynTFTListBox(TPtrRec(AVirtualTable^.Columns.Content^[i]));
+      TempListBox := PDynTFTListBox(TPtrRec(AVirtualTable^.Columns^.Content^[i]));
       TempListBox^.VertScrollBar^.Position := PDynTFTScrollBar(TPtrRec(AScrollBar))^.Position;
       {$IFDEF IsDesktop}
         TempListBox^.VertScrollBar^.OnOwnerInternalAfterAdjustScrollBar^(PDynTFTBaseComponent(TPtrRec(TempListBox^.VertScrollBar)));
@@ -475,13 +475,14 @@ end;
 
 
 procedure TDynTFTVirtualTable_OnDynTFTChildItemsGetItemEvent(AItems: PPtrRec; Index: LongInt; var ItemText: string);
-var
-  TempVirtualTable: PDynTFTVirtualTable;
-  ColumnIndex: LongInt;
+{$IFDEF UseExternalItems}
+  var
+    TempVirtualTable: PDynTFTVirtualTable;
+    ColumnIndex: LongInt;
+{$ENDIF}
 begin
-  ColumnIndex := GetVirtualTableColumnIndexFromItems(AItems, TempVirtualTable);
-
   {$IFDEF UseExternalItems}
+    ColumnIndex := GetVirtualTableColumnIndexFromItems(AItems, TempVirtualTable);
     {$IFDEF IsDesktop}
       if Assigned(TempVirtualTable^.OnGetItem) then
         if Assigned(TempVirtualTable^.OnGetItem^) then
@@ -496,13 +497,14 @@ end;
 
 
 procedure TDynTFTVirtualTable_OnDynTFTChildItemsDrawIcon(AItems: PPtrRec; Index, ItemY: LongInt; var ItemText: string {$IFDEF ItemsEnabling}; IsEnabled: Boolean {$ENDIF});
-var
-  TempVirtualTable: PDynTFTVirtualTable;
-  ColumnIndex: LongInt;
+{$IFDEF ListIcons}
+  var
+    TempVirtualTable: PDynTFTVirtualTable;
+    ColumnIndex: LongInt;
+{$ENDIF}
 begin
-  ColumnIndex := GetVirtualTableColumnIndexFromItems(AItems, TempVirtualTable);
-
   {$IFDEF ListIcons}
+    ColumnIndex := GetVirtualTableColumnIndexFromItems(AItems, TempVirtualTable);
     {$IFDEF IsDesktop}
       if Assigned(TempVirtualTable^.OnDrawIcon) then
         if Assigned(TempVirtualTable^.OnDrawIcon^) then
@@ -523,13 +525,13 @@ begin
   CurrentListBox := PDynTFTListBox(TPtrRec(Sender));
   TempVirtualTable := PDynTFTVirtualTable(TPtrRec(CurrentListBox^.BaseProps.Parent));
 
-  n := TempVirtualTable^.Columns.Len - 1;
+  n := TempVirtualTable^.Columns^.Len - 1;
   for i := 0 to n do
   begin
-    TempListBox := PDynTFTListBox(TPtrRec(TempVirtualTable^.Columns.Content^[i]));
+    TempListBox := PDynTFTListBox(TPtrRec(TempVirtualTable^.Columns^.Content^[i]));
     if TempListBox <> CurrentListBox then
     begin
-      TempListBox^.Items.ItemIndex := CurrentListBox^.Items.ItemIndex;
+      TempListBox^.Items^.ItemIndex := CurrentListBox^.Items^.ItemIndex;
       DynTFTDrawItems(TempListBox^.Items, True);
     end;
   end;
@@ -598,7 +600,9 @@ begin
     {$IFDEF UseExternalItems}
       AListBox^.Items^.OnGetItem := @TDynTFTVirtualTable_OnDynTFTChildItemsGetItemEvent;
     {$ENDIF}
-    AListBox^.Items^.OnDrawIcon := @TDynTFTVirtualTable_OnDynTFTChildItemsDrawIcon;
+    {$IFDEF ListIcons}
+      AListBox^.Items^.OnDrawIcon := @TDynTFTVirtualTable_OnDynTFTChildItemsDrawIcon;
+    {$ENDIF}
     AListBox^.BaseProps.OnMouseDownUser := @TDynTFTVirtualTable_OnDynTFTChildListBoxMouseDownEvent;  //a bit different, by using the User event, but this should also be fine
   {$ENDIF}
 end;
@@ -656,14 +660,14 @@ begin
     //DynTFTScrollBar_Destroy(TempListBox^.VertScrollBar); ////////////////////////// Do not destroy it. Not only that listbox requires a valid ScrollBar on drawing, but the VirtualTable uses the scrollbar for indexing.
     DynTFTHideComponent(PDynTFTBaseComponent(TPtrRec(TempListBox^.VertScrollBar)));  //at least it can be hidden  (not for long, see DynTFTDrawListBox ).
 
-    TempListBox^.Items.BaseProps.Width := TempListBox^.BaseProps.Width - 2;
+    TempListBox^.Items^.BaseProps.Width := TempListBox^.BaseProps.Width - 2;
   end;
 
-  if AVirtualTable^.Columns.Len = 1 then //this is the first column
+  if AVirtualTable^.Columns^.Len = 1 then //this is the first column
     TempListBox^.VertScrollBar^.BtnScroll^.DummyByte := 0 //Using DummyByte, to indicate that the Color field should not be modified. It's the first column.
   else
   begin
-    TempListBox^.VertScrollBar^.BtnScroll^.Color := AVirtualTable^.Columns.Len - 1;    //this would have to be adjusted when deleting columns
+    TempListBox^.VertScrollBar^.BtnScroll^.Color := AVirtualTable^.Columns^.Len - 1;    //this would have to be adjusted when deleting columns
     TempListBox^.VertScrollBar^.BtnScroll^.DummyByte := 1;
   end;
 
@@ -706,9 +710,15 @@ begin
   //AVirtualTable^.VertScrollBar^.BaseProps.Parent := PPtrRec(TPtrRec(AVirtualTable));  //Do not change the parent! The internal handlers assume that scrollbars belong to listboxes.
 
   //backup the pointers
-  AVirtualTable^.OnRedirectScrollBarInternalMouseMove^ := AVirtualTable^.VertScrollBar^.OnOwnerInternalMouseMove^;
-  AVirtualTable^.OnRedirectScrollBarInternalAdjustScrollBar^ := AVirtualTable^.VertScrollBar^.OnOwnerInternalAdjustScrollBar^;
-  AVirtualTable^.OnRedirectScrollBarInternalAfterAdjustScrollBar^ := AVirtualTable^.VertScrollBar^.OnOwnerInternalAfterAdjustScrollBar^;
+  {$IFDEF IsDesktop}
+    AVirtualTable^.OnRedirectScrollBarInternalMouseMove^ := AVirtualTable^.VertScrollBar^.OnOwnerInternalMouseMove^;
+    AVirtualTable^.OnRedirectScrollBarInternalAdjustScrollBar^ := AVirtualTable^.VertScrollBar^.OnOwnerInternalAdjustScrollBar^;
+    AVirtualTable^.OnRedirectScrollBarInternalAfterAdjustScrollBar^ := AVirtualTable^.VertScrollBar^.OnOwnerInternalAfterAdjustScrollBar^;
+  {$ELSE}
+    AVirtualTable^.OnRedirectScrollBarInternalMouseMove := AVirtualTable^.VertScrollBar^.OnOwnerInternalMouseMove;
+    AVirtualTable^.OnRedirectScrollBarInternalAdjustScrollBar := AVirtualTable^.VertScrollBar^.OnOwnerInternalAdjustScrollBar;
+    AVirtualTable^.OnRedirectScrollBarInternalAfterAdjustScrollBar := AVirtualTable^.VertScrollBar^.OnOwnerInternalAfterAdjustScrollBar;
+  {$ENDIF}
 
       //Set the scrollbar handlers to the VirtualTable ones.
   {$IFDEF IsDesktop}
@@ -728,16 +738,23 @@ end;
 procedure DynTFTDestroyAllVirtualTableColumns(AVirtualTable: PDynTFTVirtualTable);
 var
   i: Integer;
+  TempPanel: PDynTFTPanel;
+  TempListBox: PDynTFTListBox;
 begin
   {$IFDEF IsDesktop}
     if (AVirtualTable^.Columns.Initialized = '') or (AVirtualTable^.HeaderItems.Initialized = '') then //these may be '', if this call comes from DynTFTCreateFirstVirtualTableColumn
       Exit;
   {$ENDIF}
 
-  for i := 0 to LongInt(AVirtualTable^.Columns.Len) - 1 do
+  for i := 0 to LongInt(AVirtualTable^.Columns^.Len) - 1 do
   begin
-    DynTFTPanel_Destroy(PDynTFTPanel(AVirtualTable^.HeaderItems.Content^[i]));    /////////////////////////////// may require two types of typecasts
-    DynTFTListBox_Destroy(PDynTFTListBox(AVirtualTable^.Columns.Content^[i]));    /////////////////////////////// may require two types of typecasts
+    TempPanel := PDynTFTPanel(AVirtualTable^.HeaderItems^.Content^[i]);
+    DynTFTPanel_Destroy(TempPanel);
+    AVirtualTable^.HeaderItems^.Content^[i] := 0;//nil;
+
+    TempListBox := PDynTFTListBox(AVirtualTable^.Columns^.Content^[i]);
+    DynTFTListBox_Destroy(TempListBox);
+    AVirtualTable^.Columns^.Content^[i] := 0;//nil;
   end;
 
   FreeDynArrayOfPtrUInt(AVirtualTable^.HeaderItems^);
@@ -874,8 +891,8 @@ begin
     Dispose(AVirtualTable^.HeaderItems);  //Deallocating with System's procedure, to avoid being deallocated from DynTFT mm var.
     Dispose(AVirtualTable^.Columns);      //Deallocating with System's procedure, to avoid being deallocated from DynTFT mm var.
   {$ELSE}                                      //on MCU, there is no "Initialized" field, so it doesn't need anything special.
-    FreeMem(Result^.HeaderItems, SizeOf(Result^.HeaderItems^));
-    FreeMem(Result^.Columns, SizeOf(Result^.Columns^));
+    FreeMem(AVirtualTable^.HeaderItems, SizeOf(AVirtualTable^.HeaderItems^));
+    FreeMem(AVirtualTable^.Columns, SizeOf(AVirtualTable^.Columns^));
   {$ENDIF}
 
   {$IFDEF IsDesktop}
@@ -1052,12 +1069,12 @@ procedure HideSubComponents(AVirtualTable: PDynTFTVirtualTable);
 var
   i, n: Integer;
 begin
-  n := AVirtualTable^.HeaderItems.Len - 1;
+  n := AVirtualTable^.HeaderItems^.Len - 1;
 
   for i := 0 to n do
   begin
-    DynTFTHideComponent(PDynTFTBaseComponent(TPtrRec(AVirtualTable^.HeaderItems.Content^[i])));
-    DynTFTHideComponent(PDynTFTBaseComponent(TPtrRec(AVirtualTable^.Columns.Content^[i])));
+    DynTFTHideComponent(PDynTFTBaseComponent(TPtrRec(AVirtualTable^.HeaderItems^.Content^[i])));
+    DynTFTHideComponent(PDynTFTBaseComponent(TPtrRec(AVirtualTable^.Columns^.Content^[i])));
   end;
 
   DynTFTHideComponent(PDynTFTBaseComponent(TPtrRec(AVirtualTable^.VertScrollBar)));
@@ -1069,12 +1086,12 @@ procedure ShowSubComponents(AVirtualTable: PDynTFTVirtualTable);
 var
   i, n: Integer;
 begin
-  n := AVirtualTable^.HeaderItems.Len - 1;
+  n := AVirtualTable^.HeaderItems^.Len - 1;
 
   for i := 0 to n do
   begin
-    DynTFTShowComponent(PDynTFTBaseComponent(TPtrRec(AVirtualTable^.HeaderItems.Content^[i])));
-    DynTFTShowComponent(PDynTFTBaseComponent(TPtrRec(AVirtualTable^.Columns.Content^[i])));
+    DynTFTShowComponent(PDynTFTBaseComponent(TPtrRec(AVirtualTable^.HeaderItems^.Content^[i])));
+    DynTFTShowComponent(PDynTFTBaseComponent(TPtrRec(AVirtualTable^.Columns^.Content^[i])));
   end;
 
   DynTFTShowComponent(PDynTFTBaseComponent(TPtrRec(AVirtualTable^.VertScrollBar)));
