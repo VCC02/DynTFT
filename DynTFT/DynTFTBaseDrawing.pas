@@ -477,7 +477,7 @@ begin //chain means linked list
   {$ELSE}
     GetMem(TPtrRec(Result), SizeOf(TDynTFTComponent));  //"component in chain"    //without TPtrRec, it doesn't work in mikroPascal:  340 341 Operator "@" not applicable to these operands "?T227"
     if Result = nil then
-      raise Exception.Create(COUTOFMEMORYMESSAGE);
+      raise Exception.Create(COUTOFMEMORYMESSAGE + #13#10 + 'CL_RED');
   {$ENDIF}
   
   ComponentInChain^.NextSibling := PPtrRec(TPtrRec(Result));
@@ -510,7 +510,7 @@ begin
     GetMem(TPtrRec(AComp^.BaseComponent), SizeOfComponent);   //allocate button, panel, edit, etc
 
     if AComp^.BaseComponent = nil then
-      raise Exception.Create(COUTOFMEMORYMESSAGE);
+      raise Exception.Create(COUTOFMEMORYMESSAGE + #13#10 + 'CL_GREEN');
   {$ENDIF}
 
   Result := PDynTFTBaseComponent(TPtrRec(AComp^.BaseComponent));
@@ -1492,7 +1492,7 @@ begin
       GetMem(TPtr(DynTFTAllComponentsContainer[i].ScreenContainer), SizeOf(TDynTFTComponent));
 
       if DynTFTAllComponentsContainer[i].ScreenContainer = nil then
-        raise Exception.Create(COUTOFMEMORYMESSAGE);
+        raise Exception.Create(COUTOFMEMORYMESSAGE + #13#10 + 'CL_BLUE');
     {$ENDIF}
 
     DynTFTAllComponentsContainer[i].ScreenContainer^.BaseComponent := nil;
