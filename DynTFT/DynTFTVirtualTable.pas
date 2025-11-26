@@ -127,7 +127,8 @@ function DynTFTCreateFirstVirtualTableColumn(AVirtualTable: PDynTFTVirtualTable;
 {ToDo
 
 [in work] - implement internal handlers
- - create an event for AfterDrawingItem  -requires implementation in DynTTFItems and DynTFTListBox (under compiler directive)
+ - create an event for AfterDrawingItem  -requires implementation in DynTTFItems and DynTFTListBox (under compiler directive)/
+   Only the last created ListBox should have this set, because it is the last to be painted.
  - the last column should fill the space
  - procedure for deleting columns (should not be able to delete the first one)
  - ("nice to have" task) - hide horizontal scrollbar if all columns fit the total table width
@@ -496,6 +497,24 @@ begin
 end;
 
 
+{$IFDEF UseExternalItems}
+  procedure TDynTFTVirtualTable_OnDynTFTChildItemsGetItemVisibility(AItems: PPtrRec; Index: LongInt; var ItemText: string {$IFDEF ItemsVisibility}; IsVisible: PBoolean {$ENDIF} {$IFDEF ItemsEnabling}; IsEnabled: PBoolean {$ENDIF});
+  var
+    TempVirtualTable: PDynTFTVirtualTable;
+  begin
+    GetVirtualTableColumnIndexFromItems(AItems, TempVirtualTable); //inefficient, because it ges the table at every item call
+
+    {$IFDEF IsDesktop}
+      if Assigned(TempVirtualTable^.OnGetItemVisibility) then
+        if Assigned(TempVirtualTable^.OnGetItemVisibility^) then
+    {$ELSE}
+      if TempVirtualTable^.OnGetItemVisibility <> nil then
+    {$ENDIF}
+      TempVirtualTable^.OnGetItemVisibility^(AItems, Index, ItemText {$IFDEF ItemsVisibility}, IsVisible {$ENDIF} {$IFDEF ItemsEnabling}, IsEnabled {$ENDIF});
+  end;
+{$ENDIF}
+
+
 procedure TDynTFTVirtualTable_OnDynTFTChildItemsDrawIcon(AItems: PPtrRec; Index, ItemY: LongInt; var ItemText: string {$IFDEF ItemsEnabling}; IsEnabled: Boolean {$ENDIF});
 {$IFDEF ListIcons}
   var
@@ -591,6 +610,7 @@ begin
   {$IFDEF IsDesktop}
     {$IFDEF UseExternalItems}
       AListBox^.Items^.OnGetItem^ := TDynTFTVirtualTable_OnDynTFTChildItemsGetItemEvent;
+      AListBox^.Items^.OnGetItemVisibility^ := TDynTFTVirtualTable_OnDynTFTChildItemsGetItemVisibility;
     {$ENDIF}
     {$IFDEF ListIcons}
       AListBox^.Items^.OnDrawIcon^ := TDynTFTVirtualTable_OnDynTFTChildItemsDrawIcon;
@@ -599,6 +619,7 @@ begin
   {$ELSE}
     {$IFDEF UseExternalItems}
       AListBox^.Items^.OnGetItem := @TDynTFTVirtualTable_OnDynTFTChildItemsGetItemEvent;
+      AListBox^.Items^.OnGetItemVisibility := @TDynTFTVirtualTable_OnDynTFTChildItemsGetItemVisibility;
     {$ENDIF}
     {$IFDEF ListIcons}
       AListBox^.Items^.OnDrawIcon := @TDynTFTVirtualTable_OnDynTFTChildItemsDrawIcon;

@@ -578,7 +578,7 @@ var
   {$IFNDEF UseExternalItems}
     i: Word;
   {$ENDIF}
-  TempStr: string[3];
+//  TempStr: string[3];
 begin
   Result := PDynTFTItems(TPtrRec(DynTFTComponent_Create(ScreenIndex, SizeOf(Result^))));
 
@@ -596,9 +596,10 @@ begin
   //DynTFTInitComponentDimensions(PDynTFTBaseComponent(TPtrRec(Result)), ComponentType, True, Left, Top, Width, Height);
   DynTFTInitBasicStatePropertiesToDefault(PDynTFTBaseComponent(TPtrRec(Result)));
 
-  TempStr := 'fp';
-  GetTextWidthAndHeight(TempStr, DummyTextWidth, Result^.ItemHeight);    //fp is a text with great height
-  Result^.ItemHeight := Result^.ItemHeight + 3;
+//  TempStr := 'fp';
+//  GetTextWidthAndHeight(TempStr, DummyTextWidth, Result^.ItemHeight);    //fp is a text with great height
+//  Result^.ItemHeight := Result^.ItemHeight + 3;
+  Result^.ItemHeight := 16; //Using GetTextWidthAndHeight is unreliable, because the font is not set yet. It will be set later, after assigning the ActiveFont property.
 
   {$IFDEF IsDesktop}
     New(Result^.OnOwnerInternalMouseDown);
