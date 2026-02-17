@@ -1007,6 +1007,10 @@ begin
   Result^.BaseProps.Focused := CREJECTFOCUS;
   Result^.BaseProps.CanHandleMessages := False;
 
+  {$IFDEF DynTFTFontSupport}
+    Result^.ActiveFont := @TFT_defaultFont;
+  {$ENDIF}
+
   {$IFDEF IsDesktop}
     New(Result^.OnCharKey);
     New(Result^.OnSpecialKey);
